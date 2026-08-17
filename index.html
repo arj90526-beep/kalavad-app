@@ -64,35 +64,47 @@
     .sidebar-menu li i { margin-right: 10px; color: var(--primary); width: 20px; text-align: center;}
     .sidebar-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 15; display: none; }
 
-    .content-area { padding: 0 20px; }
+    .content-area { padding: 0 15px; }
     
     /* BANNERS CSS */
-    .banners-wrapper { display: flex; overflow-x: auto; scroll-snap-type: x mandatory; gap: 10px; padding-bottom: 5px; margin-bottom: 20px; scrollbar-width: none; }
+    .banners-wrapper { display: flex; overflow-x: auto; scroll-snap-type: x mandatory; gap: 10px; padding-bottom: 5px; margin-bottom: 10px; scrollbar-width: none; }
     .banners-wrapper::-webkit-scrollbar { display: none; }
     .banner-slide { flex: 0 0 100%; height: 130px; border-radius: 15px; scroll-snap-align: center; background-size: cover; background-position: center; position: relative; overflow: hidden; cursor: pointer; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+    
+    /* BANNERS DOTS CSS */
+    .banner-dots { display: flex; justify-content: center; gap: 6px; margin-bottom: 20px; }
+    .banner-dots .dot { width: 8px; height: 8px; border-radius: 50%; background: #ccc; transition: 0.3s ease; }
+    .banner-dots .dot.active { background: var(--primary); width: 16px; border-radius: 4px; }
     
     /* CATEGORY CSS */
     .category-card { background: white; padding: 15px 20px; border-radius: 12px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 5px rgba(0,0,0,0.05); cursor: pointer; border-left: 4px solid var(--primary); }
 
-    .section-title { display: flex; justify-content: space-between; font-weight: bold; margin-bottom: 10px; align-items: center; }
-    .restaurants-container { display: flex; overflow-x: auto; gap: 15px; padding-bottom: 15px; margin-bottom: 10px; }
+    .section-title { display: flex; justify-content: space-between; font-weight: bold; margin-bottom: 10px; align-items: center; white-space: nowrap; }
+    .restaurants-container { display: flex; overflow-x: auto; gap: 12px; padding-bottom: 15px; margin-bottom: 10px; }
     .restaurants-container::-webkit-scrollbar { display: none; }
-    .rest-card { text-align: center; min-width: 60px; cursor: pointer; }
-    .rest-logo { width: 55px; height: 55px; border-radius: 50%; background: #fff; box-shadow: 0 2px 5px rgba(0,0,0,0.1); margin: 0 auto 5px; display: flex; align-items: center; justify-content: center; overflow: hidden; border: 2px solid transparent; }
+    .rest-card { text-align: center; min-width: 65px; cursor: pointer; }
+    .rest-logo { width: 60px; height: 60px; border-radius: 12px; background: #fff; box-shadow: 0 2px 5px rgba(0,0,0,0.1); margin: 0 auto 5px; display: flex; align-items: center; justify-content: center; overflow: hidden; border: 2px solid transparent; }
     .rest-card:hover .rest-logo { border-color: var(--primary); }
     .rest-logo img { width: 100%; height: 100%; object-fit: cover; }
-    .rest-name { font-size: 11px; font-weight: bold; color: var(--text-dark); }
+    .rest-name { font-size: 11px; font-weight: bold; color: var(--text-dark); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 65px; }
 
-    .item-card { display: flex; align-items: center; background: white; padding: 10px; border-radius: 10px; margin-bottom: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
-    .item-img { width: 60px; height: 60px; border-radius: 10px; background: #eee; margin-right: 15px; overflow: hidden;}
-    .item-img img { width: 100%; height: 100%; object-fit: cover; }
-    .item-details { flex-grow: 1; }
-    .item-name { font-weight: bold; margin: 0; font-size: 15px;}
-    .item-desc { font-size: 11px; color: #666; margin: 2px 0; }
-    .item-price { color: var(--text-dark); margin: 3px 0 0 0; font-size: 14px; font-weight: 500;}
-    .item-actions { display: flex; align-items: center; }
-    .item-actions i { font-size: 24px; color: var(--primary); cursor: pointer; margin: 0 5px; }
+    /* 2-COLUMN GRID FOR ITEMS */
+    .items-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 15px; }
+    .item-card { background: white; padding: 10px; border-radius: 12px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); display: flex; flex-direction: column; justify-content: space-between; }
+    .item-card-top { cursor: pointer; }
     
+    /* ITEM IMAGE SQUARE FIX */
+    .item-img { width: 100%; aspect-ratio: 1 / 1; background: #eee; overflow: hidden; margin-bottom: 8px; border-radius: 4px; }
+    .item-img img { width: 100%; height: 100%; object-fit: cover; }
+    
+    .item-name { font-weight: bold; margin: 0 0 2px 0; font-size: 14px; line-height: 1.2; }
+    .item-restaurant { font-size: 11px; color: var(--primary); font-weight: 500; margin-bottom: 2px; text-transform: lowercase; }
+    .item-desc { font-size: 11px; color: #666; margin: 0 0 4px 0; line-height: 1.2; }
+    .item-price { color: var(--success); margin: 0 0 8px 0; font-size: 14px; font-weight: bold; }
+    
+    .item-actions-grid { display: flex; align-items: center; justify-content: space-between; border-top: 1px solid #f1f2f6; padding-top: 6px; }
+    .item-actions-grid i { font-size: 22px; color: var(--primary); cursor: pointer; }
+
     .bottom-panel { position: absolute; bottom: 0; left: 0; width: 100%; background: white; padding: 12px 20px 15px 20px; box-sizing: border-box; box-shadow: 0 -5px 15px rgba(0,0,0,0.1); border-top-left-radius: 20px; border-top-right-radius: 20px; display: none; flex-direction: column; z-index: 5; transition: 0.3s ease; }
     .bill-details-wrapper { transition: 0.3s ease; overflow: hidden; }
     .minimize-bar { text-align: center; cursor: pointer; margin-bottom: 5px; color: #777; font-size: 14px; }
@@ -108,16 +120,30 @@
 
     .custom-modal-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 100; display: flex; align-items: center; justify-content: center; opacity: 0; pointer-events: none; transition: opacity 0.3s ease; }
     .custom-modal-overlay.show { opacity: 1; pointer-events: auto; }
-    .custom-modal { background: white; width: 85%; max-width: 320px; border-radius: 20px; padding: 25px; box-shadow: 0 10px 30px rgba(0,0,0,0.2); transform: translateY(20px); transition: transform 0.3s ease; text-align: center; position: relative; }
+    .custom-modal { background: white; width: 90%; max-width: 360px; border-radius: 20px; padding: 25px; box-shadow: 0 10px 30px rgba(0,0,0,0.2); transform: translateY(20px); transition: transform 0.3s ease; text-align: center; position: relative; }
     .custom-modal-overlay.show .custom-modal { transform: translateY(0); }
     .modal-close-btn { position: absolute; top: 15px; right: 15px; background: #eee; border: none; width: 30px; height: 30px; border-radius: 50%; font-size: 14px; font-weight: bold; cursor: pointer; color: #555; display: flex; align-items: center; justify-content: center; }
     .modal-icon { font-size: 40px; color: var(--primary); margin-bottom: 15px; }
     .modal-title { font-size: 18px; font-weight: bold; color: var(--text-dark); margin: 0 0 10px 0; }
-    .modal-body { font-size: 14px; color: #555; line-height: 1.5; margin-bottom: 20px; text-align: left; background: #f9f9f9; padding: 15px; border-radius: 10px; border: 1px solid #eee; word-break: break-word; max-height: 350px; overflow-y: auto;}
+    .modal-body { font-size: 14px; color: #555; line-height: 1.5; margin-bottom: 20px; text-align: left; background: #f9f9f9; padding: 15px; border-radius: 10px; border: 1px solid #eee; word-break: break-word; max-height: 380px; overflow-y: auto;}
     .modal-buttons { display: flex; gap: 10px; justify-content: center; }
     .modal-btn { flex: 1; padding: 10px; border-radius: 20px; font-weight: bold; cursor: pointer; border: none; outline: none; transition: 0.3s; font-family: inherit; }
     .modal-btn-cancel { background: #eee; color: #555; }
     .modal-btn-confirm { background: var(--primary); color: white; }
+
+    /* EXACT MATCH REFERENCE PHOTO POPUP STYLING */
+    .item-popup-body { display: flex; flex-direction: column; gap: 12px; align-items: center; text-align: center; }
+    .item-popup-card-style { background: #fff; width: 100%; border-radius: 14px; padding: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); display: flex; gap: 12px; align-items: center; text-align: left; border: 1px solid #eee; }
+    .item-popup-img { width: 130px; height: 130px; border-radius: 10px; overflow: hidden; background: #eee; flex-shrink: 0; }
+    .item-popup-img img { width: 100%; height: 100%; object-fit: cover; }
+    .item-popup-info { flex-grow: 1; }
+    .item-popup-info h4 { font-size: 18px; margin: 0 0 2px 0; color: var(--text-dark); font-weight: bold; }
+    .item-popup-info p { font-size: 13px; color: #666; margin: 0 0 4px 0; }
+    .item-popup-info .popup-price { font-size: 18px; font-weight: bold; color: var(--success); margin: 4px 0; }
+    .item-popup-info .popup-rest { font-size: 12px; color: var(--primary); font-weight: 500; margin-top: 2px; }
+    
+    .item-popup-actions { display: flex; align-items: center; justify-content: center; gap: 20px; margin-top: 5px; background: #f4f6f9; padding: 10px; border-radius: 25px; width: 100%; }
+    .item-popup-actions i { font-size: 28px; color: var(--primary); cursor: pointer; }
 </style>
 </head>
 <body>
@@ -128,9 +154,9 @@
     <div class="custom-modal-overlay" id="customModalOverlay">
         <div class="custom-modal">
             <button class="modal-close-btn" onclick="closeModal()">✕</button>
-            <i class="fa-solid fa-bell modal-icon" id="modalIcon"></i>
+            <i class="fa-solid fa-bell modal-icon" id="modalIcon" style="display:none;"></i>
             <h3 class="modal-title" id="modalTitle">Notification</h3>
-            <div class="modal-body" id="modalBody">Message goes here...</div>
+            <div class="modal-body" id="modalBody" style="background:transparent; padding:0; border:none; max-height:420px;">Message goes here...</div>
             <div class="modal-buttons" id="modalButtons">
                 <button class="modal-btn modal-btn-confirm" onclick="closeModal()">OK</button>
             </div>
@@ -151,7 +177,6 @@
             <li onclick="showPolicy('terms')"><i class="fa-solid fa-file-contract"></i> Terms & Conditions</li>
             <li onclick="showPolicy('privacy')"><i class="fa-solid fa-shield-halved"></i> Privacy Policy</li>
             <li onclick="showPolicy('refund')"><i class="fa-solid fa-money-bill-transfer"></i> Refund Policy</li>
-            <!-- MOVED ABOUT US HERE -->
             <li onclick="showPolicy('about')"><i class="fa-solid fa-circle-info"></i> About Us</li>
             
             <li onclick="logoutUser()" style="margin-top: auto; border-top: 1px solid #ddd; color: var(--primary);">
@@ -168,7 +193,7 @@
             
             <div class="input-group">
                 <label>Name</label>
-                <input type="text" id="userName" placeholder="Apna naam daalein" autocomplete="name">
+                <input type="text" id="userName" placeholder="Your Name" autocomplete="name">
             </div>
             <div class="input-group">
                 <label>Email ID</label>
@@ -193,7 +218,7 @@
             <!-- Smart Live Search Bar -->
             <div class="search-bar">
                 <i class="fa-solid fa-magnifying-glass" style="color: #999; font-size: 14px;"></i>
-                <input type="text" id="searchInput" placeholder="Search items..." oninput="handleSearch(this.value)">
+                <input type="text" id="searchInput" placeholder="Search items or restaurant..." oninput="handleSearch(this.value)">
             </div>
             <!-- Notification Icon with Red Dot -->
             <div class="noti-wrapper" onclick="showNotification()">
@@ -207,6 +232,8 @@
             <div class="banners-wrapper" id="bannersWrapper">
                 <div class="banner-slide" style="background-color: #d0e0e3; display: flex; align-items: center; justify-content: center; color: #555;">Loading Banners...</div>
             </div>
+            <!-- BANNERS DOTS -->
+            <div class="banner-dots" id="bannerDots"></div>
             
             <div class="section-title" id="restSectionTitle">
                 <span>Restaurants & Shops</span>
@@ -216,21 +243,14 @@
 
             <div class="section-title">
                 <span id="itemSectionTitle">All Items</span>
-                <span onclick="openItemsPopup()" style="color: var(--primary); font-size: 12px; cursor: pointer; font-weight: bold;">See All</span>
+                <span id="itemSectionSeeAll" onclick="openItemsPopup()" style="color: var(--primary); font-size: 12px; cursor: pointer; font-weight: bold;">See All</span>
             </div>
             <div id="itemsContainer"><p style="text-align:center; color:#888;">Loading Items...</p></div>
         </div>
 
-        <!-- Dynamic Bottom Panel with Minimize/Maximize Bar -->
+        <!-- Dynamic Bottom Panel with Total Items Quantity & Total Amount Only -->
         <div class="bottom-panel" id="bottomPanel">
-            <div class="minimize-bar" onclick="toggleMinimizeCart()" id="minimizeToggleBtn">
-                <i class="fa-solid fa-chevron-up" id="toggleIcon"></i> <span id="toggleText" style="font-size: 12px; font-weight: bold;">Hide Details</span>
-            </div>
-            <div class="bill-details-wrapper" id="billDetailsWrapper">
-                <div class="bill-row"><span>Item Total</span><span id="itemTotal">₹0</span></div>
-                <div class="bill-row"><span>Delivery Charge</span><span id="delCharge">₹0</span></div>
-                <div class="bill-row"><span>Packing Charge</span><span id="packCharge">₹0</span></div>
-            </div>
+            <div class="bill-row"><span id="itemTotalLabel">Item Total</span><span id="itemTotal">0 Items</span></div>
             <div class="bill-row total"><span>Total Amount</span><span id="grandTotal">₹0</span></div>
             <button class="btn" style="margin-top: 5px;" onclick="goToInvoice()">Place Order</button>
         </div>
@@ -247,9 +267,10 @@
             <div style="background: white; padding: 15px; border-radius: 15px; box-shadow: 0 2px 10px rgba(0,0,0,0.05);">
                 <h4 style="margin-top:0; color:var(--primary); border-bottom: 1px dashed #ccc; padding-bottom:10px;">Items in your Cart</h4>
                 <div id="invoiceItemsList" style="font-size:14px; color:#555; line-height:1.6; margin-bottom:15px;"></div>
+                <div class="bill-row"><span id="invoiceItemCountText">Total Items (0)</span><span id="invItemTotalAmt">₹0</span></div>
                 <div class="bill-row"><span>Delivery Charge</span><span id="invDel">₹0</span></div>
                 <div class="bill-row"><span>Packing Charge</span><span id="invPack">₹0</span></div>
-                <div class="bill-row total" style="border-top:1px dashed #ccc; padding-top:10px;"><span>Grand Total</span><span id="invTotal">₹0</span></div>
+                <div class="bill-row total" style="border-top:1px dashed #ccc; padding-top:10px; color: var(--success);"><span>Total Amount</span><span id="invTotal">₹0</span></div>
             </div>
             <button class="btn" style="margin-top: 20px;" onclick="showScreen('addressScreen')">Proceed to Address</button>
         </div>
@@ -288,9 +309,10 @@
                 </select>
             </div>
 
-            <!-- Auto City Display -->
-            <div id="autoAreaDetails" class="hidden" style="background: #e9ecef; padding: 8px 15px; border-radius: 12px; margin-bottom: 15px; font-size: 13px; color: #444; border: 1px solid #ced4da; font-family: inherit;">
-                <b>City:</b> Kalavad
+            <!-- City Field Layout -->
+            <div class="input-group">
+                <label>City</label>
+                <input type="text" id="addrCity" value="" readonly placeholder="" style="background: #e9ecef; color: #444; border: 1px solid #ced4da; cursor: pointer;" onclick="checkCitySelection(this)">
             </div>
 
             <div class="input-group">
@@ -313,14 +335,14 @@
             
             <p id="noPaymentMsg" style="color:red; text-align:center; display:none; font-size:14px; font-weight:bold;">Koi payment method available nahi hai. Kripya baad mein try karein.</p>
 
-            <label class="payment-option" id="codWrapper">
-                <input type="radio" name="paymentType" value="COD" id="radioCOD" checked>
-                <span>Cash on Delivery (COD)</span>
-            </label>
-            
             <label class="payment-option" id="upiWrapper">
-                <input type="radio" name="paymentType" value="UPI" id="radioUPI">
+                <input type="radio" name="paymentType" value="UPI" id="radioUPI" checked>
                 <span>UPI / Online Payment</span>
+            </label>
+
+            <label class="payment-option" id="codWrapper">
+                <input type="radio" name="paymentType" value="COD" id="radioCOD">
+                <span>Cash on Delivery (COD)</span>
             </label>
 
             <button class="btn" id="finalPlaceOrderBtn" style="margin-top: 30px;" onclick="submitFinalOrder()">Confirm & Place Order</button>
@@ -369,7 +391,6 @@
     let currentCategoryFilter = null;
     
     let isPhoneVerified = false; 
-    let isCartMinimized = false; 
 
     window.onload = function() {
         if(localStorage.getItem('isLoggedIn') === 'true') {
@@ -406,25 +427,6 @@
         document.querySelectorAll('.screen').forEach(s => s.classList.add('hidden'));
         let target = document.getElementById(screenId);
         if(target) target.classList.remove('hidden');
-    }
-    
-    function toggleMinimizeCart() {
-        isCartMinimized = !isCartMinimized;
-        let detailsWrapper = document.getElementById('billDetailsWrapper');
-        let toggleIcon = document.getElementById('toggleIcon');
-        let toggleText = document.getElementById('toggleText');
-
-        if(isCartMinimized) {
-            detailsWrapper.style.maxHeight = "0px";
-            detailsWrapper.style.opacity = "0";
-            toggleIcon.className = "fa-solid fa-chevron-down";
-            toggleText.innerText = "Show Details";
-        } else {
-            detailsWrapper.style.maxHeight = "150px";
-            detailsWrapper.style.opacity = "1";
-            toggleIcon.className = "fa-solid fa-chevron-up";
-            toggleText.innerText = "Hide Details";
-        }
     }
 
     function fetchCloudOrdersAndShow(isNotificationClick = false) {
@@ -477,38 +479,64 @@
     }
     
     function showCustomModal(type, title, bodyHTML, onConfirmCallback = null) {
-        document.getElementById('modalTitle').innerText = title;
-        document.getElementById('modalBody').innerHTML = bodyHTML;
+        let modalTitle = document.getElementById('modalTitle');
+        let modalBody = document.getElementById('modalBody');
         let icon = document.getElementById('modalIcon');
         let btns = document.getElementById('modalButtons');
         
-        if(type === 'notification') {
-            icon.className = "fa-solid fa-bell modal-icon";
-            btns.innerHTML = `<button class="modal-btn modal-btn-confirm" onclick="closeModal()">OK</button>`;
-        } else if (type === 'order') {
-            icon.className = "fa-solid fa-box-open modal-icon";
-            btns.innerHTML = `<button class="modal-btn modal-btn-cancel" onclick="closeModal()">Close</button>`;
-        } else if (type === 'restaurants_list') {
-            icon.className = "fa-solid fa-store modal-icon";
-            btns.innerHTML = `<button class="modal-btn modal-btn-cancel" onclick="closeModal()">Close</button>`;
-        } else if (type === 'items_list') {
-            icon.className = "fa-solid fa-store modal-icon";
-            btns.innerHTML = `<button class="modal-btn modal-btn-cancel" onclick="closeItemsPopupAndReset()">Close</button>`;
-        } else if (type === 'delete_confirm') {
-            icon.className = "fa-solid fa-trash modal-icon";
-            icon.style.color = "#d9534f";
-            btns.innerHTML = `
-                <button class="modal-btn modal-btn-cancel" onclick="closeModal()">Cancel</button>
-                <button class="modal-btn modal-btn-confirm" style="background:#d9534f;" id="modalConfirmBtn">Yes, Delete</button>
-            `;
-            document.getElementById('modalConfirmBtn').onclick = function() { if(onConfirmCallback) onConfirmCallback(); closeModal(); };
-        } else if (type === 'info') {
-            icon.className = "fa-solid fa-circle-info modal-icon";
-            btns.innerHTML = `<button class="modal-btn modal-btn-confirm" onclick="closeModal()">Close</button>`;
-        } else if (type === 'alert') {
-            icon.className = "fa-solid fa-triangle-exclamation modal-icon";
-            icon.style.color = "#d9534f"; 
-            btns.innerHTML = `<button class="modal-btn modal-btn-confirm" style="background:#d9534f;" onclick="closeModal()">OK</button>`;
+        if(type === 'items_list') {
+            modalTitle.style.display = "block";
+            modalTitle.innerText = "All Items";
+            icon.style.display = "none";
+            modalBody.innerHTML = bodyHTML;
+            btns.innerHTML = `<button class="modal-btn modal-btn-cancel" onclick="closeItemsPopupAndReset()" style="width:100%; border-radius:25px; background:#eee; color:#333; padding:12px; font-weight:bold;">Close</button>`;
+        } else {
+            modalTitle.style.display = "block";
+            modalTitle.innerText = title;
+            modalBody.innerHTML = bodyHTML;
+            modalBody.style.background = "#f9f9f9";
+            modalBody.style.padding = "15px";
+            modalBody.style.border = "1px solid #eee";
+            
+            if(type === 'notification') {
+                icon.style.display = "block";
+                icon.className = "fa-solid fa-bell modal-icon";
+                btns.innerHTML = `<button class="modal-btn modal-btn-confirm" onclick="closeModal()">OK</button>`;
+            } else if (type === 'order') {
+                icon.style.display = "block";
+                icon.className = "fa-solid fa-box-open modal-icon";
+                btns.innerHTML = `<button class="modal-btn modal-btn-cancel" onclick="closeModal()">Close</button>`;
+            } else if (type === 'restaurants_list') {
+                icon.style.display = "block";
+                icon.className = "fa-solid fa-store modal-icon";
+                btns.innerHTML = `<button class="modal-btn modal-btn-cancel" onclick="closeModal()">Close</button>`;
+            } else if (type === 'item_detail') {
+                icon.style.display = "none"; 
+                modalTitle.style.display = "block";
+                modalTitle.innerText = "Item Details";
+                modalBody.style.background = "transparent";
+                modalBody.style.padding = "0";
+                modalBody.style.border = "none";
+                btns.innerHTML = `<button class="modal-btn modal-btn-cancel" onclick="closeModal()" style="width:100%; border-radius:25px; background:#eee; color:#333; padding:12px; font-weight:bold;">Close</button>`;
+            } else if (type === 'delete_confirm') {
+                icon.style.display = "block";
+                icon.className = "fa-solid fa-trash modal-icon";
+                icon.style.color = "#d9534f";
+                btns.innerHTML = `
+                    <button class="modal-btn modal-btn-cancel" onclick="closeModal()">Cancel</button>
+                    <button class="modal-btn modal-btn-confirm" style="background:#d9534f;" id="modalConfirmBtn">Yes, Delete</button>
+                `;
+                document.getElementById('modalConfirmBtn').onclick = function() { if(onConfirmCallback) onConfirmCallback(); closeModal(); };
+            } else if (type === 'info') {
+                icon.style.display = "block";
+                icon.className = "fa-solid fa-circle-info modal-icon";
+                btns.innerHTML = `<button class="modal-btn modal-btn-confirm" onclick="closeModal()">Close</button>`;
+            } else if (type === 'alert') {
+                icon.style.display = "block";
+                icon.className = "fa-solid fa-triangle-exclamation modal-icon";
+                icon.style.color = "#d9534f"; 
+                btns.innerHTML = `<button class="modal-btn modal-btn-confirm" style="background:#d9534f;" onclick="closeModal()">OK</button>`;
+            }
         }
         document.getElementById('customModalOverlay').classList.add('show');
     }
@@ -521,6 +549,41 @@
     function closeItemsPopupAndReset() {
         closeModal();
         showAllItems(); 
+    }
+
+    // --- ENLARGED MATCHING ITEM DETAIL POPUP TRIGGER ---
+    function openItemDetailModal(itemName, itemDesc, itemPrice, itemImg, rName) {
+        let uniqueKey = itemName.replace(/\s+/g, '_');
+        let currentQty = cart[uniqueKey] ? cart[uniqueKey].qty : 0;
+        let safeName = itemName.replace(/'/g, "\\'");
+        let safeRName = rName.replace(/'/g, "\\'");
+        let safeDesc = (itemDesc || '').replace(/'/g, "\\'");
+
+        let html = `
+            <div class="item-popup-body">
+                <div class="item-popup-card-style">
+                    <div class="item-popup-img"><img src="${itemImg}"></div>
+                    <div class="item-popup-info">
+                        <h4>${itemName}</h4>
+                        <p>${itemDesc || ''}</p>
+                        <div class="popup-price">₹${itemPrice}</div>
+                        <div class="popup-rest">${rName}</div>
+                    </div>
+                </div>
+                <div class="item-popup-actions">
+                    <i class="fa-solid fa-circle-minus" onclick="modifyCart('${safeName}', ${itemPrice}, -1, '${safeRName}'); updatePopupQtyDisplay('${uniqueKey}')"></i>
+                    <span id="popup_modal_qty_${uniqueKey}" style="font-weight: bold; font-size: 18px;">${currentQty}</span>
+                    <i class="fa-solid fa-circle-plus" onclick="modifyCart('${safeName}', ${itemPrice}, 1, '${safeRName}'); updatePopupQtyDisplay('${uniqueKey}')"></i>
+                </div>
+            </div>
+        `;
+        showCustomModal('item_detail', 'Item Details', html);
+    }
+
+    function updatePopupQtyDisplay(uniqueKey) {
+        let currentQty = cart[uniqueKey] ? cart[uniqueKey].qty : 0;
+        let pQtyElem = document.getElementById('popup_modal_qty_' + uniqueKey);
+        if(pQtyElem) pQtyElem.innerText = currentQty;
     }
 
     // --- DELETE ORDER CONFIRMATION LOGIC WITH CLOUD HIDING ---
@@ -588,13 +651,23 @@
                 let statusText = order.status || "Pending";
                 let statusColor = statusText === "Delivered" ? "var(--success)" : (statusText === "Accepted" ? "var(--info-blue)" : "#e67e22");
 
+                let riderInfoHtml = "";
+                // Show green box only when Accepted
+                if (statusText === "Accepted" && (order.dbName || order.dbPhone)) {
+                    riderInfoHtml = `<div style="background:#d4edda; color:#155724; padding:8px; border-radius:5px; margin-top:8px; font-size:13px; border:1px solid #c3e6cb;">
+                                        <b><i class="fa-solid fa-motorcycle"></i> Rider:</b> ${order.dbName || 'Assigned'}<br>
+                                        <b><i class="fa-solid fa-phone"></i> Contact:</b> <span style="color:var(--primary); font-weight:bold;">${order.dbPhone || 'N/A'}</span>
+                                     </div>`;
+                }
+
                 msg += `<div style="position:relative; border-bottom:1px solid #ddd; padding-bottom:10px; margin-bottom:10px; text-align:left;">
                             <i class="fa-solid fa-trash" style="position:absolute; top:0; right:0; color:#d9534f; cursor:pointer; font-size:16px;" onclick="confirmDeleteOrder('${order.code}')"></i>
                             <div style="font-size:11px; color:#888;">${order.date}</div>
                             <b>Items:</b> ${order.items}<br>
                             <b>Total:</b> ₹${order.total} | ${order.method}<br>
                             <b>Status:</b> <span style="color:${statusColor}; font-weight:bold;">${statusText}</span><br>
-                            <b>Delivery Code:</b> <span style="color:var(--primary); font-weight:bold;">${order.code}</span><br>
+                            <b>Delivery Code:</b> <span style="color:var(--primary); font-weight:bold;">${order.code}</span>
+                            ${riderInfoHtml}
                         </div>`;
             });
             showCustomModal('order', 'My Orders History', msg);
@@ -636,15 +709,15 @@
 
         if(val.length !== 10) {
             statusSpan.style.color = "#d9534f";
-            statusSpan.innerText = "❌ Mobile number 10 anko ka hona chahiye.";
+            statusSpan.innerText = "❌ Sahi mobile number daalein.";
             isPhoneVerified = false;
             return;
         }
 
         let firstDigit = val.charAt(0);
-        if(!['6', '7', '8', '9'].includes(firstDigit)) {
+        if(['0', '1', '2', '3', '4', '5'].includes(firstDigit)) {
             statusSpan.style.color = "#d9534f";
-            statusSpan.innerText = "❌ Sahi mobile number daalein (6, 7, 8, 9 se shuru ho).";
+            statusSpan.innerText = "❌ Sahi mobile number daalein.";
             isPhoneVerified = false;
             return;
         }
@@ -654,7 +727,7 @@
         
         if(allSame || repetitivePattern) {
             statusSpan.style.color = "#d9534f";
-            statusSpan.innerText = "❌ Yeh valid mobile number nahi hai.";
+            statusSpan.innerText = "❌ Sahi mobile number daalein.";
             isPhoneVerified = false;
             return;
         }
@@ -678,11 +751,18 @@
     }
 
     function onAreaSelected(selectElem) {
-        let detailsBox = document.getElementById('autoAreaDetails');
+        let cityInput = document.getElementById('addrCity');
         if(selectElem.value !== "") {
-            detailsBox.classList.remove('hidden');
+            cityInput.value = "Kalavad";
         } else {
-            detailsBox.classList.add('hidden');
+            cityInput.value = "";
+        }
+    }
+
+    function checkCitySelection(inputElem) {
+        let areaSelect = document.getElementById('addrArea');
+        if(!areaSelect || areaSelect.value === "") {
+            showCustomModal('alert', 'Notice', 'Kripya pehle area select karein.');
         }
     }
 
@@ -697,7 +777,7 @@
             let safeName = rest.name.replace(/'/g, "\\'");
             restHtml += `
             <div onclick="selectRestaurantFromPopup('${rest.id}', '${safeName}')" style="display:flex; align-items:center; gap:15px; background:white; padding:10px; border-radius:12px; border:1px solid #ddd; cursor:pointer; transition:0.2s;">
-                <img src="${imgUrl}" style="width:45px; height:45px; border-radius:50%; object-fit:cover; border:2px solid var(--primary);">
+                <img src="${imgUrl}" style="width:45px; height:45px; border-radius:8px; object-fit:cover; border:2px solid var(--primary);">
                 <span style="font-weight:bold; font-size:15px; color:var(--text-dark);">${rest.name}</span>
             </div>`;
         });
@@ -717,64 +797,104 @@
         }
         showAllItems();
 
-        let itemsHtml = `<div style="display:flex; flex-direction:column; gap:10px;">`;
-        globalData.items.forEach(item => {
+        let itemsHtml = `
+            <div style="margin-bottom: 12px; background: #f1f2f6; padding: 8px 12px; border-radius: 20px; display: flex; align-items: center;">
+                <i class="fa-solid fa-magnifying-glass" style="color: #999; font-size: 14px;"></i>
+                <input type="text" id="popupSearchInput" placeholder="Search items..." oninput="handlePopupSearch(this.value)" style="border: none; outline: none; background: transparent; width: 100%; margin-left: 10px; font-family: inherit; font-size: 14px;">
+            </div>
+            <div id="popupItemsListContainer" style="display:flex; flex-direction:column; gap:10px; max-height:280px; overflow-y:auto;">`;
+        
+        itemsHtml += generatePopupItemsHTML(globalData.items);
+        itemsHtml += `</div>`;
+        
+        showCustomModal('items_list', '', itemsHtml);
+    }
+
+    function generatePopupItemsHTML(listToRender) {
+        if(!listToRender || listToRender.length === 0) return "<p style='text-align:center; color:#888; padding:10px;'>Koi item nahi mila.</p>";
+        let html = "";
+        listToRender.forEach(item => {
             let imgUrl = item.image || 'https://via.placeholder.com/60';
             let uniqueKey = item.name.replace(/\s+/g, '_');
             let currentQty = cart[uniqueKey] ? cart[uniqueKey].qty : 0;
-            let rName = "Unknown Shop";
+            let rName = "unknown";
             let rObj = globalData.restaurants.find(r => String(r.id) === String(item.restoId));
-            if(rObj) rName = rObj.name.replace(/'/g, "\\'");
+            if(rObj && rObj.name && rObj.name.trim() !== "") rName = rObj.name;
+            let safeRName = rName.replace(/'/g, "\\'");
+            let safeItemName = item.name.replace(/'/g, "\\'");
+            let safeDesc = (item.desc || '').replace(/'/g, "\\'");
 
-            itemsHtml += `
+            html += `
             <div style="display:flex; align-items:center; gap:10px; background:white; padding:10px; border-radius:12px; border:1px solid #eee;">
-                <img src="${imgUrl}" style="width:50px; height:50px; border-radius:8px; object-fit:cover;">
-                <div style="flex-grow:1; text-align:left;">
-                    <b style="font-size:14px; color:var(--text-dark);">${item.name}</b><br>
-                    <span style="color:var(--primary); font-weight:bold; font-size:13px;">₹${item.price}</span>
+                <div style="display:flex; align-items:center; gap:10px; flex-grow:1; cursor:pointer;" onclick="openItemDetailModal('${safeItemName}', '${safeDesc}', ${item.price}, '${imgUrl}', '${safeRName}')">
+                    <img src="${imgUrl}" style="width:50px; height:50px; border-radius:8px; object-fit:cover; flex-shrink:0;">
+                    <div style="text-align:left;">
+                        <b style="font-size:14px; color:var(--text-dark);">${item.name}</b><br>
+                        <span style="color:var(--success); font-weight:bold; font-size:13px;">₹${item.price}</span><br>
+                        <span style="font-size:11px; color:var(--primary); font-weight:500;">${rName}</span>
+                    </div>
                 </div>
                 <div style="display:flex; align-items:center;">
-                    <i class="fa-solid fa-circle-minus" style="font-size:22px; color:var(--primary); cursor:pointer;" onclick="modifyCart('${item.name.replace(/'/g, "\\'")}', ${item.price}, -1, '${rName}')"></i>
+                    <i class="fa-solid fa-circle-minus" style="font-size:22px; color:var(--primary); cursor:pointer;" onclick="modifyCart('${safeItemName}', ${item.price}, -1, '${safeRName}'); updatePopupItemQty('${uniqueKey}')"></i>
                     <span id="popup_qty_${uniqueKey}" style="font-weight: bold; margin: 0 6px; font-size:14px;">${currentQty}</span>
-                    <i class="fa-solid fa-circle-plus" style="font-size:22px; color:var(--primary); cursor:pointer;" onclick="modifyCart('${item.name.replace(/'/g, "\\'")}', ${item.price}, 1, '${rName}')"></i>
+                    <i class="fa-solid fa-circle-plus" style="font-size:22px; color:var(--primary); cursor:pointer;" onclick="modifyCart('${safeItemName}', ${item.price}, 1, '${safeRName}'); updatePopupItemQty('${uniqueKey}')"></i>
                 </div>
             </div>`;
         });
-        itemsHtml += `</div>`;
-        
-        let closeBtnX = document.querySelector('.modal-close-btn');
-        if(closeBtnX) closeBtnX.setAttribute('onclick', 'closeItemsPopupAndReset()');
-
-        showCustomModal('items_list', 'Complete Menu Items', itemsHtml);
+        return html;
     }
 
-    // --- NEW: HTML GENERATOR FOR ITEMS ---
+    function handlePopupSearch(query) {
+        let q = query.toLowerCase().trim();
+        let list = globalData.items;
+        let filtered = list.filter(item => item.name.toLowerCase().includes(q) || (item.desc && item.desc.toLowerCase().includes(q)));
+        let container = document.getElementById('popupItemsListContainer');
+        if(container) {
+            container.innerHTML = generatePopupItemsHTML(filtered);
+        }
+    }
+
+    function updatePopupItemQty(uniqueKey) {
+        let currentQty = cart[uniqueKey] ? cart[uniqueKey].qty : 0;
+        let span = document.getElementById('popup_qty_' + uniqueKey);
+        if(span) span.innerText = currentQty;
+    }
+
+    // --- HTML GENERATOR FOR ITEMS (2-COLUMN GRID & SQUARE PHOTOS) ---
     function generateItemsHTML(listToRender) {
         if(!listToRender || listToRender.length === 0) return "<p style='text-align:center; color:#888;'>Koi item nahi mila.</p>";
-        let itemsHTML = "";
+        let itemsHTML = `<div class="items-grid">`;
         listToRender.forEach((item) => {
-            let imgUrl = item.image || 'https://via.placeholder.com/60';
+            let imgUrl = item.image || 'https://via.placeholder.com/110';
             let uniqueKey = item.name.replace(/\s+/g, '_');
             let currentQty = cart[uniqueKey] ? cart[uniqueKey].qty : 0;
-            let rName = "Unknown Shop";
+            
+            let rName = "unknown";
             let rObj = globalData.restaurants.find(r => String(r.id) === String(item.restoId));
-            if(rObj) rName = rObj.name.replace(/'/g, "\\'"); 
+            if(rObj && rObj.name && rObj.name.trim() !== "") {
+                rName = rObj.name;
+            }
+            let safeRName = rName.replace(/'/g, "\\'");
+            let safeItemName = item.name.replace(/'/g, "\\'");
+            let safeDesc = (item.desc || '').replace(/'/g, "\\'");
             
             itemsHTML += `
             <div class="item-card">
-                <div class="item-img"><img src="${imgUrl}"></div>
-                <div class="item-details">
+                <div class="item-card-top" onclick="openItemDetailModal('${safeItemName}', '${safeDesc}', ${item.price}, '${imgUrl}', '${safeRName}')">
+                    <div class="item-img"><img src="${imgUrl}"></div>
                     <p class="item-name">${item.name}</p>
+                    <div class="item-restaurant">${rName}</div>
                     <p class="item-desc">${item.desc || ''}</p>
-                    <p class="item-price">₹${item.price}</p>
+                    <div class="item-price">₹${item.price}</div>
                 </div>
-                <div class="item-actions">
-                    <i class="fa-solid fa-circle-minus" onclick="modifyCart('${item.name.replace(/'/g, "\\'")}', ${item.price}, -1, '${rName}')"></i>
-                    <span id="qty_${uniqueKey}" style="font-weight: bold; margin: 0 5px;">${currentQty}</span>
-                    <i class="fa-solid fa-circle-plus" onclick="modifyCart('${item.name.replace(/'/g, "\\'")}', ${item.price}, 1, '${rName}')"></i>
+                <div class="item-actions-grid">
+                    <i class="fa-solid fa-circle-minus" onclick="modifyCart('${safeItemName}', ${item.price}, -1, '${safeRName}')"></i>
+                    <span id="qty_${uniqueKey}" style="font-weight: bold; font-size: 14px;">${currentQty}</span>
+                    <i class="fa-solid fa-circle-plus" onclick="modifyCart('${safeItemName}', ${item.price}, 1, '${safeRName}')"></i>
                 </div>
             </div>`;
         });
+        itemsHTML += `</div>`;
         return itemsHTML;
     }
 
@@ -784,45 +904,78 @@
         container.innerHTML = generateItemsHTML(listToRender);
     }
 
-    // --- NEW: SMART SEARCH POP-UP LOGIC ---
+    // --- SMART SEARCH POP-UP LOGIC (SEARCHING BOTH ITEMS AND RESTAURANTS) ---
     function handleSearch(query) {
         let q = query.toLowerCase().trim();
         let list = globalData.items;
         
         let bannersWrap = document.getElementById('bannersWrapper');
+        let bannerDots = document.getElementById('bannerDots');
         let restTitle = document.getElementById('restSectionTitle');
         let restContainer = document.getElementById('restaurantsContainer');
         let itemTitle = document.getElementById('itemSectionTitle');
+        let itemSeeAll = document.getElementById('itemSectionSeeAll');
         
         if(q === "") {
-            // Restore visibility
             if(bannersWrap) bannersWrap.style.display = "flex";
+            if(bannerDots) bannerDots.style.display = "flex";
             if(restTitle) restTitle.style.display = "flex";
             if(restContainer) restContainer.style.display = "flex";
+            if(itemSeeAll) itemSeeAll.style.display = "inline-block";
             
-            // Revert Title
             if(currentRestoFilter) {
                 let restoObj = globalData.restaurants.find(r => String(r.id) === String(currentRestoFilter));
                 let rName = restoObj ? restoObj.name : "";
                 itemTitle.innerHTML = `<span onclick="showAllItems()" style="cursor:pointer; color:var(--primary);"><i class="fa-solid fa-arrow-left"></i> ${rName} Menu</span>`;
             } else {
-                itemTitle.innerText = "All Items";
+                itemTitle.innerHTML = `<span>All Items</span> <span id="itemSectionSeeAll" onclick="openItemsPopup()" style="color: var(--primary); font-size: 12px; cursor: pointer; font-weight: bold;">See All</span>`;
             }
             
             renderItemsOrCategories(currentRestoFilter);
             return;
         }
         
-        // Hide elements for clean search pop-up view
         if(bannersWrap) bannersWrap.style.display = "none";
+        if(bannerDots) bannerDots.style.display = "none";
         if(restTitle) restTitle.style.display = "none";
         if(restContainer) restContainer.style.display = "none";
+        if(itemSeeAll) itemSeeAll.style.display = "none";
         
-        itemTitle.innerHTML = `<span style="color:var(--primary);">Search Results</span>`;
+        itemTitle.innerHTML = `<span style="color:var(--primary);">Search Results</span> <span onclick="clearSearchAndGoHome()" style="font-size:13px; background:var(--primary); color:white; padding:3px 10px; border-radius:12px; cursor:pointer;"><i class="fa-solid fa-house"></i> Home</span>`;
+        itemTitle.style.display = "flex";
+        itemTitle.style.justifyContent = "space-between";
+        itemTitle.style.alignItems = "center";
+        itemTitle.style.width = "100%";
         
         currentCategoryFilter = null; 
-        let filtered = list.filter(item => item.name.toLowerCase().includes(q) || (item.desc && item.desc.toLowerCase().includes(q)));
+        
+        // Search matching items OR matching restaurant names
+        let matchingRestoIds = globalData.restaurants
+            .filter(r => r.name.toLowerCase().includes(q))
+            .map(r => String(r.id));
+
+        let filtered = list.filter(item => {
+            let matchItemName = item.name.toLowerCase().includes(q);
+            let matchDesc = item.desc && item.desc.toLowerCase().includes(q);
+            let matchResto = matchingRestoIds.includes(String(item.restoId));
+            return matchItemName || matchDesc || matchResto;
+        });
+
         renderItemsListDirectly(filtered);
+    }
+
+    function clearSearchAndGoHome() {
+        let searchInput = document.getElementById('searchInput');
+        if(searchInput) searchInput.value = "";
+        
+        let itemTitle = document.getElementById('itemSectionTitle');
+        if(itemTitle) {
+            itemTitle.style.display = "flex";
+            itemTitle.style.justifyContent = "space-between";
+            itemTitle.style.alignItems = "center";
+            itemTitle.style.width = "100%";
+        }
+        showAllItems();
     }
 
     function showPolicy(type) {
@@ -960,8 +1113,6 @@
             delCharge = Number(data.settings.deliveryCharge) || 0;
             packCharge = Number(data.settings.packingCharge) || 0;
             
-            let el1 = document.getElementById('delCharge'); if(el1) el1.innerText = "₹" + delCharge;
-            let el2 = document.getElementById('packCharge'); if(el2) el2.innerText = "₹" + packCharge;
             let el3 = document.getElementById('invDel'); if(el3) el3.innerText = "₹" + delCharge;
             let el4 = document.getElementById('invPack'); if(el4) el4.innerText = "₹" + packCharge;
             
@@ -992,18 +1143,36 @@
         }
 
         let bannersWrapper = document.getElementById('bannersWrapper');
+        let bannerDots = document.getElementById('bannerDots');
         if(bannersWrapper && data.banners && data.banners.length > 0) {
             let bHtml = "";
-            data.banners.forEach(b => {
+            let dotsHtml = "";
+            data.banners.forEach((b, index) => {
                 if(b.link) {
                     bHtml += `<a href="${b.link}" target="_blank" class="banner-slide" style="background-image: url('${b.image}'); display:block;"></a>`;
                 } else {
                     bHtml += `<div class="banner-slide" style="background-image: url('${b.image}');"></div>`;
                 }
+                dotsHtml += `<div class="dot ${index === 0 ? 'active' : ''}"></div>`;
             });
             bannersWrapper.innerHTML = bHtml;
+            if(bannerDots) bannerDots.innerHTML = dotsHtml;
+
+            // Adding scroll listener for swipe dots functionality
+            if(!bannersWrapper.dataset.listenerAttached) {
+                bannersWrapper.addEventListener('scroll', function() {
+                    let slideIndex = Math.round(bannersWrapper.scrollLeft / bannersWrapper.offsetWidth);
+                    let allDots = bannerDots.querySelectorAll('.dot');
+                    allDots.forEach((d, idx) => {
+                        if(idx === slideIndex) d.classList.add('active');
+                        else d.classList.remove('active');
+                    });
+                });
+                bannersWrapper.dataset.listenerAttached = 'true';
+            }
         } else if (bannersWrapper) {
             bannersWrapper.innerHTML = `<div class="banner-slide" style="background-color: #d0e0e3; display: flex; align-items: center; justify-content: center; color: #555;">Welcome to Kalavad</div>`;
+            if(bannerDots) bannerDots.innerHTML = "";
         }
 
         let areaSelect = document.getElementById('addrArea');
@@ -1022,7 +1191,7 @@
         
         let titleElem = document.getElementById('itemSectionTitle');
         let currentTitle = titleElem ? titleElem.innerText : "All Items";
-        if(currentTitle === "All Items") {
+        if(currentTitle.includes("All Items")) {
             renderItemsOrCategories(null); 
         } else {
             let resto = globalData.restaurants.find(r => currentTitle.includes(r.name));
@@ -1051,16 +1220,26 @@
         let searchInput = document.getElementById('searchInput');
         if(searchInput) searchInput.value = "";
 
-        // Restore visibility if hidden by search
         let bannersWrap = document.getElementById('bannersWrapper');
+        let bannerDots = document.getElementById('bannerDots');
         let restTitle = document.getElementById('restSectionTitle');
         let restContainer = document.getElementById('restaurantsContainer');
+        let itemSeeAll = document.getElementById('itemSectionSeeAll');
+
         if(bannersWrap) bannersWrap.style.display = "flex";
+        if(bannerDots) bannerDots.style.display = "flex";
         if(restTitle) restTitle.style.display = "flex";
         if(restContainer) restContainer.style.display = "flex";
+        if(itemSeeAll) itemSeeAll.style.display = "none"; 
 
         let titleElem = document.getElementById('itemSectionTitle');
-        if(titleElem) titleElem.innerHTML = `<span onclick="showAllItems()" style="cursor:pointer; color:var(--primary);"><i class="fa-solid fa-arrow-left"></i> ${restoName} Menu</span>`;
+        if(titleElem) {
+            titleElem.innerHTML = `<span onclick="showAllItems()" style="cursor:pointer; color:var(--primary);"><i class="fa-solid fa-arrow-left"></i> ${restoName} Menu</span>`;
+            titleElem.style.display = "flex";
+            titleElem.style.justifyContent = "space-between";
+            titleElem.style.alignItems = "center";
+            titleElem.style.width = "100%";
+        }
         renderItemsOrCategories(restoId);
     }
     
@@ -1070,20 +1249,27 @@
         let searchInput = document.getElementById('searchInput');
         if(searchInput) searchInput.value = "";
         
-        // Restore visibility if hidden by search
         let bannersWrap = document.getElementById('bannersWrapper');
+        let bannerDots = document.getElementById('bannerDots');
         let restTitle = document.getElementById('restSectionTitle');
         let restContainer = document.getElementById('restaurantsContainer');
+
         if(bannersWrap) bannersWrap.style.display = "flex";
+        if(bannerDots) bannerDots.style.display = "flex";
         if(restTitle) restTitle.style.display = "flex";
         if(restContainer) restContainer.style.display = "flex";
 
         let titleElem = document.getElementById('itemSectionTitle');
-        if(titleElem) titleElem.innerText = "All Items"; 
+        if(titleElem) {
+            titleElem.innerHTML = `<span>All Items</span> <span id="itemSectionSeeAll" onclick="openItemsPopup()" style="color: var(--primary); font-size: 12px; cursor: pointer; font-weight: bold;">See All</span>`;
+            titleElem.style.display = "flex";
+            titleElem.style.justifyContent = "space-between";
+            titleElem.style.alignItems = "center";
+            titleElem.style.width = "100%";
+        }
         renderItemsOrCategories(null); 
     }
 
-    // --- NEW: MIXED RENDER LOGIC ---
     function renderItemsOrCategories(restoId) {
         let list = globalData.items;
         if(restoId) {
@@ -1101,7 +1287,6 @@
                          </div>`;
             });
             
-            // Uncategorized Items in mixed scenario
             let uncategorizedItems = list.filter(i => (i.category || "").trim() === "");
             if(uncategorizedItems.length > 0) {
                 html += `<div style="margin-top:20px; font-weight:bold; font-size:14px; margin-bottom:10px; color:var(--dark);">Other Items</div>`;
@@ -1125,6 +1310,10 @@
         let titleElem = document.getElementById('itemSectionTitle');
         if(titleElem) {
             titleElem.innerHTML = `<span onclick="filterByRestaurant('${currentRestoFilter}', '${rName.replace(/'/g, "\\'")}')" style="cursor:pointer; color:var(--primary);"><i class="fa-solid fa-arrow-left"></i> ${catName}</span>`;
+            titleElem.style.display = "flex";
+            titleElem.style.justifyContent = "space-between";
+            titleElem.style.alignItems = "center";
+            titleElem.style.width = "100%";
         }
         renderItemsOrCategories(currentRestoFilter);
     }
@@ -1146,12 +1335,18 @@
 
     function updateCartTotals() {
         let itemTotal = 0;
-        for(let k in cart) { itemTotal += (cart[k].price * cart[k].qty); }
+        let totalQtyCount = 0;
+        for(let k in cart) { 
+            itemTotal += (cart[k].price * cart[k].qty); 
+            totalQtyCount += cart[k].qty;
+        }
         
-        let elIT = document.getElementById('itemTotal'); if(elIT) elIT.innerText = "₹" + itemTotal;
+        let elIT = document.getElementById('itemTotal'); 
+        if(elIT) elIT.innerText = totalQtyCount + (totalQtyCount === 1 ? " Item" : " Items");
+        
         grandTotalVal = itemTotal > 0 ? (itemTotal + delCharge + packCharge) : 0;
+        let elGT = document.getElementById('grandTotal'); if(elGT) elGT.innerText = "₹" + itemTotal;
         
-        let elGT = document.getElementById('grandTotal'); if(elGT) elGT.innerText = "₹" + grandTotalVal;
         let elITot = document.getElementById('invTotal'); if(elITot) elITot.innerText = "₹" + grandTotalVal;
         let elPAT = document.getElementById('payAmountTotal'); if(elPAT) elPAT.innerText = "₹" + grandTotalVal;
 
@@ -1162,7 +1357,16 @@
     }
 
     function goToInvoice() {
-        if(grandTotalVal === 0) { showCustomModal('alert', 'Empty Cart', 'Kripya pehle items cart mein add karein!'); return; }
+        let itemTotalCalc = 0;
+        let totalQtyCount = 0;
+        for(let k in cart) { 
+            if(cart[k].qty > 0) {
+                itemTotalCalc += (cart[k].price * cart[k].qty);
+                totalQtyCount += cart[k].qty;
+            }
+        }
+        if(itemTotalCalc === 0) { showCustomModal('alert', 'Empty Cart', 'Kripya pehle items cart mein add karein!'); return; }
+        
         let invList = "";
         for(let k in cart) {
             if(cart[k].qty > 0) {
@@ -1171,9 +1375,45 @@
         }
         let invListElem = document.getElementById('invoiceItemsList');
         if(invListElem) invListElem.innerHTML = invList;
-        let addrNameElem = document.getElementById('addrName');
-        if(addrNameElem) addrNameElem.value = localStorage.getItem('userName') || '';
-        showScreen('addressScreen');
+
+        let itemCountTextElem = document.getElementById('invoiceItemCountText');
+        if(itemCountTextElem) itemCountTextElem.innerText = `Total Items (${totalQtyCount})`;
+
+        let invItemTotalAmtElem = document.getElementById('invItemTotalAmt');
+        if(invItemTotalAmtElem) invItemTotalAmtElem.innerText = "₹" + itemTotalCalc;
+        
+        let savedName = localStorage.getItem('savedAddrName');
+        let savedPhone = localStorage.getItem('savedAddrPhone');
+        let savedArea = localStorage.getItem('savedAddrArea');
+        let savedFull = localStorage.getItem('savedAddrFull');
+
+        if(savedName) document.getElementById('addrName').value = savedName;
+        else document.getElementById('addrName').value = localStorage.getItem('userName') || '';
+
+        if(savedPhone) {
+            document.getElementById('addrPhone').value = savedPhone;
+            isPhoneVerified = true;
+            let verifyBtn = document.getElementById('verifyPhoneBtn');
+            let statusSpan = document.getElementById('phoneVerifyStatus');
+            if(verifyBtn) {
+                verifyBtn.innerText = "Verified";
+                verifyBtn.disabled = true;
+                verifyBtn.style.backgroundColor = "var(--disabled)";
+            }
+            if(statusSpan) {
+                statusSpan.style.color = "var(--success)";
+                statusSpan.innerHTML = `<i class="fa-solid fa-circle-check"></i> Verified`;
+            }
+        }
+        if(savedArea) {
+            document.getElementById('addrArea').value = savedArea;
+            document.getElementById('addrCity').value = "Kalavad";
+        } else {
+            document.getElementById('addrCity').value = "";
+        }
+        if(savedFull) document.getElementById('addrFull').value = savedFull;
+
+        showScreen('invoiceScreen');
     }
 
     function validateAddressAndGoToPayment() {
@@ -1192,12 +1432,17 @@
             return;
         }
 
+        localStorage.setItem('savedAddrName', name);
+        localStorage.setItem('savedAddrPhone', phone);
+        localStorage.setItem('savedAddrArea', area);
+        localStorage.setItem('savedAddrFull', fullAddr);
+
         showScreen('paymentScreen');
     }
 
     function submitFinalOrder() {
         let checkedRadio = document.querySelector('input[name="paymentType"]:checked');
-        let paymentMethod = checkedRadio ? checkedRadio.value : "COD";
+        let paymentMethod = checkedRadio ? checkedRadio.value : "UPI";
         
         if (paymentMethod === "UPI") {
             if(RAZORPAY_KEY === "YOUR_RAZORPAY_KEY_HERE" || !RAZORPAY_KEY) { showCustomModal('alert', 'Integration Pending', 'Developer ne abhi Razorpay Key nahi daali hai. Kripya COD select karein.'); return; }
