@@ -1261,11 +1261,10 @@
 
         let titleElem = document.getElementById('itemSectionTitle');
         if(titleElem) {
-            titleElem.innerHTML = `<span>All Items</span> <span id="itemSectionSeeAll" onclick="openItemsPopup()" style="color: var(--primary); font-size: 12px; cursor: pointer; font-weight: bold;">See All</span>`;
-            titleElem.style.display = "flex";
-            titleElem.style.justifyContent = "space-between";
-            titleElem.style.alignItems = "center";
-            titleElem.style.width = "100%";
+            let parentTitle = titleElem.closest('.section-title');
+            if(parentTitle) {
+                parentTitle.innerHTML = `<span id="itemSectionTitle">All Items</span> <span id="itemSectionSeeAll" onclick="openItemsPopup()" style="color: var(--primary); font-size: 12px; cursor: pointer; font-weight: bold;">See All</span>`;
+            }
         }
         renderItemsOrCategories(null); 
     }
