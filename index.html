@@ -82,11 +82,11 @@
     .section-title { display: flex; justify-content: space-between; font-weight: bold; margin-bottom: 10px; align-items: center; white-space: nowrap; }
     .restaurants-container { display: flex; overflow-x: auto; gap: 12px; padding-bottom: 15px; margin-bottom: 10px; }
     .restaurants-container::-webkit-scrollbar { display: none; }
-    .rest-card { text-align: center; min-width: 65px; cursor: pointer; }
-    .rest-logo { width: 60px; height: 60px; border-radius: 12px; background: #fff; box-shadow: 0 2px 5px rgba(0,0,0,0.1); margin: 0 auto 5px; display: flex; align-items: center; justify-content: center; overflow: hidden; border: 2px solid transparent; }
+    .rest-card { text-align: center; min-width: 85px; cursor: pointer; }
+    .rest-logo { width: 70px; height: 70px; border-radius: 50%; background: #fff; box-shadow: 0 2px 5px rgba(0,0,0,0.1); margin: 0 auto 5px; display: flex; align-items: center; justify-content: center; overflow: hidden; border: 2px solid transparent; }
     .rest-card:hover .rest-logo { border-color: var(--primary); }
     .rest-logo img { width: 100%; height: 100%; object-fit: cover; }
-    .rest-name { font-size: 11px; font-weight: bold; color: var(--text-dark); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 65px; }
+    .rest-name { font-size: 11px; font-weight: bold; color: var(--text-dark); max-width: 85px; line-height: 1.2; word-wrap: break-word; }
 
     /* 2-COLUMN GRID FOR ITEMS */
     .items-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 15px; }
@@ -380,7 +380,7 @@
     const SECRET_KEY = _0x1a2b[1]; 
     // --- JALEBI CODE END ---
 
-    const RAZORPAY_KEY = "YOUR_RAZORPAY_KEY_HERE"; 
+    const RAZORPAY_KEY = "rzp_test_TRGbJibzF28KJq"; 
 
     let globalData = { settings: {}, areas: [], banners: [], restaurants: [], items: [] };
     let cart = {}; 
@@ -777,7 +777,7 @@
             let safeName = rest.name.replace(/'/g, "\\'");
             restHtml += `
             <div onclick="selectRestaurantFromPopup('${rest.id}', '${safeName}')" style="display:flex; align-items:center; gap:15px; background:white; padding:10px; border-radius:12px; border:1px solid #ddd; cursor:pointer; transition:0.2s;">
-                <img src="${imgUrl}" style="width:45px; height:45px; border-radius:8px; object-fit:cover; border:2px solid var(--primary);">
+                <img src="${imgUrl}" style="width:45px; height:45px; border-radius:50%; object-fit:cover; border:2px solid var(--primary);">
                 <span style="font-weight:bold; font-size:15px; color:var(--text-dark);">${rest.name}</span>
             </div>`;
         });
@@ -1445,7 +1445,7 @@
         
         if (paymentMethod === "UPI") {
             if(RAZORPAY_KEY === "YOUR_RAZORPAY_KEY_HERE" || !RAZORPAY_KEY) { showCustomModal('alert', 'Integration Pending', 'Developer ne abhi Razorpay Key nahi daali hai. Kripya COD select karein.'); return; }
-            var options = { "key": RAZORPAY_KEY, "amount": grandTotalVal * 100, "currency": "INR", "name": "Online Kalavad", "description": "Order Payment", "handler": function (response){ processOrderToSheet("UPI - Paid (ID: " + response.razorpay_payment_id + ")"); }, "prefill": { "name": document.getElementById('addrName').value.trim(), "email": localStorage.getItem('userEmail'), "contact": document.getElementById('addrPhone').value.trim() }, "theme": { "color": "#B3391C" } };
+            var options = { "key": RAZORPAY_KEY, "amount": grandTotalVal * 100, "currency": "INR", "name": "Online Kalavad", "description": "Order Payment", "config_id": "config_TRHAzbVCogLUzD", "handler": function (response){ processOrderToSheet("UPI - Paid (ID: " + response.razorpay_payment_id + ")"); }, "prefill": { "name": document.getElementById('addrName').value.trim(), "email": localStorage.getItem('userEmail'), "contact": document.getElementById('addrPhone').value.trim() }, "theme": { "color": "#B3391C" } };
             var rzp1 = new Razorpay(options);
             rzp1.on('payment.failed', function (response){ showCustomModal('alert', 'Payment Failed', 'Aapka payment fail ho gaya. Kripya dobara koshish karein.'); });
             rzp1.open();
