@@ -1038,6 +1038,16 @@
         if(!name || !email) { showCustomModal('alert', 'Action Required', 'Please enter both Name and Email ID'); return; }
         
         let btn = document.getElementById('sendOtpBtn');
+
+        // --- RAZORPAY TEST ACCOUNT BYPASS START ---
+        if(email.toLowerCase() === "test@razorpay.com") {
+            btn.innerText = "OTP Sent to Email!";
+            let otpSec = document.getElementById('otpSection');
+            if(otpSec) otpSec.classList.remove('hidden');
+            return; // Ye backend ko call nahi karega
+        }
+        // --- RAZORPAY TEST ACCOUNT BYPASS END ---
+
         btn.innerText = "Sending..."; 
         btn.style.backgroundColor = "var(--disabled)"; 
         btn.disabled = true;
@@ -1074,6 +1084,17 @@
         if(!otp) { showCustomModal('alert', 'Action Required', 'Please enter the OTP'); return; }
         
         let btn = document.getElementById('loginBtn');
+
+        // --- RAZORPAY TEST ACCOUNT BYPASS START ---
+        if(email.toLowerCase() === "test@razorpay.com" && otp === "123456") {
+            localStorage.setItem('isLoggedIn', 'true');
+            localStorage.setItem('userName', nameField ? nameField.value : 'Razorpay Team');
+            localStorage.setItem('userEmail', email);
+            window.location.reload();
+            return; // Ye direct login kar dega
+        }
+        // --- RAZORPAY TEST ACCOUNT BYPASS END ---
+
         btn.innerText = "Verifying..."; btn.style.backgroundColor = "var(--disabled)";
 
         fetch(GOOGLE_WEB_APP_URL, {
