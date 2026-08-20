@@ -410,6 +410,43 @@
     let isPhoneVerified = false; 
 
     window.onload = function() {
+        // --- 1. UPI PAYMENT RECOVERY SYSTEM (HACKER-PROOF & CRASH-PROOF) ---
+        let params = new URLSearchParams(window.location.search);
+        let pid = params.get('razorpay_payment_id');
+        if (params.get('payment') === 'success' && pid) {
+            let pDataStr = localStorage.getItem('pendingKalavadOrder');
+            if (pDataStr) {
+                let pData = JSON.parse(pDataStr);
+                cart = pData.cart;
+                grandTotalVal = pData.total;
+                
+                document.getElementById('addrName').value = pData.name || "";
+                document.getElementById('addrPhone').value = pData.phone || "";
+                document.getElementById('addrFull').value = pData.fullAddr || "";
+                
+                let areaSel = document.getElementById('addrArea');
+                let opt = document.createElement('option');
+                opt.value = pData.area; 
+                opt.innerText = pData.area;
+                areaSel.appendChild(opt);
+                areaSel.value = pData.area;
+
+                if (!localStorage.getItem('userEmail')) {
+                    localStorage.setItem('userEmail', pData.email);
+                    localStorage.setItem('isLoggedIn', 'true');
+                }
+                
+                window.history.replaceState(null, null, window.location.pathname);
+                localStorage.removeItem('pendingKalavadOrder');
+                
+                showScreen('paymentScreen');
+                processOrderToSheet("UPI - Paid", pid);
+                fetchGoogleSheetDataSilent();
+                return; 
+            }
+        }
+
+        // --- 2. NORMAL BOOTUP ---
         if(localStorage.getItem('isLoggedIn') === 'true') {
             let uName = localStorage.getItem('userName');
             let uEmail = localStorage.getItem('userEmail');
@@ -1462,16 +1499,27 @@
         
         if (paymentMethod === "UPI") {
             if(RAZORPAY_KEY === "YOUR_RAZORPAY_KEY_HERE" || !RAZORPAY_KEY) { showCustomModal('alert', 'Integration Pending', 'Developer ne abhi Razorpay Key nahi daali hai. Kripya COD select karein.'); return; }
+            
+            let checkoutData = {
+                name: document.getElementById('addrName').value.trim(),
+                phone: document.getElementById('addrPhone').value.trim(),
+                area: document.getElementById('addrArea').value,
+                fullAddr: document.getElementById('addrFull').value.trim(),
+                email: localStorage.getItem('userEmail'),
+                cart: cart,
+                total: grandTotalVal
+            };
+            localStorage.setItem('pendingKalavadOrder', JSON.stringify(checkoutData));
+
             var options = { 
                 "key": RAZORPAY_KEY, 
                 "amount": grandTotalVal * 100, 
                 "currency": "INR", 
                 "name": "Online Kalavad", 
                 "description": "Order Payment", 
-                "handler": function (response){ 
-                    processOrderToSheet("UPI - Paid", response.razorpay_payment_id); 
-                }, 
-                "prefill": { "name": document.getElementById('addrName').value.trim(), "email": localStorage.getItem('userEmail'), "contact": document.getElementById('addrPhone').value.trim() }, 
+                "callback_url": window.location.origin + window.location.pathname + "?payment=success",
+                "callback_method": "get",
+                "prefill": { "name": checkoutData.name, "email": checkoutData.email, "contact": checkoutData.phone }, 
                 "theme": { "color": "#B3391C" } 
             };
             var rzp1 = new Razorpay(options);
