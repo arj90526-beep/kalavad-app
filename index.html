@@ -410,10 +410,12 @@
     let isPhoneVerified = false; 
 
     window.onload = function() {
-        // --- 1. UPI PAYMENT RECOVERY SYSTEM (HACKER-PROOF & CRASH-PROOF) ---
+        // --- 1. UPI PAYMENT RECOVERY SYSTEM (ULTIMATE CRASH-PROOF) ---
         let params = new URLSearchParams(window.location.search);
         let pid = params.get('razorpay_payment_id');
-        if (params.get('payment') === 'success' && pid) {
+        
+        // Agar URL mein Payment ID hai (iska matlab user paise de kar aya hai)
+        if (pid) {
             let pDataStr = localStorage.getItem('pendingKalavadOrder');
             if (pDataStr) {
                 let pData = JSON.parse(pDataStr);
@@ -423,6 +425,7 @@
                 document.getElementById('addrName').value = pData.name || "";
                 document.getElementById('addrPhone').value = pData.phone || "";
                 document.getElementById('addrFull').value = pData.fullAddr || "";
+                document.getElementById('addrCity').value = "Kalavad";
                 
                 let areaSel = document.getElementById('addrArea');
                 let opt = document.createElement('option');
@@ -436,13 +439,13 @@
                     localStorage.setItem('isLoggedIn', 'true');
                 }
                 
+                // URL saaf karein taaki refresh karne par 2 baar order na ho
                 window.history.replaceState(null, null, window.location.pathname);
-                localStorage.removeItem('pendingKalavadOrder');
                 
                 showScreen('paymentScreen');
                 processOrderToSheet("UPI - Paid", pid);
                 fetchGoogleSheetDataSilent();
-                return; 
+                return; // Normal Bootup rok dein
             }
         }
 
@@ -1517,8 +1520,11 @@
                 "currency": "INR", 
                 "name": "Online Kalavad", 
                 "description": "Order Payment", 
-                "callback_url": window.location.origin + window.location.pathname + "?payment=success",
+                "callback_url": window.location.origin + window.location.pathname,
                 "callback_method": "get",
+                "handler": function (response){ 
+                    processOrderToSheet("UPI - Paid", response.razorpay_payment_id); 
+                }, 
                 "prefill": { "name": checkoutData.name, "email": checkoutData.email, "contact": checkoutData.phone }, 
                 "theme": { "color": "#B3391C" } 
             };
@@ -1564,6 +1570,7 @@
         .then(res => res.json())
         .then(data => {
             if(data.status === "success") {
+                localStorage.removeItem('pendingKalavadOrder');
                 let newOrderObj = { date: new Date().toLocaleString(), items: itemsSummary, total: grandTotalVal, method: finalPaymentMethod, code: data.code, status: "Pending" };
                 let historyArray = JSON.parse(localStorage.getItem('myOrdersHistory') || "[]");
                 historyArray.unshift(newOrderObj); if(historyArray.length > 5) historyArray.pop(); 
