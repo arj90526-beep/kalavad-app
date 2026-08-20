@@ -69,7 +69,7 @@
     /* BANNERS CSS */
     .banners-wrapper { display: flex; overflow-x: auto; scroll-snap-type: x mandatory; gap: 10px; padding-bottom: 5px; margin-bottom: 10px; scrollbar-width: none; }
     .banners-wrapper::-webkit-scrollbar { display: none; }
-    .banner-slide { flex: 0 0 100%; height: 150px; border-radius: 15px; scroll-snap-align: center; background-size: cover; background-position: center; position: relative; overflow: hidden; cursor: pointer; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+    .banner-slide { flex: 0 0 100%; height: 130px; border-radius: 15px; scroll-snap-align: center; background-size: cover; background-position: center; position: relative; overflow: hidden; cursor: pointer; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
     
     /* BANNERS DOTS CSS */
     .banner-dots { display: flex; justify-content: center; gap: 6px; margin-bottom: 20px; }
@@ -105,9 +105,7 @@
     .item-actions-grid { display: flex; align-items: center; justify-content: space-between; border-top: 1px solid #f1f2f6; padding-top: 6px; }
     .item-actions-grid i { font-size: 22px; color: var(--primary); cursor: pointer; }
 
-    /* Fix applied here for Fixed Bottom Panel */
-    .bottom-panel { position: fixed; bottom: 0; left: 50%; transform: translateX(-50%); width: 100%; max-width: 400px; background: white; padding: 12px 20px 15px 20px; box-sizing: border-box; box-shadow: 0 -5px 15px rgba(0,0,0,0.1); border-top-left-radius: 20px; border-top-right-radius: 20px; display: none; flex-direction: column; z-index: 50; transition: 0.3s ease; }
-    
+    .bottom-panel { position: absolute; bottom: 0; left: 0; width: 100%; background: white; padding: 12px 20px 15px 20px; box-sizing: border-box; box-shadow: 0 -5px 15px rgba(0,0,0,0.1); border-top-left-radius: 20px; border-top-right-radius: 20px; display: none; flex-direction: column; z-index: 5; transition: 0.3s ease; }
     .bill-details-wrapper { transition: 0.3s ease; overflow: hidden; }
     .minimize-bar { text-align: center; cursor: pointer; margin-bottom: 5px; color: #777; font-size: 14px; }
     .bill-row { display: flex; justify-content: space-between; font-size: 14px; margin-bottom: 4px; color: #555;}
@@ -152,15 +150,13 @@
        ========================================= */
     @media screen and (min-width: 480px) {
         .app-container { max-width: 100%; border-radius: 0; }
-        .bottom-panel { max-width: 100%; } /* Added */
         .items-grid { grid-template-columns: repeat(3, 1fr); }
         .sidebar { max-width: 300px; }
     }
     @media screen and (min-width: 768px) {
         .app-container { max-width: 900px; }
-        .bottom-panel { max-width: 900px; } /* Added */
         .items-grid { grid-template-columns: repeat(4, 1fr); gap: 15px; }
-        .banner-slide { height: 230px; }
+        .banner-slide { height: 200px; }
         .rest-logo { width: 90px; height: 90px; }
         .rest-card { min-width: 90px; }
         .rest-name { max-width: 90px; font-size: 13px; }
@@ -169,7 +165,6 @@
     }
     @media screen and (min-width: 1024px) {
         .app-container { max-width: 1200px; }
-        .bottom-panel { max-width: 1200px; } /* Added */
         .items-grid { grid-template-columns: repeat(5, 1fr); }
         .banner-slide { height: 250px; }
     }
@@ -400,16 +395,9 @@
 </div>
 
 <script>
-    // --- JALEBI (ANTI-HACKER) CODE START ---
-    const _0x1a2b = [
-        "https://script.google.com/macros/s/AKfycbw51Zxq08xptCsxN_3uZKTEZ9l2z9VMu3oD-j9BBQuEXU7TebuduKd5M4CQcjspfWbZzw/exec",
-        "KalavadSecureKey2026"
-    ];
-    const GOOGLE_WEB_APP_URL = _0x1a2b[0]; 
-    const SECRET_KEY = _0x1a2b[1]; 
-    // --- JALEBI CODE END ---
-
-    const RAZORPAY_KEY = "rzp_test_TRGbJibzF28KJq"; 
+    // --- SECURITY UPDATE: Secret Key removed from frontend ---
+    const GOOGLE_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbw51Zxq08xptCsxN_3uZKTEZ9l2z9VMu3oD-j9BBQuEXU7TebuduKd5M4CQcjspfWbZzw/exec"; 
+    const RAZORPAY_KEY = "rzp_live_TReBmM0SvEpLsV"; 
 
     let globalData = { settings: {}, areas: [], banners: [], restaurants: [], items: [] };
     let cart = {}; 
@@ -465,7 +453,7 @@
         fetch(GOOGLE_WEB_APP_URL, {
             method: "POST",
             headers: { "Content-Type": "text/plain;charset=utf-8" },
-            body: JSON.stringify({ action: "getUserOrders", email: userEmail, secretKey: SECRET_KEY })
+            body: JSON.stringify({ action: "getUserOrders", email: userEmail })
         })
         .then(res => res.json())
         .then(data => {
@@ -620,7 +608,7 @@
         showCustomModal(
             'delete_confirm', 
             'Delete Order?', 
-            'Kripya dhyan dein: Agar order aapke paas pahunch gaya hai, tabhi ise history se delete karein. Kya aap ise delete karna chahte hain?', 
+            'Kripya dhyan dein: Agar order aapke paas pahunch gaya hai, tabhi ise history se delete karein. Kya aap ise delete karna chtate hain?', 
             function() {
                 let deletedCodes = JSON.parse(localStorage.getItem('deletedOrderCodes') || "[]");
                 if(!deletedCodes.includes(String(orderCode))) {
@@ -1038,16 +1026,6 @@
         if(!name || !email) { showCustomModal('alert', 'Action Required', 'Please enter both Name and Email ID'); return; }
         
         let btn = document.getElementById('sendOtpBtn');
-
-        // --- RAZORPAY TEST ACCOUNT BYPASS START ---
-        if(email.toLowerCase() === "test@razorpay.com") {
-            btn.innerText = "OTP Sent to Email!";
-            let otpSec = document.getElementById('otpSection');
-            if(otpSec) otpSec.classList.remove('hidden');
-            return; // Ye backend ko call nahi karega
-        }
-        // --- RAZORPAY TEST ACCOUNT BYPASS END ---
-
         btn.innerText = "Sending..."; 
         btn.style.backgroundColor = "var(--disabled)"; 
         btn.disabled = true;
@@ -1055,7 +1033,7 @@
         fetch(GOOGLE_WEB_APP_URL, {
             method: "POST",
             headers: { "Content-Type": "text/plain;charset=utf-8" },
-            body: JSON.stringify({ action: "sendOTP", email: email, secretKey: SECRET_KEY })
+            body: JSON.stringify({ action: "sendOTP", email: email })
         })
         .then(res => res.json())
         .then(data => {
@@ -1084,23 +1062,12 @@
         if(!otp) { showCustomModal('alert', 'Action Required', 'Please enter the OTP'); return; }
         
         let btn = document.getElementById('loginBtn');
-
-        // --- RAZORPAY TEST ACCOUNT BYPASS START ---
-        if(email.toLowerCase() === "test@razorpay.com" && otp === "123456") {
-            localStorage.setItem('isLoggedIn', 'true');
-            localStorage.setItem('userName', nameField ? nameField.value : 'Razorpay Team');
-            localStorage.setItem('userEmail', email);
-            window.location.reload();
-            return; // Ye direct login kar dega
-        }
-        // --- RAZORPAY TEST ACCOUNT BYPASS END ---
-
         btn.innerText = "Verifying..."; btn.style.backgroundColor = "var(--disabled)";
 
         fetch(GOOGLE_WEB_APP_URL, {
             method: "POST",
             headers: { "Content-Type": "text/plain;charset=utf-8" },
-            body: JSON.stringify({ action: "verifyOTP", email: email, otp: otp, secretKey: SECRET_KEY })
+            body: JSON.stringify({ action: "verifyOTP", email: email, otp: otp })
         })
         .then(res => res.json())
         .then(data => {
@@ -1130,7 +1097,7 @@
     }
 
     function fetchGoogleSheetData() {
-        fetch(GOOGLE_WEB_APP_URL + "?secretKey=" + SECRET_KEY)
+        fetch(GOOGLE_WEB_APP_URL)
             .then(res => res.json())
             .then(data => {
                 if(data.error) return;
@@ -1141,7 +1108,7 @@
     }
 
     function fetchGoogleSheetDataSilent() {
-        fetch(GOOGLE_WEB_APP_URL + "?secretKey=" + SECRET_KEY)
+        fetch(GOOGLE_WEB_APP_URL)
             .then(res => res.json())
             .then(data => {
                 if(data.error) return;
@@ -1501,17 +1468,19 @@
                 "currency": "INR", 
                 "name": "Online Kalavad", 
                 "description": "Order Payment", 
-                "handler": function (response){ processOrderToSheet("UPI - Paid (ID: " + response.razorpay_payment_id + ")"); }, 
+                "handler": function (response){ 
+                    processOrderToSheet("UPI - Paid", response.razorpay_payment_id); 
+                }, 
                 "prefill": { "name": document.getElementById('addrName').value.trim(), "email": localStorage.getItem('userEmail'), "contact": document.getElementById('addrPhone').value.trim() }, 
                 "theme": { "color": "#B3391C" } 
             };
             var rzp1 = new Razorpay(options);
             rzp1.on('payment.failed', function (response){ showCustomModal('alert', 'Payment Failed', 'Aapka payment fail ho gaya. Kripya dobara koshish karein.'); });
             rzp1.open();
-        } else { processOrderToSheet("COD"); }
+        } else { processOrderToSheet("COD", ""); }
     }
 
-    function processOrderToSheet(finalPaymentMethod) {
+    function processOrderToSheet(finalPaymentMethod, paymentId) {
         let name = document.getElementById('addrName').value.trim(); 
         let phone = "+91 " + document.getElementById('addrPhone').value.trim(); 
         let area = document.getElementById('addrArea').value; 
@@ -1519,11 +1488,26 @@
         let email = localStorage.getItem('userEmail');
         
         let itemsSummary = "";
-        for(let k in cart) { if(cart[k].qty > 0) itemsSummary += `${cart[k].name} [${cart[k].rName}] (x${cart[k].qty}), `; }
+        let cartDataForBackend = [];
+
+        for(let k in cart) { 
+            if(cart[k].qty > 0) {
+                itemsSummary += `${cart[k].name} [${cart[k].rName}] (x${cart[k].qty}), `; 
+                cartDataForBackend.push({ name: cart[k].name, rName: cart[k].rName, qty: cart[k].qty });
+            }
+        }
 
         let fullAddressString = name + " | Ph: " + phone + " | Area: " + area + " (City: Kalavad) | Addr: " + fullAddr;
 
-        let payload = { action: "placeOrder", name: fullAddressString, email: email, items: itemsSummary, total: grandTotalVal, paymentMethod: finalPaymentMethod, secretKey: SECRET_KEY };
+        let payload = { 
+            action: "placeOrder", 
+            name: fullAddressString, 
+            email: email, 
+            items: itemsSummary, 
+            cartData: cartDataForBackend, 
+            paymentMethod: finalPaymentMethod, 
+            paymentId: paymentId 
+        };
 
         let btn = document.getElementById('finalPlaceOrderBtn');
         if(btn) { btn.innerText = "Processing..."; btn.disabled = true; btn.style.backgroundColor = "var(--disabled)"; }
@@ -1554,4 +1538,4 @@
     }
 </script>
 </body>
-    </html>
+</html>
