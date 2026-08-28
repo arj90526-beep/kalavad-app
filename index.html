@@ -4,44 +4,24 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Online Kalavad</title>
-<!-- FontAwesome for Icons -->
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-<!-- Razorpay Payment Script -->
 <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+
+<!-- 🔥 Firebase Scripts (Auth Added) -->
+<script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-auth-compat.js"></script>
+
 <style>
-    :root {
-        --primary: #B3391C; 
-        --success: #28a745; 
-        --info-blue: #007bff; 
-        --disabled: #888888; 
-        --bg-color: #f4f6f9;
-        --text-dark: #333;
-        --white: #fff;
-    }
-    body {
-        margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        background-color: #ddd; display: flex; justify-content: center;
-    }
-    .app-container {
-        width: 100%; max-width: 400px; height: 100vh; background-color: var(--bg-color);
-        position: relative; overflow: hidden; box-shadow: 0 0 20px rgba(0,0,0,0.1);
-        display: flex; flex-direction: column;
-    }
+    :root { --primary: #B3391C; --success: #28a745; --info-blue: #007bff; --disabled: #888888; --bg-color: #f4f6f9; --text-dark: #333; --white: #fff; }
+    body { margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #ddd; display: flex; justify-content: center; }
+    .app-container { width: 100%; max-width: 400px; height: 100vh; background-color: var(--bg-color); position: relative; overflow: hidden; box-shadow: 0 0 20px rgba(0,0,0,0.1); display: flex; flex-direction: column; }
     .hidden { display: none !important; }
     .screen { height: 100%; width: 100%; overflow-y: auto; padding-bottom: 190px; box-sizing: border-box;}
     
     .login-wrapper { padding: 40px 20px; text-align: center; }
-    .logo-title {
-        color: var(--primary);
-        font-size: 32px;
-        font-family: 'Arial Black', Impact, sans-serif;
-        font-weight: 900;
-        line-height: 1.1;
-        letter-spacing: 1px;
-        display: inline-block;
-        margin-bottom: 5px;
-    }
-    .logo-sub { font-size: 14px; color: #666; margin-bottom: 40px; }
+    .logo-title { color: var(--primary); font-size: 32px; font-family: 'Arial Black', Impact, sans-serif; font-weight: 900; line-height: 1.1; letter-spacing: 1px; display: inline-block; margin-bottom: 5px; }
+    .logo-sub { font-size: 14px; color: #666; margin-bottom: 30px; }
     .input-group { margin-bottom: 15px; text-align: left; }
     .input-group label { display: block; font-size: 14px; margin-bottom: 5px; font-weight: 500; font-family: inherit; }
     .input-group input, .input-group select, .input-group textarea { width: 100%; padding: 12px; border: 1px solid #ccc; border-radius: 20px; box-sizing: border-box; outline: none; font-family: inherit; font-size: 14px; }
@@ -65,20 +45,14 @@
     .sidebar-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 15; display: none; }
 
     .content-area { padding: 0 15px; }
-    
-    /* BANNERS CSS */
     .banners-wrapper { display: flex; overflow-x: auto; scroll-snap-type: x mandatory; gap: 10px; padding-bottom: 5px; margin-bottom: 10px; scrollbar-width: none; }
     .banners-wrapper::-webkit-scrollbar { display: none; }
     .banner-slide { flex: 0 0 100%; height: 150px; border-radius: 15px; scroll-snap-align: center; background-size: cover; background-position: center; position: relative; overflow: hidden; cursor: pointer; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
-    
-    /* BANNERS DOTS CSS */
     .banner-dots { display: flex; justify-content: center; gap: 6px; margin-bottom: 20px; }
     .banner-dots .dot { width: 8px; height: 8px; border-radius: 50%; background: #ccc; transition: 0.3s ease; }
     .banner-dots .dot.active { background: var(--primary); width: 16px; border-radius: 4px; }
     
-    /* CATEGORY CSS */
     .category-card { background: white; padding: 15px 20px; border-radius: 12px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 5px rgba(0,0,0,0.05); cursor: pointer; border-left: 4px solid var(--primary); }
-
     .section-title { display: flex; justify-content: space-between; font-weight: bold; margin-bottom: 10px; align-items: center; white-space: nowrap; }
     .restaurants-container { display: flex; overflow-x: auto; gap: 12px; padding-bottom: 15px; margin-bottom: 10px; }
     .restaurants-container::-webkit-scrollbar { display: none; }
@@ -88,15 +62,11 @@
     .rest-logo img { width: 100%; height: 100%; object-fit: cover; }
     .rest-name { font-size: 11px; font-weight: bold; color: var(--text-dark); max-width: 85px; line-height: 1.2; word-wrap: break-word; }
 
-    /* 2-COLUMN GRID FOR ITEMS */
     .items-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 15px; }
     .item-card { background: white; padding: 10px; border-radius: 12px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); display: flex; flex-direction: column; justify-content: space-between; }
     .item-card-top { cursor: pointer; }
-    
-    /* ITEM IMAGE SQUARE FIX */
     .item-img { width: 100%; aspect-ratio: 1 / 1; background: #eee; overflow: hidden; margin-bottom: 8px; border-radius: 4px; }
     .item-img img { width: 100%; height: 100%; object-fit: cover; }
-    
     .item-name { font-weight: bold; margin: 0 0 2px 0; font-size: 14px; line-height: 1.2; }
     .item-restaurant { font-size: 11px; color: var(--primary); font-weight: 500; margin-bottom: 2px; text-transform: lowercase; }
     .item-desc { font-size: 11px; color: #666; margin: 0 0 4px 0; line-height: 1.2; }
@@ -105,11 +75,7 @@
     .item-actions-grid { display: flex; align-items: center; justify-content: space-between; border-top: 1px solid #f1f2f6; padding-top: 6px; }
     .item-actions-grid i { font-size: 22px; color: var(--primary); cursor: pointer; }
 
-    /* Fix applied here for Fixed Bottom Panel */
     .bottom-panel { position: fixed; bottom: 0; left: 50%; transform: translateX(-50%); width: 100%; max-width: 400px; background: white; padding: 12px 20px 15px 20px; box-sizing: border-box; box-shadow: 0 -5px 15px rgba(0,0,0,0.1); border-top-left-radius: 20px; border-top-right-radius: 20px; display: none; flex-direction: column; z-index: 50; transition: 0.3s ease; }
-    
-    .bill-details-wrapper { transition: 0.3s ease; overflow: hidden; }
-    .minimize-bar { text-align: center; cursor: pointer; margin-bottom: 5px; color: #777; font-size: 14px; }
     .bill-row { display: flex; justify-content: space-between; font-size: 14px; margin-bottom: 4px; color: #555;}
     .bill-row.total { font-size: 17px; font-weight: bold; color: var(--text-dark); margin-bottom: 8px; margin-top: 4px; border-top: 1px dashed #ccc; padding-top: 4px;}
     
@@ -133,7 +99,6 @@
     .modal-btn-cancel { background: #eee; color: #555; }
     .modal-btn-confirm { background: var(--primary); color: white; }
 
-    /* EXACT MATCH REFERENCE PHOTO POPUP STYLING */
     .item-popup-body { display: flex; flex-direction: column; gap: 12px; align-items: center; text-align: center; }
     .item-popup-card-style { background: #fff; width: 100%; border-radius: 14px; padding: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); display: flex; gap: 12px; align-items: center; text-align: left; border: 1px solid #eee; }
     .item-popup-img { width: 130px; height: 130px; border-radius: 10px; overflow: hidden; background: #eee; flex-shrink: 0; }
@@ -143,43 +108,16 @@
     .item-popup-info p { font-size: 13px; color: #666; margin: 0 0 4px 0; }
     .item-popup-info .popup-price { font-size: 18px; font-weight: bold; color: var(--success); margin: 4px 0; }
     .item-popup-info .popup-rest { font-size: 12px; color: var(--primary); font-weight: 500; margin-top: 2px; }
-    
     .item-popup-actions { display: flex; align-items: center; justify-content: center; gap: 20px; margin-top: 5px; background: #f4f6f9; padding: 10px; border-radius: 25px; width: 100%; }
     .item-popup-actions i { font-size: 28px; color: var(--primary); cursor: pointer; }
 
-    /* =========================================
-       DESKTOP & TABLET MODE RESPONSIVENESS
-       ========================================= */
-    @media screen and (min-width: 480px) {
-        .app-container { max-width: 100%; border-radius: 0; }
-        .bottom-panel { max-width: 100%; } 
-        .items-grid { grid-template-columns: repeat(3, 1fr); }
-        .sidebar { max-width: 300px; }
-    }
-    @media screen and (min-width: 768px) {
-        .app-container { max-width: 900px; }
-        .bottom-panel { max-width: 900px; } 
-        .items-grid { grid-template-columns: repeat(4, 1fr); gap: 15px; }
-        .banner-slide { height: 230px; }
-        .rest-logo { width: 90px; height: 90px; }
-        .rest-card { min-width: 90px; }
-        .rest-name { max-width: 90px; font-size: 13px; }
-        .login-wrapper { max-width: 400px; margin: 0 auto; }
-        .code-box { width: 40%; }
-    }
-    @media screen and (min-width: 1024px) {
-        .app-container { max-width: 1200px; }
-        .bottom-panel { max-width: 1200px; } 
-        .items-grid { grid-template-columns: repeat(5, 1fr); }
-        .banner-slide { height: 250px; }
-    }
+    @media screen and (min-width: 480px) { .app-container, .bottom-panel { max-width: 100%; border-radius: 0; } .items-grid { grid-template-columns: repeat(3, 1fr); } .sidebar { max-width: 300px; } }
+    @media screen and (min-width: 768px) { .app-container, .bottom-panel { max-width: 900px; } .items-grid { grid-template-columns: repeat(4, 1fr); gap: 15px; } .banner-slide { height: 230px; } .rest-logo { width: 90px; height: 90px; } .login-wrapper { max-width: 400px; margin: 0 auto; } .code-box { width: 40%; } }
+    @media screen and (min-width: 1024px) { .app-container, .bottom-panel { max-width: 1200px; } .items-grid { grid-template-columns: repeat(5, 1fr); } .banner-slide { height: 250px; } }
 </style>
 </head>
 <body>
-
 <div class="app-container">
-    
-    <!-- Custom Modal Overlay -->
     <div class="custom-modal-overlay" id="customModalOverlay">
         <div class="custom-modal">
             <button class="modal-close-btn" onclick="closeModal()">✕</button>
@@ -191,93 +129,79 @@
             </div>
         </div>
     </div>
-
-    <!-- Sidebar Overlay & Menu -->
     <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleMenu()"></div>
     <div class="sidebar" id="sidebar">
         <div class="sidebar-header">
             <h3 id="profileName">Guest User</h3>
-            <p id="profileEmail" style="margin: 0; font-size: 12px;">user@gmail.com</p>
+            <p id="profileEmail" style="margin: 0; font-size: 12px;">+91 XXXXXXXXXX</p>
         </div>
         <ul class="sidebar-menu">
             <li onclick="toggleMenu(); showScreen('homeScreen');"><i class="fa-solid fa-house"></i> Home</li>
             <li onclick="fetchCloudOrdersAndShow()"><i class="fa-solid fa-box-open"></i> My Orders</li>
-            
             <li onclick="showPolicy('terms')"><i class="fa-solid fa-file-contract"></i> Terms & Conditions</li>
             <li onclick="showPolicy('privacy')"><i class="fa-solid fa-shield-halved"></i> Privacy Policy</li>
             <li onclick="showPolicy('refund')"><i class="fa-solid fa-money-bill-transfer"></i> Refund Policy</li>
             <li onclick="showPolicy('about')"><i class="fa-solid fa-circle-info"></i> About Us</li>
-            
             <li onclick="logoutUser()" style="margin-top: auto; border-top: 1px solid #ddd; color: var(--primary);">
                 <i class="fa-solid fa-right-from-bracket"></i> Logout
             </li>
         </ul>
     </div>
-
-    <!-- 1. LOGIN SCREEN -->
+    
+    <!-- 🔥 LOGIN SCREEN (PHONE OTP) 🔥 -->
     <div id="loginScreen" class="screen">
         <div class="login-wrapper">
             <div class="logo-title">ONLINE<br>KALAVAD</div>
             <div class="logo-sub">Fast & Fresh, Right at your door</div>
             
             <div class="input-group">
-                <label>Name</label>
-                <input type="text" id="userName" placeholder="Your Name" autocomplete="name">
+                <label>Your Name</label>
+                <input type="text" id="userName" placeholder="Enter Full Name" autocomplete="name">
             </div>
             <div class="input-group">
-                <label>Email ID</label>
-                <input type="email" id="userEmail" placeholder="example@gmail.com" autocomplete="email" inputmode="email">
+                <label>Mobile Number</label>
+                <div style="display: flex; align-items: center; border: 1px solid #ccc; border-radius: 20px; background: white; padding: 0 15px; overflow: hidden;">
+                    <span style="font-size: 14px; color: #333; margin-right: 6px;">+91</span>
+                    <input type="tel" id="userPhone" placeholder="10-digit mobile number" maxlength="10" inputmode="numeric" style="border: none !important; border-radius: 0 !important; padding: 12px 0 !important; background: transparent; width: 100%;">
+                </div>
             </div>
-            <button class="btn" id="sendOtpBtn" onclick="requestOTP()">Send OTP</button>
-
+            
+            <!-- Recaptcha Container -->
+            <div id="recaptcha-container" style="margin-top: 10px;"></div>
+            
+            <button class="btn" id="sendOtpBtn" onclick="sendPhoneOTP()">Get OTP via SMS</button>
+            
             <div id="otpSection" class="hidden" style="margin-top: 20px;">
                 <div class="input-group">
-                    <label>Enter Email OTP</label>
-                    <input type="number" id="otpInput" placeholder="6-digit OTP">
+                    <label>Enter 6-Digit OTP</label>
+                    <input type="number" id="otpInput" placeholder="Enter OTP received">
                 </div>
-                <button class="btn" id="loginBtn" onclick="verifyOTPCode()" style="background-color: var(--success);">Login</button>
+                <button class="btn" id="loginBtn" onclick="verifyPhoneOTP()" style="background-color: var(--success);">Verify & Login</button>
             </div>
         </div>
     </div>
 
-    <!-- 2. HOME SCREEN -->
+    <!-- HOME SCREEN -->
     <div id="homeScreen" class="screen hidden">
         <div class="header">
             <i class="fa-solid fa-bars" onclick="toggleMenu()"></i>
-            <!-- Smart Live Search Bar -->
             <div class="search-bar">
                 <i class="fa-solid fa-magnifying-glass" style="color: #999; font-size: 14px;"></i>
                 <input type="text" id="searchInput" placeholder="Search items or restaurant..." oninput="handleSearch(this.value)">
             </div>
-            <!-- Notification Icon with Red Dot -->
             <div class="noti-wrapper" onclick="showNotification()">
                 <i class="fa-solid fa-bell" style="color: var(--primary);"></i>
                 <div class="red-dot" id="notiRedDot"></div>
             </div>
         </div>
-
         <div class="content-area">
-            <!-- BANNERS CONTAINER -->
-            <div class="banners-wrapper" id="bannersWrapper">
-                <div class="banner-slide" style="background-color: #d0e0e3; display: flex; align-items: center; justify-content: center; color: #555;">Loading Banners...</div>
-            </div>
-            <!-- BANNERS DOTS -->
+            <div class="banners-wrapper" id="bannersWrapper"><div class="banner-slide" style="background-color: #d0e0e3; display: flex; align-items: center; justify-content: center; color: #555;">Loading Banners...</div></div>
             <div class="banner-dots" id="bannerDots"></div>
-            
-            <div class="section-title" id="restSectionTitle">
-                <span>Restaurants & Shops</span>
-                <span onclick="openRestaurantsPopup()" style="color: var(--primary); font-size: 12px; cursor: pointer; font-weight: bold;">See All</span>
-            </div>
+            <div class="section-title" id="restSectionTitle"><span>Restaurants & Shops</span><span onclick="openRestaurantsPopup()" style="color: var(--primary); font-size: 12px; cursor: pointer; font-weight: bold;">See All</span></div>
             <div class="restaurants-container" id="restaurantsContainer"><p style="font-size:12px; color:#888;">Loading...</p></div>
-
-            <div class="section-title">
-                <span id="itemSectionTitle">All Items</span>
-                <span id="itemSectionSeeAll" onclick="openItemsPopup()" style="color: var(--primary); font-size: 12px; cursor: pointer; font-weight: bold;">See All</span>
-            </div>
+            <div class="section-title"><span id="itemSectionTitle">All Items</span><span id="itemSectionSeeAll" onclick="openItemsPopup()" style="color: var(--primary); font-size: 12px; cursor: pointer; font-weight: bold;">See All</span></div>
             <div id="itemsContainer"><p style="text-align:center; color:#888;">Loading Items...</p></div>
         </div>
-
-        <!-- Dynamic Bottom Panel with Total Items Quantity & Total Amount Only -->
         <div class="bottom-panel" id="bottomPanel">
             <div class="bill-row"><span id="itemTotalLabel">Item Total</span><span id="itemTotal">0 Items</span></div>
             <div class="bill-row total"><span>Total Amount</span><span id="grandTotal">₹0</span></div>
@@ -285,12 +209,9 @@
         </div>
     </div>
 
-    <!-- 3. INVOICE SCREEN -->
     <div id="invoiceScreen" class="screen hidden">
         <div class="header">
-            <i class="fa-solid fa-arrow-left" onclick="showScreen('homeScreen')"></i>
-            <h3 style="margin: 0; flex: 1; text-align: center;">Order Summary</h3>
-            <div style="width: 20px;"></div>
+            <i class="fa-solid fa-arrow-left" onclick="showScreen('homeScreen')"></i><h3 style="margin: 0; flex: 1; text-align: center;">Order Summary</h3><div style="width: 20px;"></div>
         </div>
         <div class="content-area" style="padding-top: 20px;">
             <div style="background: white; padding: 15px; border-radius: 15px; box-shadow: 0 2px 10px rgba(0,0,0,0.05);">
@@ -304,337 +225,238 @@
             <button class="btn" style="margin-top: 20px;" onclick="showScreen('addressScreen')">Proceed to Address</button>
         </div>
     </div>
-
-    <!-- 4. ADDRESS SCREEN -->
     <div id="addressScreen" class="screen hidden">
         <div class="header">
-            <i class="fa-solid fa-arrow-left" onclick="showScreen('invoiceScreen')"></i>
-            <h3 style="margin: 0; flex: 1; text-align: center;">Delivery Address</h3>
-            <div style="width: 20px;"></div>
+            <i class="fa-solid fa-arrow-left" onclick="showScreen('invoiceScreen')"></i><h3 style="margin: 0; flex: 1; text-align: center;">Delivery Address</h3><div style="width: 20px;"></div>
         </div>
         <div class="content-area" style="padding-top: 20px;">
-            <div class="input-group">
-                <label>Full Name</label>
-                <input type="text" id="addrName">
-            </div>
-
+            <div class="input-group"><label>Full Name</label><input type="text" id="addrName"></div>
             <div class="input-group">
                 <label>Mobile Number</label>
                 <div style="display: flex; align-items: center; border: 1px solid #ccc; border-radius: 20px; background: white; padding: 0 15px; overflow: hidden; font-family: inherit;">
                     <span style="font-size: 14px; color: #333; margin-right: 6px; font-weight: 400; font-family: inherit;">+91</span>
-                    <input type="tel" id="addrPhone" placeholder="Enter 10-digit number" maxlength="10" inputmode="numeric" style="border: none !important; border-radius: 0 !important; padding: 12px 0 !important; outline: none; background: transparent; width: 100%; font-size: 14px; font-family: inherit;" oninput="onPhoneInput(this)">
-                </div>
-                
-                <div style="display: flex; align-items: center; gap: 10px; margin-top: 8px;">
-                    <button type="button" class="btn" id="verifyPhoneBtn" style="width: auto; background-color: var(--info-blue); padding: 8px 18px; font-size: 13px; border-radius: 15px; margin-top: 0; font-family: inherit;" onclick="verifyPhoneNumber()">Verify</button>
-                    <span id="phoneVerifyStatus" style="font-size: 13px; font-weight: bold; font-family: inherit;"></span>
+                    <input type="tel" id="addrPhone" placeholder="Enter 10-digit number" maxlength="10" inputmode="numeric" style="border: none !important; border-radius: 0 !important; padding: 12px 0 !important; outline: none; background: transparent; width: 100%; font-size: 14px; font-family: inherit;" oninput="this.value = this.value.replace(/[^0-9]/g, '')">
                 </div>
             </div>
-
-            <div class="input-group">
-                <label>Select Area</label>
-                <select id="addrArea" onchange="onAreaSelected(this)">
-                    <option value="">Select your area...</option>
-                </select>
-            </div>
-
-            <!-- City Field Layout -->
-            <div class="input-group">
-                <label>City</label>
-                <input type="text" id="addrCity" value="" readonly placeholder="" style="background: #e9ecef; color: #444; border: 1px solid #ced4da; cursor: pointer;" onclick="checkCitySelection(this)">
-            </div>
-
-            <div class="input-group">
-                <label>Full Address</label>
-                <textarea id="addrFull" rows="3" placeholder="House no, street, landmark, etc."></textarea>
-            </div>
+            <div class="input-group"><label>Select Area</label><select id="addrArea" onchange="onAreaSelected(this)"><option value="">Select your area...</option></select></div>
+            <div class="input-group"><label>City</label><input type="text" id="addrCity" value="" readonly placeholder="" style="background: #e9ecef; color: #444; border: 1px solid #ced4da; cursor: pointer;" onclick="checkCitySelection(this)"></div>
+            <div class="input-group"><label>Full Address</label><textarea id="addrFull" rows="3" placeholder="House no, street, landmark, etc."></textarea></div>
             <button class="btn" style="margin-top: 10px;" onclick="validateAddressAndGoToPayment()">Proceed to Payment</button>
         </div>
     </div>
-
-    <!-- 5. PAYMENT SCREEN -->
     <div id="paymentScreen" class="screen hidden">
         <div class="header">
-            <i class="fa-solid fa-arrow-left" onclick="showScreen('addressScreen')"></i>
-            <h3 style="margin: 0; flex: 1; text-align: center;">Payment Method</h3>
-            <div style="width: 20px;"></div>
+            <i class="fa-solid fa-arrow-left" onclick="showScreen('addressScreen')"></i><h3 style="margin: 0; flex: 1; text-align: center;">Payment Method</h3><div style="width: 20px;"></div>
         </div>
         <div class="content-area" style="padding-top: 20px;">
             <p style="text-align:center; font-weight:bold; font-size:18px; margin-bottom:20px;">Amount to Pay: <span id="payAmountTotal" style="color:var(--primary);">₹0</span></p>
-            
-            <p id="noPaymentMsg" style="color:red; text-align:center; display:none; font-size:14px; font-weight:bold;">Koi payment method available nahi hai. Kripya baad mein try karein.</p>
-
-            <label class="payment-option" id="upiWrapper">
-                <input type="radio" name="paymentType" value="UPI" id="radioUPI" checked>
-                <span>UPI / Online Payment</span>
-            </label>
-
-            <label class="payment-option" id="codWrapper">
-                <input type="radio" name="paymentType" value="COD" id="radioCOD">
-                <span>Cash on Delivery (COD)</span>
-            </label>
-
+            <p id="noPaymentMsg" style="color:red; text-align:center; display:none; font-size:14px; font-weight:bold;">Koi payment method available nahi hai.</p>
+            <label class="payment-option" id="upiWrapper"><input type="radio" name="paymentType" value="UPI" id="radioUPI" checked><span>UPI / Online Payment</span></label>
+            <label class="payment-option" id="codWrapper"><input type="radio" name="paymentType" value="COD" id="radioCOD"><span>Cash on Delivery (COD)</span></label>
             <button class="btn" id="finalPlaceOrderBtn" style="margin-top: 30px;" onclick="submitFinalOrder()">Confirm & Place Order</button>
         </div>
     </div>
-
-    <!-- 6. SUCCESS SCREEN -->
     <div id="successScreen" class="screen hidden" style="text-align: center;">
-        <i class="fa-regular fa-circle-check success-icon"></i>
-        <h2>Thank you</h2>
+        <i class="fa-regular fa-circle-check success-icon"></i><h2>Thank you</h2>
         <p style="color: #555; margin-bottom: 5px;">Your order has been<br>Placed Successfully.</p>
-        
-        <p style="color: var(--success); font-size: 13px; font-weight: bold; margin-top: 0; padding: 0 15px;">
-            Track your order status in 'My Orders' section
-        </p>
-
-        <div style="margin-top: 20px;">
-            <p style="margin: 0; color: #555;">Delivery Boy Code</p>
-            <div class="code-box"><span id="deliveryCode" style="color:var(--primary);">----</span></div>
-        </div>
-        
+        <p style="color: var(--success); font-size: 13px; font-weight: bold; margin-top: 0; padding: 0 15px;">Track your order status in 'My Orders' section</p>
+        <div style="margin-top: 20px;"><p style="margin: 0; color: #555;">Delivery Code</p><div class="code-box"><span id="deliveryCode" style="color:var(--primary);">----</span></div></div>
         <p style="color: #555; margin-top: 10px;">Show this code to delivery partner.</p>
-        <!-- Back to Home Loading Button -->
         <button class="btn" style="width: 80%; margin-top: 20px;" onclick="backToHomeClick(this)">Back to Home</button>
     </div>
 </div>
 
 <script>
-    const GOOGLE_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbw51Zxq08xptCsxN_3uZKTEZ9l2z9VMu3oD-j9BBQuEXU7TebuduKd5M4CQcjspfWbZzw/exec"; 
-    const RAZORPAY_KEY = "rzp_live_TReBmM0SvEpLsV"; 
+    const RAZORPAY_KEY = "rzp_live_TReBmMOSvEpLsV"; 
+    
+    // FIREBASE INITIALIZATION
+    const firebaseConfig = {
+        apiKey: "AIzaSyBx_evS-lATF32s2LFhlIlEj9kDdz0iwR8",
+        authDomain: "onlinekalavad.firebaseapp.com",
+        databaseURL: "https://onlinekalavad-default-rtdb.firebaseio.com",
+        projectId: "onlinekalavad",
+        storageBucket: "onlinekalavad.firebasestorage.app",
+        messagingSenderId: "602162437764",
+        appId: "1:602162437764:web:f612725390ceb4b94b2cd1"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
+    const auth = firebase.auth();
 
     let globalData = { settings: {}, areas: [], banners: [], restaurants: [], items: [] };
-    let cart = {}; 
-    let delCharge = 0; let packCharge = 0; let grandTotalVal = 0;
-    
-    // UI Filters
-    let currentRestoFilter = null; 
-    let currentCategoryFilter = null;
-    let isPhoneVerified = false; 
+    let cart = {}; let delCharge = 0; let packCharge = 0; let grandTotalVal = 0;
+    let currentRestoFilter = null; let currentCategoryFilter = null;
+    let confirmationResultObj = null;
 
     window.onload = function() {
         if(localStorage.getItem('isLoggedIn') === 'true') {
-            let uName = localStorage.getItem('userName');
-            let uEmail = localStorage.getItem('userEmail');
-            if(uName && uEmail) {
-                let profileNameElem = document.getElementById('profileName');
-                let profileEmailElem = document.getElementById('profileEmail');
-                if(profileNameElem) profileNameElem.innerText = uName;
-                if(profileEmailElem) profileEmailElem.innerText = uEmail;
+            let uName = localStorage.getItem('userName'); let uPhone = localStorage.getItem('userPhone');
+            if(uName && uPhone) {
+                let pName = document.getElementById('profileName'); let pEmail = document.getElementById('profileEmail');
+                if(pName) pName.innerText = uName; if(pEmail) pEmail.innerText = uPhone;
                 showScreen('homeScreen');
-            } else {
-                localStorage.clear();
-                showScreen('loginScreen');
-            }
-            
+            } else { localStorage.clear(); showScreen('loginScreen'); }
             let cachedData = localStorage.getItem('onlineKalavadCache');
-            if(cachedData) {
-                try {
-                    globalData = JSON.parse(cachedData);
-                    renderAllDataUI(globalData); 
-                } catch(e) {}
-            }
-            fetchGoogleSheetData();
-            updateRedDot(); 
-
-            setInterval(fetchGoogleSheetDataSilent, 30000); 
-        } else {
-            showScreen('loginScreen');
+            if(cachedData) { try { globalData = JSON.parse(cachedData); renderAllDataUI(globalData); } catch(e) {} }
+            fetchFirebaseData(); 
+        } else { 
+            showScreen('loginScreen'); 
+            setupRecaptcha(); // Initialize Recaptcha on load
         }
     };
 
-    function showScreen(screenId) {
-        document.querySelectorAll('.screen').forEach(s => s.classList.add('hidden'));
-        let target = document.getElementById(screenId);
-        if(target) target.classList.remove('hidden');
-    }
-
-    function fetchCloudOrdersAndShow(isNotificationClick = false) {
-        let userEmail = localStorage.getItem('userEmail');
-        if(!userEmail) return;
-
-        fetch(GOOGLE_WEB_APP_URL, {
-            method: "POST",
-            headers: { "Content-Type": "text/plain;charset=utf-8" },
-            body: JSON.stringify({ action: "getUserOrders", email: userEmail })
-        })
-        .then(res => res.json())
-        .then(data => {
-            if(data.status === "success" && data.orders) {
-                let cloudOrders = data.orders; 
-                let deletedCodes = JSON.parse(localStorage.getItem('deletedOrderCodes') || "[]");
-                let filteredOrders = cloudOrders.filter(o => !deletedCodes.includes(String(o.code)));
-                
-                localStorage.setItem('myOrdersHistory', JSON.stringify(filteredOrders));
-                updateRedDot();
-                if(isNotificationClick) {
-                    renderNotificationModal(filteredOrders);
-                } else {
-                    renderOrdersModal(filteredOrders);
-                }
-            } else {
-                if(isNotificationClick) {
-                    showCustomModal('notification', 'Alert', 'Aapka abhi tak koi active order nahi hai.');
-                } else {
-                    showCustomModal('info', 'My Orders', 'Koi pichla order nahi mila.');
-                }
-            }
-        }).catch(err => {
-            let localOrders = JSON.parse(localStorage.getItem('myOrdersHistory') || "[]");
-            if(isNotificationClick) {
-                renderNotificationModal(localOrders);
-            } else {
-                renderOrdersModal(localOrders);
+    // 🔥 FIREBASE PHONE AUTHENTICATION FUNCTIONS 🔥
+    function setupRecaptcha() {
+        window.recaptchaVerifier = new firebase.auth.RecaptchaVerifier('recaptcha-container', {
+            'size': 'normal',
+            'callback': (response) => {
+                // reCAPTCHA solved
             }
         });
     }
 
-    function updateRedDot() {
-        let historyArray = JSON.parse(localStorage.getItem('myOrdersHistory') || "[]");
-        let activeOrders = historyArray.filter(o => o.status !== "Delivered");
-        let dot = document.getElementById('notiRedDot');
-        if(dot) {
-            dot.style.display = (activeOrders.length > 0) ? 'block' : 'none';
+    function sendPhoneOTP() {
+        let nameField = document.getElementById('userName'); 
+        let phoneField = document.getElementById('userPhone'); 
+        
+        let name = nameField.value.trim(); 
+        let phoneRaw = phoneField.value.trim(); 
+        
+        if(!name || phoneRaw.length !== 10) { 
+            showCustomModal('alert', 'Action Required', 'Kripya apna Naam aur 10-digit Mobile number daalein.'); 
+            return; 
+        }
+        
+        let phoneNumber = "+91" + phoneRaw;
+        let btn = document.getElementById('sendOtpBtn');
+        btn.innerText = "Sending OTP..."; 
+        btn.style.backgroundColor = "var(--disabled)"; 
+        btn.disabled = true;
+
+        const appVerifier = window.recaptchaVerifier;
+
+        auth.signInWithPhoneNumber(phoneNumber, appVerifier)
+            .then((confirmationResult) => {
+                window.confirmationResultObj = confirmationResult;
+                btn.innerText = "OTP Sent via SMS!";
+                document.getElementById('otpSection').classList.remove('hidden');
+                document.getElementById('recaptcha-container').style.display = "none";
+            }).catch((error) => {
+                console.error(error);
+                showCustomModal('alert', 'Error', 'OTP bhejte samay error aayi. Please refresh karein.');
+                btn.innerText = "Get OTP via SMS"; 
+                btn.style.backgroundColor = "var(--primary)"; 
+                btn.disabled = false;
+                if(window.recaptchaVerifier) window.recaptchaVerifier.render(); // reset recaptcha
+            });
+    }
+
+    function verifyPhoneOTP() {
+        let otpInput = document.getElementById('otpInput').value.trim();
+        let name = document.getElementById('userName').value.trim();
+        let phone = "+91 " + document.getElementById('userPhone').value.trim();
+
+        if(!otpInput || otpInput.length !== 6) { 
+            showCustomModal('alert', 'Action Required', 'Kripya 6-digit ka OTP daalein.'); 
+            return; 
+        }
+        
+        let btn = document.getElementById('loginBtn');
+        btn.innerText = "Verifying..."; 
+        btn.style.backgroundColor = "var(--disabled)";
+
+        window.confirmationResultObj.confirm(otpInput).then((result) => {
+            // User signed in successfully.
+            localStorage.setItem('isLoggedIn', 'true'); 
+            localStorage.setItem('userName', name); 
+            localStorage.setItem('userPhone', phone); 
+            window.location.reload(); 
+        }).catch((error) => {
+            showCustomModal('alert', 'Login Failed', 'Aapne galat OTP daala hai.'); 
+            btn.innerText = "Verify & Login"; 
+            btn.style.backgroundColor = "var(--success)";
+        });
+    }
+
+    function fetchFirebaseData() {
+        db.collection("settings").doc("general").onSnapshot(doc => { if(doc.exists) { globalData.settings = doc.data(); renderAllDataUI(globalData); } });
+        db.collection("settings").doc("areas").get().then(doc => { if(doc.exists) { globalData.areas = doc.data().list || []; renderAllDataUI(globalData); } });
+        db.collection("banners").get().then(snap => { globalData.banners = snap.docs.map(d => d.data()); renderAllDataUI(globalData); });
+        db.collection("restaurants").onSnapshot(snap => { globalData.restaurants = snap.docs.map(d => { let r = d.data(); r.id = d.id; return r; }); renderAllDataUI(globalData); });
+        db.collection("items").onSnapshot(snap => { globalData.items = snap.docs.map(d => d.data()); renderAllDataUI(globalData); });
+        
+        let uPhone = localStorage.getItem('userPhone');
+        if(uPhone) {
+            db.collection("orders").where("email", "==", uPhone).onSnapshot(snap => {
+                let cloudOrders = snap.docs.map(d => d.data());
+                cloudOrders.sort((a,b) => b.timestamp - a.timestamp);
+                let deletedCodes = JSON.parse(localStorage.getItem('deletedOrderCodes') || "[]");
+                let active = cloudOrders.filter(o => !deletedCodes.includes(String(o.code)) && o.status !== "Delivered");
+                let dot = document.getElementById('notiRedDot');
+                if(dot) dot.style.display = (active.length > 0) ? 'block' : 'none';
+            });
         }
     }
-    
+
+    function showScreen(screenId) { document.querySelectorAll('.screen').forEach(s => s.classList.add('hidden')); let target = document.getElementById(screenId); if(target) target.classList.remove('hidden'); }
+
+    async function fetchCloudOrdersAndShow(isNotificationClick = false) {
+        let userPhone = localStorage.getItem('userPhone'); if(!userPhone) return;
+        try {
+            let snap = await db.collection("orders").where("email", "==", userPhone).get();
+            let cloudOrders = snap.docs.map(doc => doc.data());
+            cloudOrders.sort((a,b) => b.timestamp - a.timestamp);
+            cloudOrders.forEach(o => { o.date = new Date(o.timestamp).toLocaleString(); });
+            let deletedCodes = JSON.parse(localStorage.getItem('deletedOrderCodes') || "[]");
+            let filteredOrders = cloudOrders.filter(o => !deletedCodes.includes(String(o.code)));
+            localStorage.setItem('myOrdersHistory', JSON.stringify(filteredOrders));
+            if(isNotificationClick) renderNotificationModal(filteredOrders); else renderOrdersModal(filteredOrders);
+        } catch(e) {
+            let localOrders = JSON.parse(localStorage.getItem('myOrdersHistory') || "[]");
+            if(isNotificationClick) renderNotificationModal(localOrders); else renderOrdersModal(localOrders);
+        }
+    }
+
     function showCustomModal(type, title, bodyHTML, onConfirmCallback = null) {
-        let modalTitle = document.getElementById('modalTitle');
-        let modalBody = document.getElementById('modalBody');
-        let icon = document.getElementById('modalIcon');
-        let btns = document.getElementById('modalButtons');
-        
+        let modalTitle = document.getElementById('modalTitle'); let modalBody = document.getElementById('modalBody'); let icon = document.getElementById('modalIcon'); let btns = document.getElementById('modalButtons');
         if(type === 'items_list') {
-            modalTitle.style.display = "block";
-            modalTitle.innerText = "All Items";
-            icon.style.display = "none";
-            modalBody.innerHTML = bodyHTML;
+            modalTitle.style.display = "block"; modalTitle.innerText = "All Items"; icon.style.display = "none"; modalBody.innerHTML = bodyHTML;
             btns.innerHTML = `<button class="modal-btn modal-btn-cancel" onclick="closeItemsPopupAndReset()" style="width:100%; border-radius:25px; background:#eee; color:#333; padding:12px; font-weight:bold;">Close</button>`;
         } else {
-            modalTitle.style.display = "block";
-            modalTitle.innerText = title;
-            modalBody.innerHTML = bodyHTML;
-            modalBody.style.background = "#f9f9f9";
-            modalBody.style.padding = "15px";
-            modalBody.style.border = "1px solid #eee";
-            
-            if(type === 'notification') {
-                icon.style.display = "block";
-                icon.className = "fa-solid fa-bell modal-icon";
-                btns.innerHTML = `<button class="modal-btn modal-btn-confirm" onclick="closeModal()">OK</button>`;
-            } else if (type === 'order') {
-                icon.style.display = "block";
-                icon.className = "fa-solid fa-box-open modal-icon";
-                btns.innerHTML = `<button class="modal-btn modal-btn-cancel" onclick="closeModal()">Close</button>`;
-            } else if (type === 'restaurants_list') {
-                icon.style.display = "block";
-                icon.className = "fa-solid fa-store modal-icon";
-                btns.innerHTML = `<button class="modal-btn modal-btn-cancel" onclick="closeModal()">Close</button>`;
-            } else if (type === 'item_detail') {
-                icon.style.display = "none"; 
-                modalTitle.style.display = "block";
-                modalTitle.innerText = "Item Details";
-                modalBody.style.background = "transparent";
-                modalBody.style.padding = "0";
-                modalBody.style.border = "none";
-                btns.innerHTML = `<button class="modal-btn modal-btn-cancel" onclick="closeModal()" style="width:100%; border-radius:25px; background:#eee; color:#333; padding:12px; font-weight:bold;">Close</button>`;
-            } else if (type === 'delete_confirm') {
-                icon.style.display = "block";
-                icon.className = "fa-solid fa-trash modal-icon";
-                icon.style.color = "#d9534f";
-                btns.innerHTML = `
-                    <button class="modal-btn modal-btn-cancel" onclick="closeModal()">Cancel</button>
-                    <button class="modal-btn modal-btn-confirm" style="background:#d9534f;" id="modalConfirmBtn">Yes, Delete</button>
-                `;
-                document.getElementById('modalConfirmBtn').onclick = function() { if(onConfirmCallback) onConfirmCallback(); closeModal(); };
-            } else if (type === 'info') {
-                icon.style.display = "block";
-                icon.className = "fa-solid fa-circle-info modal-icon";
-                btns.innerHTML = `<button class="modal-btn modal-btn-confirm" onclick="closeModal()">Close</button>`;
-            } else if (type === 'alert') {
-                icon.style.display = "block";
-                icon.className = "fa-solid fa-triangle-exclamation modal-icon";
-                icon.style.color = "#d9534f"; 
-                btns.innerHTML = `<button class="modal-btn modal-btn-confirm" style="background:#d9534f;" onclick="closeModal()">OK</button>`;
-            }
+            modalTitle.style.display = "block"; modalTitle.innerText = title; modalBody.innerHTML = bodyHTML; modalBody.style.background = "#f9f9f9"; modalBody.style.padding = "15px"; modalBody.style.border = "1px solid #eee";
+            if(type === 'notification') { icon.style.display = "block"; icon.className = "fa-solid fa-bell modal-icon"; btns.innerHTML = `<button class="modal-btn modal-btn-confirm" onclick="closeModal()">OK</button>`; } 
+            else if (type === 'order') { icon.style.display = "block"; icon.className = "fa-solid fa-box-open modal-icon"; btns.innerHTML = `<button class="modal-btn modal-btn-cancel" onclick="closeModal()">Close</button>`; } 
+            else if (type === 'restaurants_list') { icon.style.display = "block"; icon.className = "fa-solid fa-store modal-icon"; btns.innerHTML = `<button class="modal-btn modal-btn-cancel" onclick="closeModal()">Close</button>`; } 
+            else if (type === 'item_detail') { icon.style.display = "none"; modalTitle.style.display = "block"; modalTitle.innerText = "Item Details"; modalBody.style.background = "transparent"; modalBody.style.padding = "0"; modalBody.style.border = "none"; btns.innerHTML = `<button class="modal-btn modal-btn-cancel" onclick="closeModal()" style="width:100%; border-radius:25px; background:#eee; color:#333; padding:12px; font-weight:bold;">Close</button>`; } 
+            else if (type === 'delete_confirm') { icon.style.display = "block"; icon.className = "fa-solid fa-trash modal-icon"; icon.style.color = "#d9534f"; btns.innerHTML = `<button class="modal-btn modal-btn-cancel" onclick="closeModal()">Cancel</button><button class="modal-btn modal-btn-confirm" style="background:#d9534f;" id="modalConfirmBtn">Yes, Delete</button>`; document.getElementById('modalConfirmBtn').onclick = function() { if(onConfirmCallback) onConfirmCallback(); closeModal(); }; } 
+            else if (type === 'info') { icon.style.display = "block"; icon.className = "fa-solid fa-circle-info modal-icon"; btns.innerHTML = `<button class="modal-btn modal-btn-confirm" onclick="closeModal()">Close</button>`; } 
+            else if (type === 'alert') { icon.style.display = "block"; icon.className = "fa-solid fa-triangle-exclamation modal-icon"; icon.style.color = "#d9534f"; btns.innerHTML = `<button class="modal-btn modal-btn-confirm" style="background:#d9534f;" onclick="closeModal()">OK</button>`; }
         }
         document.getElementById('customModalOverlay').classList.add('show');
     }
 
-    function closeModal() {
-        document.getElementById('customModalOverlay').classList.remove('show');
-        setTimeout(() => { document.getElementById('modalIcon').style.color = "var(--primary)"; }, 300);
-    }
+    function closeModal() { document.getElementById('customModalOverlay').classList.remove('show'); setTimeout(() => { document.getElementById('modalIcon').style.color = "var(--primary)"; }, 300); }
+    function closeItemsPopupAndReset() { closeModal(); showAllItems(); }
 
-    function closeItemsPopupAndReset() {
-        closeModal();
-        showAllItems(); 
-    }
-
-    // --- ENLARGED MATCHING ITEM DETAIL POPUP TRIGGER ---
     function openItemDetailModal(itemName, itemDesc, itemPrice, itemImg, rName) {
-        let uniqueKey = itemName.replace(/\s+/g, '_');
-        let currentQty = cart[uniqueKey] ? cart[uniqueKey].qty : 0;
-        let safeName = itemName.replace(/'/g, "\\'");
-        let safeRName = rName.replace(/'/g, "\\'");
-        let safeDesc = (itemDesc || '').replace(/'/g, "\\'");
-
-        let html = `
-            <div class="item-popup-body">
-                <div class="item-popup-card-style">
-                    <div class="item-popup-img"><img src="${itemImg}"></div>
-                    <div class="item-popup-info">
-                        <h4>${itemName}</h4>
-                        <p>${itemDesc || ''}</p>
-                        <div class="popup-price">₹${itemPrice}</div>
-                        <div class="popup-rest">${rName}</div>
-                    </div>
-                </div>
-                <div class="item-popup-actions">
-                    <i class="fa-solid fa-circle-minus" onclick="modifyCart('${safeName}', ${itemPrice}, -1, '${safeRName}'); updatePopupQtyDisplay('${uniqueKey}')"></i>
-                    <span id="popup_modal_qty_${uniqueKey}" style="font-weight: bold; font-size: 18px;">${currentQty}</span>
-                    <i class="fa-solid fa-circle-plus" onclick="modifyCart('${safeName}', ${itemPrice}, 1, '${safeRName}'); updatePopupQtyDisplay('${uniqueKey}')"></i>
-                </div>
-            </div>
-        `;
+        let uniqueKey = itemName.replace(/\s+/g, '_'); let currentQty = cart[uniqueKey] ? cart[uniqueKey].qty : 0;
+        let safeName = itemName.replace(/'/g, "\'"); let safeRName = rName.replace(/'/g, "\'"); let safeDesc = (itemDesc || '').replace(/'/g, "\'");
+        let html = `<div class="item-popup-body"><div class="item-popup-card-style"><div class="item-popup-img"><img src="${itemImg}"></div><div class="item-popup-info"><h4>${itemName}</h4><p>${itemDesc || ''}</p><div class="popup-price">₹${itemPrice}</div><div class="popup-rest">${rName}</div></div></div><div class="item-popup-actions"><i class="fa-solid fa-circle-minus" onclick="modifyCart('${safeName}', ${itemPrice}, -1, '${safeRName}'); updatePopupQtyDisplay('${uniqueKey}')"></i><span id="popup_modal_qty_${uniqueKey}" style="font-weight: bold; font-size: 18px;">${currentQty}</span><i class="fa-solid fa-circle-plus" onclick="modifyCart('${safeName}', ${itemPrice}, 1, '${safeRName}'); updatePopupQtyDisplay('${uniqueKey}')"></i></div></div>`;
         showCustomModal('item_detail', 'Item Details', html);
     }
+    function updatePopupQtyDisplay(uniqueKey) { let pQtyElem = document.getElementById('popup_modal_qty_' + uniqueKey); if(pQtyElem) pQtyElem.innerText = cart[uniqueKey] ? cart[uniqueKey].qty : 0; }
 
-    function updatePopupQtyDisplay(uniqueKey) {
-        let currentQty = cart[uniqueKey] ? cart[uniqueKey].qty : 0;
-        let pQtyElem = document.getElementById('popup_modal_qty_' + uniqueKey);
-        if(pQtyElem) pQtyElem.innerText = currentQty;
-    }
-
-    // --- DELETE ORDER CONFIRMATION LOGIC WITH CLOUD HIDING ---
     function confirmDeleteOrder(orderCode) {
-        showCustomModal(
-            'delete_confirm', 
-            'Delete Order?', 
-            'Kripya dhyan dein: Agar order aapke paas pahunch gaya hai, tabhi ise history se delete karein. Kya aap ise delete karna chahte hain?', 
-            function() {
-                let deletedCodes = JSON.parse(localStorage.getItem('deletedOrderCodes') || "[]");
-                if(!deletedCodes.includes(String(orderCode))) {
-                    deletedCodes.push(String(orderCode));
-                    localStorage.setItem('deletedOrderCodes', JSON.stringify(deletedCodes));
-                }
-
-                let history = JSON.parse(localStorage.getItem('myOrdersHistory') || "[]");
-                history = history.filter(o => String(o.code) !== String(orderCode));
-                localStorage.setItem('myOrdersHistory', JSON.stringify(history));
-                updateRedDot();
-                
-                setTimeout(() => {
-                    showCustomModal('info', 'Deleted Successfully', 'Order history se hata diya gaya hai.');
-                }, 350);
-            }
-        );
+        showCustomModal('delete_confirm', 'Delete Order?', 'Kripya dhyan dein: Agar order aapke paas pahunch gaya hai, tabhi ise history se delete karein.', function() {
+            let deletedCodes = JSON.parse(localStorage.getItem('deletedOrderCodes') || "[]");
+            if(!deletedCodes.includes(String(orderCode))) { deletedCodes.push(String(orderCode)); localStorage.setItem('deletedOrderCodes', JSON.stringify(deletedCodes)); }
+            let history = JSON.parse(localStorage.getItem('myOrdersHistory') || "[]"); history = history.filter(o => String(o.code) !== String(orderCode));
+            localStorage.setItem('myOrdersHistory', JSON.stringify(history)); 
+            setTimeout(() => { showCustomModal('info', 'Deleted Successfully', 'Order history se hata diya gaya hai.'); }, 350);
+        });
     }
 
-    function showNotification() {
-        fetchCloudOrdersAndShow(true);
-    }
-
+    function showNotification() { fetchCloudOrdersAndShow(true); }
     function renderNotificationModal(ordersArray) {
         if(ordersArray.length > 0) {
             let msg = `Your order statuses:<br><br><div id="notiListWrapper">`;
@@ -642,910 +464,201 @@
                 let statusHtml = "";
                 if(order.status === "Pending") statusHtml = `<span style="color:#e67e22; font-weight:bold;"><i class="fa-solid fa-clock"></i> Pending (Searching Rider...)</span>`;
                 else if(order.status === "Accepted") statusHtml = `<div style="background:#d4edda; color:#155724; padding:8px; border-radius:5px; margin-top:5px; border:1px solid #c3e6cb;"><b style="font-size:14px;"><i class="fa-solid fa-motorcycle"></i> Order Accepted!</b><br><span style="color:#555;">Rider: ${order.dbName || 'Assigned'}</span><br><span style="color:var(--primary); font-weight:bold;"><i class="fa-solid fa-phone"></i> ${order.dbPhone || ''}</span></div>`;
+                else if(order.status === "Rider_Rejected") statusHtml = `<span style="color:#e67e22; font-weight:bold;"><i class="fa-solid fa-clock"></i> Re-assigning Rider...</span>`;
+                else if(order.status === "Rejected") statusHtml = `<div style="background:#f8d7da; color:#721c24; padding:8px; border-radius:5px; margin-top:5px;"><b style="font-size:14px;"><i class="fa-solid fa-xmark"></i> Order Rejected</b><br><span style="color:#555;">Reason: ${order.rejectReason || 'Shop busy'}</span></div>`;
                 else if(order.status === "Delivered") statusHtml = `<span style="color:var(--success); font-weight:bold;"><i class="fa-solid fa-check-circle"></i> Delivered Successfully</span>`;
-                else statusHtml = `Status: ${order.status}`;
-
-                msg += `<div style="position:relative; text-align:center; margin-bottom:15px; padding:15px 10px 10px 10px; background:#fff; border-radius:10px; box-shadow:0 2px 5px rgba(0,0,0,0.1);">
-                            <i class="fa-solid fa-trash" style="position:absolute; top:12px; right:12px; color:#d9534f; cursor:pointer; font-size:16px;" onclick="confirmDeleteOrder('${order.code}')"></i>
-                            <span style="font-size:12px; color:#666;">Code:</span>
-                            <span style="font-size:20px; font-weight:bold; color:var(--primary); letter-spacing:2px; margin-left:10px;">${order.code}</span>
-                            <div style="margin-top:8px; font-size:13px;">${statusHtml}</div>
-                        </div>`;
+                msg += `<div style="position:relative; text-align:center; margin-bottom:15px; padding:15px 10px 10px 10px; background:#fff; border-radius:10px; box-shadow:0 2px 5px rgba(0,0,0,0.1);"><i class="fa-solid fa-trash" style="position:absolute; top:12px; right:12px; color:#d9534f; cursor:pointer; font-size:16px;" onclick="confirmDeleteOrder('${order.code}')"></i><span style="font-size:12px; color:#666;">Code:</span><span style="font-size:20px; font-weight:bold; color:var(--primary); letter-spacing:2px; margin-left:10px;">${order.code}</span><div style="margin-top:8px; font-size:13px;">${statusHtml}</div></div>`;
             });
             msg += `</div><small style="color:#888; display:block; text-align:center;">Delivery boy aane par ye code unhe batayein.</small>`;
             showCustomModal('notification', 'Order Status', msg);
-        } else {
-            showCustomModal('notification', 'Alert', 'Aapka abhi tak koi active order nahi hai.');
-        }
+        } else { showCustomModal('notification', 'Alert', 'Aapka abhi tak koi active order nahi hai.'); }
     }
 
-    function showOrders() {
-        toggleMenu();
-        fetchCloudOrdersAndShow(false);
-    }
-
+    function showOrders() { toggleMenu(); fetchCloudOrdersAndShow(false); }
     function renderOrdersModal(ordersArray) {
         if(ordersArray.length > 0) {
             let msg = ``;
             ordersArray.forEach((order) => {
-                let statusText = order.status || "Pending";
-                let statusColor = statusText === "Delivered" ? "var(--success)" : (statusText === "Accepted" ? "var(--info-blue)" : "#e67e22");
-
+                let statusText = order.status || "Pending"; 
+                if (statusText === "Rider_Rejected") statusText = "Pending";
+                let statusColor = statusText === "Delivered" ? "var(--success)" : (statusText === "Accepted" ? "var(--info-blue)" : (statusText === "Rejected" ? "#ef4444" : "#e67e22"));
                 let riderInfoHtml = "";
-                // Show green box only when Accepted
-                if (statusText === "Accepted" && (order.dbName || order.dbPhone)) {
-                    riderInfoHtml = `<div style="background:#d4edda; color:#155724; padding:8px; border-radius:5px; margin-top:8px; font-size:13px; border:1px solid #c3e6cb;">
-                                        <b><i class="fa-solid fa-motorcycle"></i> Rider:</b> ${order.dbName || 'Assigned'}<br>
-                                        <b><i class="fa-solid fa-phone"></i> Contact:</b> <span style="color:var(--primary); font-weight:bold;">${order.dbPhone || 'N/A'}</span>
-                                     </div>`;
-                }
-
-                msg += `<div style="position:relative; border-bottom:1px solid #ddd; padding-bottom:10px; margin-bottom:10px; text-align:left;">
-                            <i class="fa-solid fa-trash" style="position:absolute; top:0; right:0; color:#d9534f; cursor:pointer; font-size:16px;" onclick="confirmDeleteOrder('${order.code}')"></i>
-                            <div style="font-size:11px; color:#888;">${order.date}</div>
-                            <b>Items:</b> ${order.items}<br>
-                            <b>Total:</b> ₹${order.total} | ${order.method}<br>
-                            <b>Status:</b> <span style="color:${statusColor}; font-weight:bold;">${statusText}</span><br>
-                            <b>Delivery Code:</b> <span style="color:var(--primary); font-weight:bold;">${order.code}</span>
-                            ${riderInfoHtml}
-                        </div>`;
+                if (statusText === "Accepted" && (order.dbName || order.dbPhone)) riderInfoHtml = `<div style="background:#d4edda; color:#155724; padding:8px; border-radius:5px; margin-top:8px; font-size:13px; border:1px solid #c3e6cb;"><b><i class="fa-solid fa-motorcycle"></i> Rider:</b> ${order.dbName || 'Assigned'}<br><b><i class="fa-solid fa-phone"></i> Contact:</b> <span style="color:var(--primary); font-weight:bold;">${order.dbPhone || 'N/A'}</span></div>`;
+                if (statusText === "Rejected") riderInfoHtml = `<div style="color:#ef4444; margin-top:5px; font-size:12px;"><b>Reason:</b> ${order.rejectReason || ''}</div>`;
+                msg += `<div style="position:relative; border-bottom:1px solid #ddd; padding-bottom:10px; margin-bottom:10px; text-align:left;"><i class="fa-solid fa-trash" style="position:absolute; top:0; right:0; color:#d9534f; cursor:pointer; font-size:16px;" onclick="confirmDeleteOrder('${order.code}')"></i><div style="font-size:11px; color:#888;">${order.date}</div><b>Items:</b> ${order.items}<br><b>Total:</b> ₹${order.total} | ${order.method}<br><b>Status:</b> <span style="color:${statusColor}; font-weight:bold;">${statusText}</span><br><b>Delivery Code:</b> <span style="color:var(--primary); font-weight:bold;">${order.code}</span>${riderInfoHtml}</div>`;
             });
             showCustomModal('order', 'My Orders History', msg);
-        } else {
-            showCustomModal('info', 'My Orders', 'Koi pichla order nahi mila.');
-        }
+        } else { showCustomModal('info', 'My Orders', 'Koi pichla order nahi mila.'); }
     }
 
-    function backToHomeClick(btn) {
-        btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Loading...';
-        btn.style.backgroundColor = "var(--disabled)";
-        btn.disabled = true;
-        setTimeout(() => {
-            window.location.reload();
-        }, 800); 
-    }
+    function backToHomeClick(btn) { btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Loading...'; btn.style.backgroundColor = "var(--disabled)"; btn.disabled = true; setTimeout(() => { window.location.reload(); }, 800); }
 
-    function onPhoneInput(input) {
-        input.value = input.value.replace(/[^0-9]/g, ''); 
-        isPhoneVerified = false;
-        let verifyBtn = document.getElementById('verifyPhoneBtn');
-        let statusSpan = document.getElementById('phoneVerifyStatus');
-        
-        if(verifyBtn) {
-            verifyBtn.disabled = false;
-            verifyBtn.style.backgroundColor = "var(--info-blue)";
-            verifyBtn.innerText = "Verify";
-        }
-        if(statusSpan) { statusSpan.innerText = ""; }
-    }
-
-    function verifyPhoneNumber() {
-        let phoneInput = document.getElementById('addrPhone');
-        let statusSpan = document.getElementById('phoneVerifyStatus');
-        let verifyBtn = document.getElementById('verifyPhoneBtn');
-        if(!phoneInput || !statusSpan || !verifyBtn) return;
-
-        let val = phoneInput.value.trim();
-
-        if(val.length !== 10) {
-            statusSpan.style.color = "#d9534f";
-            statusSpan.innerText = "❌ Sahi mobile number daalein.";
-            isPhoneVerified = false;
-            return;
-        }
-
-        let firstDigit = val.charAt(0);
-        if(['0', '1', '2', '3', '4', '5'].includes(firstDigit)) {
-            statusSpan.style.color = "#d9534f";
-            statusSpan.innerText = "❌ Sahi mobile number daalein.";
-            isPhoneVerified = false;
-            return;
-        }
-
-        let allSame = /^([0-9])\1{9}$/.test(val);
-        let repetitivePattern = /(\d)\1{7,}/.test(val); 
-        
-        if(allSame || repetitivePattern) {
-            statusSpan.style.color = "#d9534f";
-            statusSpan.innerText = "❌ Sahi mobile number daalein.";
-            isPhoneVerified = false;
-            return;
-        }
-
-        verifyBtn.innerText = "Verifying...";
-        verifyBtn.disabled = true;
-        verifyBtn.style.backgroundColor = "var(--disabled)";
-        
-        statusSpan.style.color = "#e67e22";
-        statusSpan.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Checking...`;
-
-        setTimeout(() => {
-            isPhoneVerified = true;
-            verifyBtn.innerText = "Verified";
-            verifyBtn.disabled = true;
-            verifyBtn.style.backgroundColor = "var(--disabled)";
-            
-            statusSpan.style.color = "var(--success)";
-            statusSpan.innerHTML = `<i class="fa-solid fa-circle-check"></i> Verified Successfully!`;
-        }, 1200); 
-    }
-
-    function onAreaSelected(selectElem) {
-        let cityInput = document.getElementById('addrCity');
-        if(selectElem.value !== "") {
-            cityInput.value = "Kalavad";
-        } else {
-            cityInput.value = "";
-        }
-    }
-
-    function checkCitySelection(inputElem) {
-        let areaSelect = document.getElementById('addrArea');
-        if(!areaSelect || areaSelect.value === "") {
-            showCustomModal('alert', 'Notice', 'Kripya pehle area select karein.');
-        }
-    }
+    function onAreaSelected(selectElem) { document.getElementById('addrCity').value = (selectElem.value !== "") ? "Kalavad" : ""; }
+    function checkCitySelection(inputElem) { let areaSelect = document.getElementById('addrArea'); if(!areaSelect || areaSelect.value === "") showCustomModal('alert', 'Notice', 'Kripya pehle area select karein.'); }
 
     function openRestaurantsPopup() {
-        if(!globalData.restaurants || globalData.restaurants.length === 0) {
-            showCustomModal('alert', 'Notice', 'Koi restaurant available nahi hai.');
-            return;
-        }
+        if(!globalData.restaurants || globalData.restaurants.length === 0) { showCustomModal('alert', 'Notice', 'Koi restaurant available nahi hai.'); return; }
         let restHtml = `<div style="display:flex; flex-direction:column; gap:10px;">`;
-        globalData.restaurants.forEach(rest => {
-            let imgUrl = rest.image || 'https://via.placeholder.com/60';
-            let safeName = rest.name.replace(/'/g, "\\'");
-            restHtml += `
-            <div onclick="selectRestaurantFromPopup('${rest.id}', '${safeName}')" style="display:flex; align-items:center; gap:15px; background:white; padding:10px; border-radius:12px; border:1px solid #ddd; cursor:pointer; transition:0.2s;">
-                <img src="${imgUrl}" style="width:45px; height:45px; border-radius:50%; object-fit:cover; border:2px solid var(--primary);">
-                <span style="font-weight:bold; font-size:15px; color:var(--text-dark);">${rest.name}</span>
-            </div>`;
-        });
-        restHtml += `</div>`;
-        showCustomModal('restaurants_list', 'Select Restaurant / Shop', restHtml);
+        globalData.restaurants.forEach(rest => { let imgUrl = rest.image || 'https://via.placeholder.com/60'; let safeName = rest.name.replace(/'/g, "\'"); restHtml += `<div onclick="selectRestaurantFromPopup('${rest.id}', '${safeName}')" style="display:flex; align-items:center; gap:15px; background:white; padding:10px; border-radius:12px; border:1px solid #ddd; cursor:pointer;"><img src="${imgUrl}" style="width:45px; height:45px; border-radius:50%; object-fit:cover; border:2px solid var(--primary);"><span style="font-weight:bold; font-size:15px; color:var(--text-dark);">${rest.name}</span></div>`; });
+        restHtml += `</div>`; showCustomModal('restaurants_list', 'Select Restaurant / Shop', restHtml);
     }
-
-    function selectRestaurantFromPopup(restoId, restoName) {
-        closeModal();
-        filterByRestaurant(restoId, restoName);
-    }
+    function selectRestaurantFromPopup(restoId, restoName) { closeModal(); filterByRestaurant(restoId, restoName); }
 
     function openItemsPopup() {
-        if(!globalData.items || globalData.items.length === 0) {
-            showCustomModal('alert', 'Notice', 'Koi item available nahi hai.');
-            return;
-        }
+        if(!globalData.items || globalData.items.length === 0) { showCustomModal('alert', 'Notice', 'Koi item available nahi hai.'); return; }
         showAllItems();
-
-        let itemsHtml = `
-            <div style="margin-bottom: 12px; background: #f1f2f6; padding: 8px 12px; border-radius: 20px; display: flex; align-items: center;">
-                <i class="fa-solid fa-magnifying-glass" style="color: #999; font-size: 14px;"></i>
-                <input type="text" id="popupSearchInput" placeholder="Search items..." oninput="handlePopupSearch(this.value)" style="border: none; outline: none; background: transparent; width: 100%; margin-left: 10px; font-family: inherit; font-size: 14px;">
-            </div>
-            <div id="popupItemsListContainer" style="display:flex; flex-direction:column; gap:10px; max-height:280px; overflow-y:auto;">`;
-        
-        itemsHtml += generatePopupItemsHTML(globalData.items);
-        itemsHtml += `</div>`;
-        
+        let itemsHtml = `<div style="margin-bottom: 12px; background: #f1f2f6; padding: 8px 12px; border-radius: 20px; display: flex; align-items: center;"><i class="fa-solid fa-magnifying-glass" style="color: #999; font-size: 14px;"></i><input type="text" id="popupSearchInput" placeholder="Search items..." oninput="handlePopupSearch(this.value)" style="border: none; outline: none; background: transparent; width: 100%; margin-left: 10px; font-family: inherit; font-size: 14px;"></div><div id="popupItemsListContainer" style="display:flex; flex-direction:column; gap:10px; max-height:280px; overflow-y:auto;">` + generatePopupItemsHTML(globalData.items) + `</div>`;
         showCustomModal('items_list', '', itemsHtml);
     }
-
     function generatePopupItemsHTML(listToRender) {
-        if(!listToRender || listToRender.length === 0) return "<p style='text-align:center; color:#888; padding:10px;'>Koi item nahi mila.</p>";
-        let html = "";
+        if(!listToRender || listToRender.length === 0) return "<p style='text-align:center; color:#888; padding:10px;'>Koi item nahi mila.</p>"; let html = "";
         listToRender.forEach(item => {
-            let imgUrl = item.image || 'https://via.placeholder.com/60';
-            let uniqueKey = item.name.replace(/\s+/g, '_');
-            let currentQty = cart[uniqueKey] ? cart[uniqueKey].qty : 0;
-            let rName = "unknown";
-            let rObj = globalData.restaurants.find(r => String(r.id) === String(item.restoId));
-            if(rObj && rObj.name && rObj.name.trim() !== "") rName = rObj.name;
-            let safeRName = rName.replace(/'/g, "\\'");
-            let safeItemName = item.name.replace(/'/g, "\\'");
-            let safeDesc = (item.desc || '').replace(/'/g, "\\'");
-
-            html += `
-            <div style="display:flex; align-items:center; gap:10px; background:white; padding:10px; border-radius:12px; border:1px solid #eee;">
-                <div style="display:flex; align-items:center; gap:10px; flex-grow:1; cursor:pointer;" onclick="openItemDetailModal('${safeItemName}', '${safeDesc}', ${item.price}, '${imgUrl}', '${safeRName}')">
-                    <img src="${imgUrl}" style="width:50px; height:50px; border-radius:8px; object-fit:cover; flex-shrink:0;">
-                    <div style="text-align:left;">
-                        <b style="font-size:14px; color:var(--text-dark);">${item.name}</b><br>
-                        <span style="color:var(--success); font-weight:bold; font-size:13px;">₹${item.price}</span><br>
-                        <span style="font-size:11px; color:var(--primary); font-weight:500;">${rName}</span>
-                    </div>
-                </div>
-                <div style="display:flex; align-items:center;">
-                    <i class="fa-solid fa-circle-minus" style="font-size:22px; color:var(--primary); cursor:pointer;" onclick="modifyCart('${safeItemName}', ${item.price}, -1, '${safeRName}'); updatePopupItemQty('${uniqueKey}')"></i>
-                    <span id="popup_qty_${uniqueKey}" style="font-weight: bold; margin: 0 6px; font-size:14px;">${currentQty}</span>
-                    <i class="fa-solid fa-circle-plus" style="font-size:22px; color:var(--primary); cursor:pointer;" onclick="modifyCart('${safeItemName}', ${item.price}, 1, '${safeRName}'); updatePopupItemQty('${uniqueKey}')"></i>
-                </div>
-            </div>`;
-        });
-        return html;
+            let imgUrl = item.image || 'https://via.placeholder.com/60'; let uniqueKey = item.name.replace(/\s+/g, '_'); let currentQty = cart[uniqueKey] ? cart[uniqueKey].qty : 0; let rName = "unknown"; let rObj = globalData.restaurants.find(r => String(r.id) === String(item.restoId)); if(rObj && rObj.name) rName = rObj.name;
+            let safeRName = rName.replace(/'/g, "\'"); let safeItemName = item.name.replace(/'/g, "\'"); let safeDesc = (item.desc || '').replace(/'/g, "\'");
+            html += `<div style="display:flex; align-items:center; gap:10px; background:white; padding:10px; border-radius:12px; border:1px solid #eee;"><div style="display:flex; align-items:center; gap:10px; flex-grow:1; cursor:pointer;" onclick="openItemDetailModal('${safeItemName}', '${safeDesc}', ${item.price}, '${imgUrl}', '${safeRName}')"><img src="${imgUrl}" style="width:50px; height:50px; border-radius:8px; object-fit:cover; flex-shrink:0;"><div style="text-align:left;"><b style="font-size:14px; color:var(--text-dark);">${item.name}</b><br><span style="color:var(--success); font-weight:bold; font-size:13px;">₹${item.price}</span><br><span style="font-size:11px; color:var(--primary); font-weight:500;">${rName}</span></div></div><div style="display:flex; align-items:center;"><i class="fa-solid fa-circle-minus" style="font-size:22px; color:var(--primary); cursor:pointer;" onclick="modifyCart('${safeItemName}', ${item.price}, -1, '${safeRName}'); updatePopupItemQty('${uniqueKey}')"></i><span id="popup_qty_${uniqueKey}" style="font-weight: bold; margin: 0 6px; font-size:14px;">${currentQty}</span><i class="fa-solid fa-circle-plus" style="font-size:22px; color:var(--primary); cursor:pointer;" onclick="modifyCart('${safeItemName}', ${item.price}, 1, '${safeRName}'); updatePopupItemQty('${uniqueKey}')"></i></div></div>`;
+        }); return html;
     }
-
-    function handlePopupSearch(query) {
-        let q = query.toLowerCase().trim();
-        let list = globalData.items;
-        let filtered = list.filter(item => item.name.toLowerCase().includes(q) || (item.desc && item.desc.toLowerCase().includes(q)));
-        let container = document.getElementById('popupItemsListContainer');
-        if(container) {
-            container.innerHTML = generatePopupItemsHTML(filtered);
-        }
-    }
-
-    function updatePopupItemQty(uniqueKey) {
-        let currentQty = cart[uniqueKey] ? cart[uniqueKey].qty : 0;
-        let span = document.getElementById('popup_qty_' + uniqueKey);
-        if(span) span.innerText = currentQty;
-    }
-
+    function handlePopupSearch(query) { let q = query.toLowerCase().trim(); let list = globalData.items; let filtered = list.filter(item => item.name.toLowerCase().includes(q) || (item.desc && item.desc.toLowerCase().includes(q))); let container = document.getElementById('popupItemsListContainer'); if(container) container.innerHTML = generatePopupItemsHTML(filtered); }
+    function updatePopupItemQty(uniqueKey) { let span = document.getElementById('popup_qty_' + uniqueKey); if(span) span.innerText = cart[uniqueKey] ? cart[uniqueKey].qty : 0; }
     function generateItemsHTML(listToRender) {
-        if(!listToRender || listToRender.length === 0) return "<p style='text-align:center; color:#888;'>Koi item nahi mila.</p>";
-        let itemsHTML = `<div class="items-grid">`;
+        if(!listToRender || listToRender.length === 0) return "<p style='text-align:center; color:#888;'>Koi item nahi mila.</p>"; let itemsHTML = `<div class="items-grid">`;
         listToRender.forEach((item) => {
-            let imgUrl = item.image || 'https://via.placeholder.com/110';
-            let uniqueKey = item.name.replace(/\s+/g, '_');
-            let currentQty = cart[uniqueKey] ? cart[uniqueKey].qty : 0;
-            
-            let rName = "unknown";
-            let rObj = globalData.restaurants.find(r => String(r.id) === String(item.restoId));
-            if(rObj && rObj.name && rObj.name.trim() !== "") {
-                rName = rObj.name;
-            }
-            let safeRName = rName.replace(/'/g, "\\'");
-            let safeItemName = item.name.replace(/'/g, "\\'");
-            let safeDesc = (item.desc || '').replace(/'/g, "\\'");
-            
-            itemsHTML += `
-            <div class="item-card">
-                <div class="item-card-top" onclick="openItemDetailModal('${safeItemName}', '${safeDesc}', ${item.price}, '${imgUrl}', '${safeRName}')">
-                    <div class="item-img"><img src="${imgUrl}"></div>
-                    <p class="item-name">${item.name}</p>
-                    <div class="item-restaurant">${rName}</div>
-                    <p class="item-desc">${item.desc || ''}</p>
-                    <div class="item-price">₹${item.price}</div>
-                </div>
-                <div class="item-actions-grid">
-                    <i class="fa-solid fa-circle-minus" onclick="modifyCart('${safeItemName}', ${item.price}, -1, '${safeRName}')"></i>
-                    <span id="qty_${uniqueKey}" style="font-weight: bold; font-size: 14px;">${currentQty}</span>
-                    <i class="fa-solid fa-circle-plus" onclick="modifyCart('${safeItemName}', ${item.price}, 1, '${safeRName}')"></i>
-                </div>
-            </div>`;
-        });
-        itemsHTML += `</div>`;
-        return itemsHTML;
+            let imgUrl = item.image || 'https://via.placeholder.com/110'; let uniqueKey = item.name.replace(/\s+/g, '_'); let currentQty = cart[uniqueKey] ? cart[uniqueKey].qty : 0; let rName = "unknown"; let rObj = globalData.restaurants.find(r => String(r.id) === String(item.restoId)); if(rObj && rObj.name) rName = rObj.name;
+            let safeRName = rName.replace(/'/g, "\'"); let safeItemName = item.name.replace(/'/g, "\'"); let safeDesc = (item.desc || '').replace(/'/g, "\'");
+            itemsHTML += `<div class="item-card"><div class="item-card-top" onclick="openItemDetailModal('${safeItemName}', '${safeDesc}', ${item.price}, '${imgUrl}', '${safeRName}')"><div class="item-img"><img src="${imgUrl}"></div><p class="item-name">${item.name}</p><div class="item-restaurant">${rName}</div><p class="item-desc">${item.desc || ''}</p><div class="item-price">₹${item.price}</div></div><div class="item-actions-grid"><i class="fa-solid fa-circle-minus" onclick="modifyCart('${safeItemName}', ${item.price}, -1, '${safeRName}')"></i><span id="qty_${uniqueKey}" style="font-weight: bold; font-size: 14px;">${currentQty}</span><i class="fa-solid fa-circle-plus" onclick="modifyCart('${safeItemName}', ${item.price}, 1, '${safeRName}')"></i></div></div>`;
+        }); return itemsHTML + `</div>`;
     }
-
-    function renderItemsListDirectly(listToRender) {
-        let container = document.getElementById('itemsContainer');
-        if(!container) return;
-        container.innerHTML = generateItemsHTML(listToRender);
-    }
+    function renderItemsListDirectly(listToRender) { let container = document.getElementById('itemsContainer'); if(container) container.innerHTML = generateItemsHTML(listToRender); }
 
     function handleSearch(query) {
-        let q = query.toLowerCase().trim();
-        let list = globalData.items;
-        
-        let bannersWrap = document.getElementById('bannersWrapper');
-        let bannerDots = document.getElementById('bannerDots');
-        let restTitle = document.getElementById('restSectionTitle');
-        let restContainer = document.getElementById('restaurantsContainer');
-        let itemTitle = document.getElementById('itemSectionTitle');
-        let itemSeeAll = document.getElementById('itemSectionSeeAll');
-        
+        let q = query.toLowerCase().trim(); let list = globalData.items; let bannersWrap = document.getElementById('bannersWrapper'); let bannerDots = document.getElementById('bannerDots'); let restTitle = document.getElementById('restSectionTitle'); let restContainer = document.getElementById('restaurantsContainer'); let itemTitle = document.getElementById('itemSectionTitle'); let itemSeeAll = document.getElementById('itemSectionSeeAll');
         if(q === "") {
-            if(bannersWrap) bannersWrap.style.display = "flex";
-            if(bannerDots) bannerDots.style.display = "flex";
-            if(restTitle) restTitle.style.display = "flex";
-            if(restContainer) restContainer.style.display = "flex";
-            if(itemSeeAll) itemSeeAll.style.display = "inline-block";
-            
-            if(currentRestoFilter) {
-                let restoObj = globalData.restaurants.find(r => String(r.id) === String(currentRestoFilter));
-                let rName = restoObj ? restoObj.name : "";
-                itemTitle.innerHTML = `<span onclick="showAllItems()" style="cursor:pointer; color:var(--primary);"><i class="fa-solid fa-arrow-left"></i> ${rName} Menu</span>`;
-            } else {
-                itemTitle.innerHTML = `<span>All Items</span> <span id="itemSectionSeeAll" onclick="openItemsPopup()" style="color: var(--primary); font-size: 12px; cursor: pointer; font-weight: bold;">See All</span>`;
-            }
-            
-            renderItemsOrCategories(currentRestoFilter);
-            return;
+            if(bannersWrap) bannersWrap.style.display = "flex"; if(bannerDots) bannerDots.style.display = "flex"; if(restTitle) restTitle.style.display = "flex"; if(restContainer) restContainer.style.display = "flex"; if(itemSeeAll) itemSeeAll.style.display = "inline-block";
+            if(currentRestoFilter) { let restoObj = globalData.restaurants.find(r => String(r.id) === String(currentRestoFilter)); itemTitle.innerHTML = `<span onclick="showAllItems()" style="cursor:pointer; color:var(--primary);"><i class="fa-solid fa-arrow-left"></i> ${restoObj ? restoObj.name : ""} Menu</span>`; } else { itemTitle.innerHTML = `<span>All Items</span> <span id="itemSectionSeeAll" onclick="openItemsPopup()" style="color: var(--primary); font-size: 12px; cursor: pointer; font-weight: bold;">See All</span>`; }
+            renderItemsOrCategories(currentRestoFilter); return;
         }
-        
-        if(bannersWrap) bannersWrap.style.display = "none";
-        if(bannerDots) bannerDots.style.display = "none";
-        if(restTitle) restTitle.style.display = "none";
-        if(restContainer) restContainer.style.display = "none";
-        if(itemSeeAll) itemSeeAll.style.display = "none";
-        
-        itemTitle.innerHTML = `<span style="color:var(--primary);">Search Results</span> <span onclick="clearSearchAndGoHome()" style="font-size:13px; background:var(--primary); color:white; padding:3px 10px; border-radius:12px; cursor:pointer;"><i class="fa-solid fa-house"></i> Home</span>`;
-        itemTitle.style.display = "flex";
-        itemTitle.style.justifyContent = "space-between";
-        itemTitle.style.alignItems = "center";
-        itemTitle.style.width = "100%";
-        
-        currentCategoryFilter = null; 
-        
-        let matchingRestoIds = globalData.restaurants
-            .filter(r => r.name.toLowerCase().includes(q))
-            .map(r => String(r.id));
-
-        let filtered = list.filter(item => {
-            let matchItemName = item.name.toLowerCase().includes(q);
-            let matchDesc = item.desc && item.desc.toLowerCase().includes(q);
-            let matchResto = matchingRestoIds.includes(String(item.restoId));
-            return matchItemName || matchDesc || matchResto;
-        });
-
-        renderItemsListDirectly(filtered);
+        if(bannersWrap) bannersWrap.style.display = "none"; if(bannerDots) bannerDots.style.display = "none"; if(restTitle) restTitle.style.display = "none"; if(restContainer) restContainer.style.display = "none"; if(itemSeeAll) itemSeeAll.style.display = "none";
+        itemTitle.innerHTML = `<span style="color:var(--primary);">Search Results</span> <span onclick="clearSearchAndGoHome()" style="font-size:13px; background:var(--primary); color:white; padding:3px 10px; border-radius:12px; cursor:pointer;"><i class="fa-solid fa-house"></i> Home</span>`; itemTitle.style.display = "flex"; itemTitle.style.justifyContent = "space-between"; itemTitle.style.alignItems = "center"; itemTitle.style.width = "100%"; currentCategoryFilter = null; 
+        let matchingRestoIds = globalData.restaurants.filter(r => r.name.toLowerCase().includes(q)).map(r => String(r.id));
+        let filtered = list.filter(item => item.name.toLowerCase().includes(q) || (item.desc && item.desc.toLowerCase().includes(q)) || matchingRestoIds.includes(String(item.restoId))); renderItemsListDirectly(filtered);
     }
-
-    function clearSearchAndGoHome() {
-        let searchInput = document.getElementById('searchInput');
-        if(searchInput) searchInput.value = "";
-        
-        let itemTitle = document.getElementById('itemSectionTitle');
-        if(itemTitle) {
-            itemTitle.style.display = "flex";
-            itemTitle.style.justifyContent = "space-between";
-            itemTitle.style.alignItems = "center";
-            itemTitle.style.width = "100%";
-        }
-        showAllItems();
-    }
+    function clearSearchAndGoHome() { let searchInput = document.getElementById('searchInput'); if(searchInput) searchInput.value = ""; let itemTitle = document.getElementById('itemSectionTitle'); if(itemTitle) { itemTitle.style.display = "flex"; itemTitle.style.justifyContent = "space-between"; itemTitle.style.alignItems = "center"; itemTitle.style.width = "100%"; } showAllItems(); }
 
     function showPolicy(type) {
-        toggleMenu();
-        let title = ""; let text = "";
-        let email = (globalData.settings && globalData.settings.adminEmail) ? globalData.settings.adminEmail : "Contact Owner";
-
-        if(type === 'about') {
-            title = "About Online Kalavad";
-            text = `Fast & Fresh, Right at your door.<br><br><b>Contact Support:</b><br>${email}`;
-        } else if(type === 'terms') {
-            title = "Terms & Conditions";
-            text = `<b>1. General:</b> By using Online Kalavad, you agree to these terms.<br><br><b>2. Orders & Pricing:</b> All orders are subject to availability. Prices may change without notice. Delivery charges apply as mentioned during checkout.<br><br><b>3. Payments:</b> We accept Cash on Delivery (COD) and securely processed online UPI payments.<br><br><b>4. Changes:</b> We reserve the right to modify these terms at any time.`;
-        } else if(type === 'privacy') {
-            title = "Privacy Policy";
-            text = `<b>1. Information Collection:</b> We collect your name, email, phone number, and delivery address to fulfill your orders.<br><br><b>2. Data Usage:</b> Your data is securely used only for order delivery and customer support.<br><br><b>3. Data Sharing:</b> We do NOT sell or share your personal information with third parties.<br><br><b>4. Payments:</b> Online payment processing is handled securely by Razorpay. We do not store your payment credentials.`;
-        } else if(type === 'refund') {
-            title = "Refund & Cancellation Policy";
-            text = `<b>1. Cancellations:</b> Orders can only be cancelled before they are accepted or dispatched by the restaurant.<br><br><b>2. Refunds:</b> If you cancel a prepaid order in time, the refund will be initiated and credited back to your original payment method within 5-7 business days.<br><br><b>3. Damaged Items:</b> If your food arrives damaged or incorrect, please contact us immediately at ${email} with proof for a replacement or refund.`;
-        }
+        toggleMenu(); let title = ""; let text = ""; let email = (globalData.settings && globalData.settings.adminEmail) ? globalData.settings.adminEmail : "Contact Owner";
+        if(type === 'about') { title = "About Online Kalavad"; text = `Fast & Fresh, Right at your door.<br><br><b>Contact Support:</b><br>${email}`; } 
+        else if(type === 'terms') { title = "Terms & Conditions"; text = `<b>1. General:</b> By using Online Kalavad, you agree to these terms.<br><br><b>2. Orders & Pricing:</b> All orders are subject to availability. Prices may change without notice.`; } 
+        else if(type === 'privacy') { title = "Privacy Policy"; text = `<b>1. Information Collection:</b> We collect your name, email, phone number, and delivery address to fulfill your orders.<br><br><b>2. Data Usage:</b> Your data is securely used only for order delivery and customer support.`; } 
+        else if(type === 'refund') { title = "Refund & Cancellation Policy"; text = `<b>1. Cancellations:</b> Orders can only be cancelled before they are accepted or dispatched by the restaurant.<br><br><b>2. Refunds:</b> If you cancel a prepaid order in time, the refund will be initiated and credited back.`; }
         showCustomModal('info', title, text);
     }
 
-    function requestOTP() {
-        let nameField = document.getElementById('userName');
-        let emailField = document.getElementById('userEmail');
-        if(!nameField || !emailField) return;
-        
-        let name = nameField.value.trim();
-        let email = emailField.value.trim();
-        if(!name || !email) { showCustomModal('alert', 'Action Required', 'Please enter both Name and Email ID'); return; }
-        
-        let btn = document.getElementById('sendOtpBtn');
-
-        btn.innerText = "Sending..."; 
-        btn.style.backgroundColor = "var(--disabled)"; 
-        btn.disabled = true;
-
-        fetch(GOOGLE_WEB_APP_URL, {
-            method: "POST",
-            headers: { "Content-Type": "text/plain;charset=utf-8" },
-            body: JSON.stringify({ action: "sendOTP", email: email })
-        })
-        .then(res => res.json())
-        .then(data => {
-            if(data.status === "success") {
-                btn.innerText = "OTP Sent to Email!";
-                let otpSec = document.getElementById('otpSection');
-                if(otpSec) otpSec.classList.remove('hidden');
-            } else {
-                showCustomModal('alert', 'Error', data.message);
-                btn.innerText = "Send OTP"; btn.style.backgroundColor = "var(--primary)"; btn.disabled = false;
-            }
-        }).catch(err => {
-            showCustomModal('alert', 'Network Error', 'Network blocked.');
-            btn.innerText = "Send OTP"; btn.style.backgroundColor = "var(--primary)"; btn.disabled = false;
+    function logoutUser() { 
+        firebase.auth().signOut().then(() => {
+            localStorage.clear(); window.location.reload(); 
         });
     }
-
-    function verifyOTPCode() {
-        let emailField = document.getElementById('userEmail');
-        let otpField = document.getElementById('otpInput');
-        let nameField = document.getElementById('userName');
-        if(!emailField || !otpField) return;
-
-        let email = emailField.value.trim();
-        let otp = otpField.value.trim();
-        if(!otp) { showCustomModal('alert', 'Action Required', 'Please enter the OTP'); return; }
-        
-        let btn = document.getElementById('loginBtn');
-
-        btn.innerText = "Verifying..."; btn.style.backgroundColor = "var(--disabled)";
-
-        fetch(GOOGLE_WEB_APP_URL, {
-            method: "POST",
-            headers: { "Content-Type": "text/plain;charset=utf-8" },
-            body: JSON.stringify({ action: "verifyOTP", email: email, otp: otp })
-        })
-        .then(res => res.json())
-        .then(data => {
-            if(data.status === "success") {
-                localStorage.setItem('isLoggedIn', 'true');
-                localStorage.setItem('userName', nameField ? nameField.value : 'User');
-                localStorage.setItem('userEmail', email);
-                window.location.reload();
-            } else {
-                showCustomModal('alert', 'Login Failed', data.message);
-                btn.innerText = "Login"; btn.style.backgroundColor = "var(--success)";
-            }
-        }).catch(err => {
-            showCustomModal('alert', 'Error', 'Error verifying OTP.');
-            btn.innerText = "Login"; btn.style.backgroundColor = "var(--success)";
-        });
-    }
-
-    function logoutUser() { localStorage.clear(); window.location.reload(); }
-
-    function toggleMenu() {
-        let sidebar = document.getElementById('sidebar');
-        let overlay = document.getElementById('sidebarOverlay');
-        if(!sidebar || !overlay) return;
-        sidebar.classList.toggle('open');
-        overlay.style.display = sidebar.classList.contains('open') ? 'block' : 'none';
-    }
-
-    function fetchGoogleSheetData() {
-        fetch(GOOGLE_WEB_APP_URL)
-            .then(res => res.json())
-            .then(data => {
-                if(data.error) return;
-                globalData = data;
-                localStorage.setItem('onlineKalavadCache', JSON.stringify(data));
-                renderAllDataUI(data); 
-            }).catch(err => console.log("Fetch err"));
-    }
-
-    function fetchGoogleSheetDataSilent() {
-        fetch(GOOGLE_WEB_APP_URL)
-            .then(res => res.json())
-            .then(data => {
-                if(data.error) return;
-                globalData = data;
-                localStorage.setItem('onlineKalavadCache', JSON.stringify(data));
-                let cartHasItems = Object.values(cart).some(c => c.qty > 0);
-                if(!cartHasItems) renderAllDataUI(data); 
-            }).catch(err => console.log("Silent err"));
-    }
+    function toggleMenu() { let sidebar = document.getElementById('sidebar'); let overlay = document.getElementById('sidebarOverlay'); if(!sidebar || !overlay) return; sidebar.classList.toggle('open'); overlay.style.display = sidebar.classList.contains('open') ? 'block' : 'none'; }
 
     function renderAllDataUI(data) {
-        if(data.settings && data.settings.status && data.settings.status.toLowerCase() === 'closed') {
-            let containerElem = document.querySelector('.app-container');
-            if(containerElem) containerElem.innerHTML = `<div style="padding:50px; text-align:center; margin-top:50px;"><h2 style="color:var(--primary);">Store is Closed</h2><p>${data.settings.closeMsg}</p></div>`;
-            return;
-        }
-
+        localStorage.setItem('onlineKalavadCache', JSON.stringify(data));
+        if(data.settings && data.settings.status && data.settings.status.toLowerCase() === 'closed') { let containerElem = document.querySelector('.app-container'); if(containerElem) containerElem.innerHTML = `<div style="padding:50px; text-align:center; margin-top:50px;"><h2 style="color:var(--primary);">Store is Closed</h2><p>${data.settings.closeMsg || 'Humein khed hai, abhi order lena band hai.'}</p></div>`; return; }
         if(data.settings) {
-            delCharge = Number(data.settings.deliveryCharge) || 0;
-            packCharge = Number(data.settings.packingCharge) || 0;
-            
-            let el3 = document.getElementById('invDel'); if(el3) el3.innerText = "₹" + delCharge;
-            let el4 = document.getElementById('invPack'); if(el4) el4.innerText = "₹" + packCharge;
-            
-            let codWrapper = document.getElementById('codWrapper');
-            let upiWrapper = document.getElementById('upiWrapper');
-            let radioCOD = document.getElementById('radioCOD');
-            let radioUPI = document.getElementById('radioUPI');
-            let placeBtn = document.getElementById('finalPlaceOrderBtn');
-            let errorMsg = document.getElementById('noPaymentMsg');
-
-            let isCodOn = (data.settings.codStatus !== "OFF");
-            let isUpiOn = (data.settings.upiStatus !== "OFF");
-
-            if(codWrapper && radioCOD && radioUPI) {
-                if(!isCodOn) { codWrapper.style.display = "none"; radioCOD.checked = false; radioUPI.checked = true; } 
-                else { codWrapper.style.display = "flex"; }
-            }
-
-            if(upiWrapper && radioUPI && radioCOD) {
-                if(!isUpiOn) { upiWrapper.style.display = "none"; radioUPI.checked = false; if(isCodOn) radioCOD.checked = true; } 
-                else { upiWrapper.style.display = "flex"; }
-            }
-
-            if(placeBtn && errorMsg) {
-                if(!isCodOn && !isUpiOn) { errorMsg.style.display = "block"; placeBtn.disabled = true; placeBtn.style.backgroundColor = "var(--disabled)"; } 
-                else { errorMsg.style.display = "none"; placeBtn.disabled = false; placeBtn.style.backgroundColor = "var(--primary)"; }
-            }
+            delCharge = Number(data.settings.deliveryCharge) || 0; packCharge = Number(data.settings.packingCharge) || 0;
+            let el3 = document.getElementById('invDel'); if(el3) el3.innerText = "₹" + delCharge; let el4 = document.getElementById('invPack'); if(el4) el4.innerText = "₹" + packCharge;
+            let codWrapper = document.getElementById('codWrapper'); let upiWrapper = document.getElementById('upiWrapper'); let radioCOD = document.getElementById('radioCOD'); let radioUPI = document.getElementById('radioUPI'); let placeBtn = document.getElementById('finalPlaceOrderBtn'); let errorMsg = document.getElementById('noPaymentMsg');
+            let isCodOn = (data.settings.codStatus !== "OFF"); let isUpiOn = (data.settings.upiStatus !== "OFF");
+            if(codWrapper && radioCOD && radioUPI) { if(!isCodOn) { codWrapper.style.display = "none"; radioCOD.checked = false; radioUPI.checked = true; } else { codWrapper.style.display = "flex"; } }
+            if(upiWrapper && radioUPI && radioCOD) { if(!isUpiOn) { upiWrapper.style.display = "none"; radioUPI.checked = false; if(isCodOn) radioCOD.checked = true; } else { upiWrapper.style.display = "flex"; } }
+            if(placeBtn && errorMsg) { if(!isCodOn && !isUpiOn) { errorMsg.style.display = "block"; placeBtn.disabled = true; placeBtn.style.backgroundColor = "var(--disabled)"; } else { errorMsg.style.display = "none"; placeBtn.disabled = false; placeBtn.style.backgroundColor = "var(--primary)"; } }
         }
-
-        let bannersWrapper = document.getElementById('bannersWrapper');
-        let bannerDots = document.getElementById('bannerDots');
+        let bannersWrapper = document.getElementById('bannersWrapper'); let bannerDots = document.getElementById('bannerDots');
         if(bannersWrapper && data.banners && data.banners.length > 0) {
-            let bHtml = "";
-            let dotsHtml = "";
-            data.banners.forEach((b, index) => {
-                if(b.link) {
-                    bHtml += `<a href="${b.link}" target="_blank" class="banner-slide" style="background-image: url('${b.image}'); display:block;"></a>`;
-                } else {
-                    bHtml += `<div class="banner-slide" style="background-image: url('${b.image}');"></div>`;
-                }
-                dotsHtml += `<div class="dot ${index === 0 ? 'active' : ''}"></div>`;
-            });
-            bannersWrapper.innerHTML = bHtml;
-            if(bannerDots) bannerDots.innerHTML = dotsHtml;
-
-            if(!bannersWrapper.dataset.listenerAttached) {
-                bannersWrapper.addEventListener('scroll', function() {
-                    let slideIndex = Math.round(bannersWrapper.scrollLeft / bannersWrapper.offsetWidth);
-                    let allDots = bannerDots.querySelectorAll('.dot');
-                    allDots.forEach((d, idx) => {
-                        if(idx === slideIndex) d.classList.add('active');
-                        else d.classList.remove('active');
-                    });
-                });
-                bannersWrapper.dataset.listenerAttached = 'true';
-            }
-        } else if (bannersWrapper) {
-            bannersWrapper.innerHTML = `<div class="banner-slide" style="background-color: #d0e0e3; display: flex; align-items: center; justify-content: center; color: #555;">Welcome to Kalavad</div>`;
-            if(bannerDots) bannerDots.innerHTML = "";
-        }
-
+            let bHtml = ""; let dotsHtml = "";
+            data.banners.forEach((b, index) => { if(b.link) bHtml += `<a href="${b.link}" target="_blank" class="banner-slide" style="background-image: url('${b.image}'); display:block;"></a>`; else bHtml += `<div class="banner-slide" style="background-image: url('${b.image}');"></div>`; dotsHtml += `<div class="dot ${index === 0 ? 'active' : ''}"></div>`; });
+            bannersWrapper.innerHTML = bHtml; if(bannerDots) bannerDots.innerHTML = dotsHtml;
+            if(!bannersWrapper.dataset.listenerAttached) { bannersWrapper.addEventListener('scroll', function() { let slideIndex = Math.round(bannersWrapper.scrollLeft / bannersWrapper.offsetWidth); let allDots = bannerDots.querySelectorAll('.dot'); allDots.forEach((d, idx) => { if(idx === slideIndex) d.classList.add('active'); else d.classList.remove('active'); }); }); bannersWrapper.dataset.listenerAttached = 'true'; }
+        } else if (bannersWrapper) { bannersWrapper.innerHTML = `<div class="banner-slide" style="background-color: #d0e0e3; display: flex; align-items: center; justify-content: center; color: #555;">Welcome to Kalavad</div>`; if(bannerDots) bannerDots.innerHTML = ""; }
         let areaSelect = document.getElementById('addrArea');
-        if(areaSelect) {
-            let oldAreaVal = areaSelect.value;
-            areaSelect.innerHTML = '<option value="">Select your area...</option>';
-            if(data.areas && data.areas.length > 0) {
-                data.areas.forEach(a => {
-                    let opt = document.createElement('option'); opt.value = a; opt.innerText = a; areaSelect.appendChild(opt);
-                });
-            }
-            areaSelect.value = oldAreaVal;
-        }
-
-        renderRestaurants();
-        
-        let titleElem = document.getElementById('itemSectionTitle');
-        let currentTitle = titleElem ? titleElem.innerText : "All Items";
-        if(currentTitle.includes("All Items")) {
-            renderItemsOrCategories(null); 
-        } else {
-            let resto = globalData.restaurants.find(r => currentTitle.includes(r.name));
-            if(resto) renderItemsOrCategories(resto.id); 
-            else renderItemsOrCategories(null);
-        }
+        if(areaSelect) { let oldAreaVal = areaSelect.value; areaSelect.innerHTML = '<option value="">Select your area...</option>'; if(data.areas && data.areas.length > 0) { data.areas.forEach(a => { let opt = document.createElement('option'); opt.value = a; opt.innerText = a; areaSelect.appendChild(opt); }); } areaSelect.value = oldAreaVal; }
+        renderRestaurants(); let titleElem = document.getElementById('itemSectionTitle'); let currentTitle = titleElem ? titleElem.innerText : "All Items";
+        if(currentTitle.includes("All Items")) { renderItemsOrCategories(null); } else { let resto = globalData.restaurants.find(r => currentTitle.includes(r.name)); if(resto) renderItemsOrCategories(resto.id); else renderItemsOrCategories(null); }
     }
 
-    function renderRestaurants() {
-        let restsContainer = document.getElementById('restaurantsContainer');
-        if(!restsContainer) return;
-        let restsHTML = "";
-        if(globalData.restaurants && globalData.restaurants.length > 0) {
-            globalData.restaurants.forEach(rest => {
-                let imgUrl = rest.image || 'https://via.placeholder.com/60';
-                restsHTML += `<div class="rest-card" onclick="filterByRestaurant('${rest.id}', '${rest.name.replace(/'/g, "\\'")}')"><div class="rest-logo"><img src="${imgUrl}"></div><div class="rest-name">${rest.name}</div></div>`;
-            });
-        }
-        restsContainer.innerHTML = restsHTML;
-    }
-
-    function filterByRestaurant(restoId, restoName) {
-        currentRestoFilter = restoId;
-        currentCategoryFilter = null; 
-        
-        let searchInput = document.getElementById('searchInput');
-        if(searchInput) searchInput.value = "";
-
-        let bannersWrap = document.getElementById('bannersWrapper');
-        let bannerDots = document.getElementById('bannerDots');
-        let restTitle = document.getElementById('restSectionTitle');
-        let restContainer = document.getElementById('restaurantsContainer');
-        let itemSeeAll = document.getElementById('itemSectionSeeAll');
-
-        if(bannersWrap) bannersWrap.style.display = "flex";
-        if(bannerDots) bannerDots.style.display = "flex";
-        if(restTitle) restTitle.style.display = "flex";
-        if(restContainer) restContainer.style.display = "flex";
-        if(itemSeeAll) itemSeeAll.style.display = "none"; 
-
-        let titleElem = document.getElementById('itemSectionTitle');
-        if(titleElem) {
-            titleElem.innerHTML = `<span onclick="showAllItems()" style="cursor:pointer; color:var(--primary);"><i class="fa-solid fa-arrow-left"></i> ${restoName} Menu</span>`;
-            titleElem.style.display = "flex";
-            titleElem.style.justifyContent = "space-between";
-            titleElem.style.alignItems = "center";
-            titleElem.style.width = "100%";
-        }
-        renderItemsOrCategories(restoId);
-    }
-    
-    function showAllItems() { 
-        currentRestoFilter = null;
-        currentCategoryFilter = null;
-        let searchInput = document.getElementById('searchInput');
-        if(searchInput) searchInput.value = "";
-        
-        let bannersWrap = document.getElementById('bannersWrapper');
-        let bannerDots = document.getElementById('bannerDots');
-        let restTitle = document.getElementById('restSectionTitle');
-        let restContainer = document.getElementById('restaurantsContainer');
-
-        if(bannersWrap) bannersWrap.style.display = "flex";
-        if(bannerDots) bannerDots.style.display = "flex";
-        if(restTitle) restTitle.style.display = "flex";
-        if(restContainer) restContainer.style.display = "flex";
-
-        let titleElem = document.getElementById('itemSectionTitle');
-        if(titleElem) {
-            let parentTitle = titleElem.closest('.section-title');
-            if(parentTitle) {
-                parentTitle.innerHTML = `<span id="itemSectionTitle">All Items</span> <span id="itemSectionSeeAll" onclick="openItemsPopup()" style="color: var(--primary); font-size: 12px; cursor: pointer; font-weight: bold;">See All</span>`;
-            }
-        }
-        renderItemsOrCategories(null); 
-    }
-
+    function renderRestaurants() { let restsContainer = document.getElementById('restaurantsContainer'); if(!restsContainer) return; let restsHTML = ""; if(globalData.restaurants && globalData.restaurants.length > 0) { globalData.restaurants.forEach(rest => { let imgUrl = rest.image || 'https://via.placeholder.com/60'; restsHTML += `<div class="rest-card" onclick="filterByRestaurant('${rest.id}', '${rest.name.replace(/'/g, "\'")}')"><div class="rest-logo"><img src="${imgUrl}"></div><div class="rest-name">${rest.name}</div></div>`; }); } restsContainer.innerHTML = restsHTML; }
+    function filterByRestaurant(restoId, restoName) { currentRestoFilter = restoId; currentCategoryFilter = null; let searchInput = document.getElementById('searchInput'); if(searchInput) searchInput.value = ""; let bannersWrap = document.getElementById('bannersWrapper'); let bannerDots = document.getElementById('bannerDots'); let restTitle = document.getElementById('restSectionTitle'); let restContainer = document.getElementById('restaurantsContainer'); let itemSeeAll = document.getElementById('itemSectionSeeAll'); if(bannersWrap) bannersWrap.style.display = "flex"; if(bannerDots) bannerDots.style.display = "flex"; if(restTitle) restTitle.style.display = "flex"; if(restContainer) restContainer.style.display = "flex"; if(itemSeeAll) itemSeeAll.style.display = "none"; let titleElem = document.getElementById('itemSectionTitle'); if(titleElem) { titleElem.innerHTML = `<span onclick="showAllItems()" style="cursor:pointer; color:var(--primary);"><i class="fa-solid fa-arrow-left"></i> ${restoName} Menu</span>`; titleElem.style.display = "flex"; titleElem.style.justifyContent = "space-between"; titleElem.style.alignItems = "center"; titleElem.style.width = "100%"; } renderItemsOrCategories(restoId); }
+    function showAllItems() { currentRestoFilter = null; currentCategoryFilter = null; let searchInput = document.getElementById('searchInput'); if(searchInput) searchInput.value = ""; let bannersWrap = document.getElementById('bannersWrapper'); let bannerDots = document.getElementById('bannerDots'); let restTitle = document.getElementById('restSectionTitle'); let restContainer = document.getElementById('restaurantsContainer'); if(bannersWrap) bannersWrap.style.display = "flex"; if(bannerDots) bannerDots.style.display = "flex"; if(restTitle) restTitle.style.display = "flex"; if(restContainer) restContainer.style.display = "flex"; let titleElem = document.getElementById('itemSectionTitle'); if(titleElem) { let parentTitle = titleElem.closest('.section-title'); if(parentTitle) parentTitle.innerHTML = `<span id="itemSectionTitle">All Items</span> <span id="itemSectionSeeAll" onclick="openItemsPopup()" style="color: var(--primary); font-size: 12px; cursor: pointer; font-weight: bold;">See All</span>`; } renderItemsOrCategories(null); }
     function renderItemsOrCategories(restoId) {
-        let list = globalData.items;
-        if(restoId) {
-            list = list.filter(i => String(i.restoId).trim() === String(restoId).trim());
-        }
-
+        let list = globalData.items; if(restoId) list = list.filter(i => String(i.restoId).trim() === String(restoId).trim());
         let categories = [...new Set(list.map(i => (i.category || "").trim()).filter(c => c !== ""))];
-
         if (categories.length > 0 && currentCategoryFilter === null && restoId) {
-            let html = "";
-            categories.forEach(cat => {
-                html += `<div class="category-card" onclick="selectCategory('${cat.replace(/'/g, "\\'")}')">
-                            <div style="font-weight:bold; font-size:16px;">${cat}</div>
-                            <i class="fa-solid fa-chevron-right" style="color:#aaa;"></i>
-                         </div>`;
-            });
-            
-            let uncategorizedItems = list.filter(i => (i.category || "").trim() === "");
-            if(uncategorizedItems.length > 0) {
-                html += `<div style="margin-top:20px; font-weight:bold; font-size:14px; margin-bottom:10px; color:var(--dark);">Other Items</div>`;
-                html += generateItemsHTML(uncategorizedItems);
-            }
-            
+            let html = ""; categories.forEach(cat => { html += `<div class="category-card" onclick="selectCategory('${cat.replace(/'/g, "\'")}')"><div style="font-weight:bold; font-size:16px;">${cat}</div><i class="fa-solid fa-chevron-right" style="color:#aaa;"></i></div>`; });
+            let uncategorizedItems = list.filter(i => (i.category || "").trim() === ""); if(uncategorizedItems.length > 0) { html += `<div style="margin-top:20px; font-weight:bold; font-size:14px; margin-bottom:10px; color:var(--dark);">Other Items</div>` + generateItemsHTML(uncategorizedItems); }
             document.getElementById('itemsContainer').innerHTML = html;
-        } else {
-            let itemsToRender = list;
-            if (currentCategoryFilter) {
-                itemsToRender = list.filter(i => (i.category || "").trim() === currentCategoryFilter);
-            }
-            renderItemsListDirectly(itemsToRender);
-        }
+        } else { let itemsToRender = list; if (currentCategoryFilter) itemsToRender = list.filter(i => (i.category || "").trim() === currentCategoryFilter); renderItemsListDirectly(itemsToRender); }
     }
+    function selectCategory(catName) { currentCategoryFilter = catName; let restoObj = globalData.restaurants.find(r => String(r.id) === String(currentRestoFilter)); let titleElem = document.getElementById('itemSectionTitle'); if(titleElem) { titleElem.innerHTML = `<span onclick="filterByRestaurant('${currentRestoFilter}', '${restoObj ? restoObj.name.replace(/'/g, "\'") : ""}')" style="cursor:pointer; color:var(--primary);"><i class="fa-solid fa-arrow-left"></i> ${catName}</span>`; titleElem.style.display = "flex"; titleElem.style.justifyContent = "space-between"; titleElem.style.alignItems = "center"; titleElem.style.width = "100%"; } renderItemsOrCategories(currentRestoFilter); }
 
-    function selectCategory(catName) {
-        currentCategoryFilter = catName;
-        let restoObj = globalData.restaurants.find(r => String(r.id) === String(currentRestoFilter));
-        let rName = restoObj ? restoObj.name : "";
-        let titleElem = document.getElementById('itemSectionTitle');
-        if(titleElem) {
-            titleElem.innerHTML = `<span onclick="filterByRestaurant('${currentRestoFilter}', '${rName.replace(/'/g, "\\'")}')" style="cursor:pointer; color:var(--primary);"><i class="fa-solid fa-arrow-left"></i> ${catName}</span>`;
-            titleElem.style.display = "flex";
-            titleElem.style.justifyContent = "space-between";
-            titleElem.style.alignItems = "center";
-            titleElem.style.width = "100%";
-        }
-        renderItemsOrCategories(currentRestoFilter);
-    }
-
-    function modifyCart(itemName, price, change, restoName) {
-        let key = itemName.replace(/\s+/g, '_');
-        if(!cart[key]) cart[key] = { name: itemName, price: price, qty: 0, rName: restoName || '' };
-        cart[key].qty += change;
-        if(cart[key].qty < 0) cart[key].qty = 0;
-        
-        let spanElem = document.getElementById('qty_' + key);
-        if(spanElem) spanElem.innerText = cart[key].qty;
-
-        let popupSpanElem = document.getElementById('popup_qty_' + key);
-        if(popupSpanElem) popupSpanElem.innerText = cart[key].qty;
-
-        updateCartTotals();
-    }
-
-    function updateCartTotals() {
-        let itemTotal = 0;
-        let totalQtyCount = 0;
-        for(let k in cart) { 
-            itemTotal += (cart[k].price * cart[k].qty); 
-            totalQtyCount += cart[k].qty;
-        }
-        
-        let elIT = document.getElementById('itemTotal'); 
-        if(elIT) elIT.innerText = totalQtyCount + (totalQtyCount === 1 ? " Item" : " Items");
-        
-        grandTotalVal = itemTotal > 0 ? (itemTotal + delCharge + packCharge) : 0;
-        let elGT = document.getElementById('grandTotal'); if(elGT) elGT.innerText = "₹" + itemTotal;
-        
-        let elITot = document.getElementById('invTotal'); if(elITot) elITot.innerText = "₹" + grandTotalVal;
-        let elPAT = document.getElementById('payAmountTotal'); if(elPAT) elPAT.innerText = "₹" + grandTotalVal;
-
-        let bottomPanel = document.getElementById('bottomPanel');
-        if(bottomPanel) {
-            bottomPanel.style.display = (itemTotal > 0) ? "flex" : "none";
-        }
-    }
-
+    function modifyCart(itemName, price, change, restoName) { let key = itemName.replace(/\s+/g, '_'); if(!cart[key]) cart[key] = { name: itemName, price: price, qty: 0, rName: restoName || '' }; cart[key].qty += change; if(cart[key].qty < 0) cart[key].qty = 0; let spanElem = document.getElementById('qty_' + key); if(spanElem) spanElem.innerText = cart[key].qty; let popupSpanElem = document.getElementById('popup_qty_' + key); if(popupSpanElem) popupSpanElem.innerText = cart[key].qty; updateCartTotals(); }
+    function updateCartTotals() { let itemTotal = 0; let totalQtyCount = 0; for(let k in cart) { itemTotal += (cart[k].price * cart[k].qty); totalQtyCount += cart[k].qty; } let elIT = document.getElementById('itemTotal'); if(elIT) elIT.innerText = totalQtyCount + (totalQtyCount === 1 ? " Item" : " Items"); grandTotalVal = itemTotal > 0 ? (itemTotal + delCharge + packCharge) : 0; let elGT = document.getElementById('grandTotal'); if(elGT) elGT.innerText = "₹" + itemTotal; let elITot = document.getElementById('invTotal'); if(elITot) elITot.innerText = "₹" + grandTotalVal; let elPAT = document.getElementById('payAmountTotal'); if(elPAT) elPAT.innerText = "₹" + grandTotalVal; let bottomPanel = document.getElementById('bottomPanel'); if(bottomPanel) bottomPanel.style.display = (itemTotal > 0) ? "flex" : "none"; }
     function goToInvoice() {
-        let itemTotalCalc = 0;
-        let totalQtyCount = 0;
-        for(let k in cart) { 
-            if(cart[k].qty > 0) {
-                itemTotalCalc += (cart[k].price * cart[k].qty);
-                totalQtyCount += cart[k].qty;
-            }
-        }
-        if(itemTotalCalc === 0) { showCustomModal('alert', 'Empty Cart', 'Kripya pehle items cart mein add karein!'); return; }
-        
-        let invList = "";
-        for(let k in cart) {
-            if(cart[k].qty > 0) {
-                invList += `<div style="display:flex; justify-content:space-between; border-bottom:1px solid #eee; padding:5px 0;"><span>${cart[k].name} <small style="color:var(--primary); font-weight:bold;">[${cart[k].rName}]</small> (x${cart[k].qty})</span><span>₹${cart[k].price * cart[k].qty}</span></div>`;
-            }
-        }
-        let invListElem = document.getElementById('invoiceItemsList');
-        if(invListElem) invListElem.innerHTML = invList;
-
-        let itemCountTextElem = document.getElementById('invoiceItemCountText');
-        if(itemCountTextElem) itemCountTextElem.innerText = `Total Items (${totalQtyCount})`;
-
-        let invItemTotalAmtElem = document.getElementById('invItemTotalAmt');
-        if(invItemTotalAmtElem) invItemTotalAmtElem.innerText = "₹" + itemTotalCalc;
-        
-        let savedName = localStorage.getItem('savedAddrName');
-        let savedPhone = localStorage.getItem('savedAddrPhone');
-        let savedArea = localStorage.getItem('savedAddrArea');
-        let savedFull = localStorage.getItem('savedAddrFull');
-
-        if(savedName) document.getElementById('addrName').value = savedName;
-        else document.getElementById('addrName').value = localStorage.getItem('userName') || '';
-
-        if(savedPhone) {
-            document.getElementById('addrPhone').value = savedPhone;
-            isPhoneVerified = true;
-            let verifyBtn = document.getElementById('verifyPhoneBtn');
-            let statusSpan = document.getElementById('phoneVerifyStatus');
-            if(verifyBtn) {
-                verifyBtn.innerText = "Verified";
-                verifyBtn.disabled = true;
-                verifyBtn.style.backgroundColor = "var(--disabled)";
-            }
-            if(statusSpan) {
-                statusSpan.style.color = "var(--success)";
-                statusSpan.innerHTML = `<i class="fa-solid fa-circle-check"></i> Verified`;
-            }
-        }
-        if(savedArea) {
-            document.getElementById('addrArea').value = savedArea;
-            document.getElementById('addrCity').value = "Kalavad";
-        } else {
-            document.getElementById('addrCity').value = "";
-        }
-        if(savedFull) document.getElementById('addrFull').value = savedFull;
-
-        showScreen('invoiceScreen');
+        let itemTotalCalc = 0; let totalQtyCount = 0; for(let k in cart) { if(cart[k].qty > 0) { itemTotalCalc += (cart[k].price * cart[k].qty); totalQtyCount += cart[k].qty; } } if(itemTotalCalc === 0) { showCustomModal('alert', 'Empty Cart', 'Kripya pehle items cart mein add karein!'); return; }
+        let invList = ""; for(let k in cart) { if(cart[k].qty > 0) invList += `<div style="display:flex; justify-content:space-between; border-bottom:1px solid #eee; padding:5px 0;"><span>${cart[k].name} <small style="color:var(--primary); font-weight:bold;">[${cart[k].rName}]</small> (x${cart[k].qty})</span><span>₹${cart[k].price * cart[k].qty}</span></div>`; }
+        let invListElem = document.getElementById('invoiceItemsList'); if(invListElem) invListElem.innerHTML = invList; let itemCountTextElem = document.getElementById('invoiceItemCountText'); if(itemCountTextElem) itemCountTextElem.innerText = `Total Items (${totalQtyCount})`; let invItemTotalAmtElem = document.getElementById('invItemTotalAmt'); if(invItemTotalAmtElem) invItemTotalAmtElem.innerText = "₹" + itemTotalCalc;
+        let savedName = localStorage.getItem('savedAddrName'); let savedPhone = localStorage.getItem('savedAddrPhone'); let savedArea = localStorage.getItem('savedAddrArea'); let savedFull = localStorage.getItem('savedAddrFull');
+        if(savedName) document.getElementById('addrName').value = savedName; else document.getElementById('addrName').value = localStorage.getItem('userName') || '';
+        if(savedPhone) { document.getElementById('addrPhone').value = savedPhone; }
+        if(savedArea) { document.getElementById('addrArea').value = savedArea; document.getElementById('addrCity').value = "Kalavad"; } else { document.getElementById('addrCity').value = ""; }
+        if(savedFull) document.getElementById('addrFull').value = savedFull; showScreen('invoiceScreen');
     }
-
-    function validateAddressAndGoToPayment() {
-        let name = document.getElementById('addrName').value.trim(); 
-        let phone = document.getElementById('addrPhone').value.trim(); 
-        let area = document.getElementById('addrArea').value; 
-        let fullAddr = document.getElementById('addrFull').value.trim();
-        
-        if(!name || !phone || !area || !fullAddr) { 
-            showCustomModal('alert', 'Incomplete Form', 'Kripya address ki saari details bharein.'); 
-            return; 
-        }
-
-        if(!isPhoneVerified) {
-            showCustomModal('alert', 'Verification Required', 'Kripya pehle apna mobile number "Verify" button dabakar verify karein.');
-            return;
-        }
-
-        localStorage.setItem('savedAddrName', name);
-        localStorage.setItem('savedAddrPhone', phone);
-        localStorage.setItem('savedAddrArea', area);
-        localStorage.setItem('savedAddrFull', fullAddr);
-
-        showScreen('paymentScreen');
-    }
+    function validateAddressAndGoToPayment() { let name = document.getElementById('addrName').value.trim(); let phone = document.getElementById('addrPhone').value.trim(); let area = document.getElementById('addrArea').value; let fullAddr = document.getElementById('addrFull').value.trim(); if(!name || !phone || !area || !fullAddr) { showCustomModal('alert', 'Incomplete Form', 'Kripya address ki saari details bharein.'); return; } if(phone.length !== 10) { showCustomModal('alert', 'Invalid Phone', 'Kripya sahi 10-digit number daalein.'); return; } localStorage.setItem('savedAddrName', name); localStorage.setItem('savedAddrPhone', phone); localStorage.setItem('savedAddrArea', area); localStorage.setItem('savedAddrFull', fullAddr); showScreen('paymentScreen'); }
 
     function submitFinalOrder() {
-        let checkedRadio = document.querySelector('input[name="paymentType"]:checked');
-        let paymentMethod = checkedRadio ? checkedRadio.value : "UPI";
-        
+        let checkedRadio = document.querySelector('input[name="paymentType"]:checked'); let paymentMethod = checkedRadio ? checkedRadio.value : "UPI";
         if (paymentMethod === "UPI") {
             if(RAZORPAY_KEY === "YOUR_RAZORPAY_KEY_HERE" || !RAZORPAY_KEY) { showCustomModal('alert', 'Integration Pending', 'Developer ne abhi Razorpay Key nahi daali hai. Kripya COD select karein.'); return; }
-            
-            let checkoutData = {
-                name: document.getElementById('addrName').value.trim(),
-                phone: document.getElementById('addrPhone').value.trim(),
-                area: document.getElementById('addrArea').value,
-                fullAddr: document.getElementById('addrFull').value.trim(),
-                email: localStorage.getItem('userEmail')
-            };
-
-            var options = { 
-                "key": RAZORPAY_KEY, 
-                "amount": grandTotalVal * 100, 
-                "currency": "INR", 
-                "name": "Online Kalavad", 
-                "description": "Order Payment", 
-                "handler": function (response){ 
-                    processOrderToSheet("UPI - Paid", response.razorpay_payment_id); 
-                }, 
-                "prefill": { "name": checkoutData.name, "email": checkoutData.email, "contact": checkoutData.phone }, 
-                "theme": { "color": "#B3391C" } 
-            };
-            var rzp1 = new Razorpay(options);
-            rzp1.on('payment.failed', function (response){ showCustomModal('alert', 'Payment Failed', 'Aapka payment fail ho gaya. Kripya dobara koshish karein.'); });
-            rzp1.open();
-        } else { processOrderToSheet("COD", ""); }
+            var options = { "key": RAZORPAY_KEY, "amount": grandTotalVal * 100, "currency": "INR", "name": "Online Kalavad", "description": "Order Payment", "handler": function (response){ processOrderToFirebase("UPI - Paid (ID: " + response.razorpay_payment_id + ")"); }, "prefill": { "name": document.getElementById('addrName').value.trim(), "email": localStorage.getItem('userPhone'), "contact": document.getElementById('addrPhone').value.trim() }, "theme": { "color": "#B3391C" } };
+            var rzp1 = new Razorpay(options); rzp1.on('payment.failed', function (response){ showCustomModal('alert', 'Payment Failed', 'Aapka payment fail ho gaya. Kripya dobara koshish karein.'); }); rzp1.open();
+        } else { processOrderToFirebase("COD"); }
     }
 
-    function processOrderToSheet(finalPaymentMethod, paymentId) {
+    async function processOrderToFirebase(finalPaymentMethod) {
         let name = document.getElementById('addrName').value.trim(); 
         let phone = "+91 " + document.getElementById('addrPhone').value.trim(); 
         let area = document.getElementById('addrArea').value; 
         let fullAddr = document.getElementById('addrFull').value.trim(); 
-        let email = localStorage.getItem('userEmail');
+        let userPhoneId = localStorage.getItem('userPhone');
         
-        let itemsSummary = "";
-        let cartDataForBackend = [];
-
-        for(let k in cart) { 
-            if(cart[k].qty > 0) {
-                itemsSummary += `${cart[k].name} [${cart[k].rName}] (x${cart[k].qty}), `; 
-                cartDataForBackend.push({ name: cart[k].name, rName: cart[k].rName, qty: cart[k].qty });
-            }
-        }
-
+        let itemsSummary = ""; 
+        for(let k in cart) { if(cart[k].qty > 0) itemsSummary += `${cart[k].name} [${cart[k].rName}] (x${cart[k].qty}), `; }
+        
         let fullAddressString = name + " | Ph: " + phone + " | Area: " + area + " (City: Kalavad) | Addr: " + fullAddr;
-
-        let payload = { 
-            action: "placeOrder", 
-            name: fullAddressString, 
-            email: email, 
-            items: itemsSummary, 
-            cartData: cartDataForBackend, 
-            paymentMethod: finalPaymentMethod, 
-            paymentId: paymentId 
-        };
+        let orderCode = Math.floor(1000 + Math.random() * 9000).toString(); 
 
         let btn = document.getElementById('finalPlaceOrderBtn');
         if(btn) { btn.innerText = "Processing..."; btn.disabled = true; btn.style.backgroundColor = "var(--disabled)"; }
 
-        fetch(GOOGLE_WEB_APP_URL, { method: "POST", headers: { "Content-Type": "text/plain;charset=utf-8" }, body: JSON.stringify(payload) })
-        .then(res => res.json())
-        .then(data => {
-            if(data.status === "success") {
-                let newOrderObj = { date: new Date().toLocaleString(), items: itemsSummary, total: grandTotalVal, method: finalPaymentMethod, code: data.code, status: "Pending" };
-                let historyArray = JSON.parse(localStorage.getItem('myOrdersHistory') || "[]");
-                historyArray.unshift(newOrderObj); if(historyArray.length > 5) historyArray.pop(); 
-                localStorage.setItem('myOrdersHistory', JSON.stringify(historyArray));
-                localStorage.setItem('lastDeliveryCode', data.code);
-                
-                let codeSpan = document.getElementById('deliveryCode');
-                if(codeSpan) codeSpan.innerText = data.code;
-                
-                showScreen('successScreen'); updateRedDot(); cart = {}; updateCartTotals();
-                if(btn) { btn.innerText = "Confirm & Place Order"; btn.disabled = false; btn.style.backgroundColor = "var(--primary)"; }
-            } else {
-                showCustomModal('alert', 'Order Failed', data.message);
-                if(btn) { btn.innerText = "Confirm & Place Order"; btn.disabled = false; btn.style.backgroundColor = "var(--primary)"; }
-            }
-        }).catch(err => {
+        try {
+            await db.collection("orders").add({
+                code: orderCode, customerName: fullAddressString, email: userPhoneId, items: itemsSummary,
+                total: grandTotalVal, paymentMethod: finalPaymentMethod, status: "Pending", timestamp: Date.now()
+            });
+
+            let newOrderObj = { date: new Date().toLocaleString(), items: itemsSummary, total: grandTotalVal, method: finalPaymentMethod, code: orderCode, status: "Pending", timestamp: Date.now() };
+            let historyArray = JSON.parse(localStorage.getItem('myOrdersHistory') || "[]");
+            historyArray.unshift(newOrderObj); if(historyArray.length > 5) historyArray.pop(); 
+            localStorage.setItem('myOrdersHistory', JSON.stringify(historyArray));
+            
+            let codeSpan = document.getElementById('deliveryCode'); if(codeSpan) codeSpan.innerText = orderCode;
+            showScreen('successScreen'); updateRedDot(); cart = {}; updateCartTotals();
+            if(btn) { btn.innerText = "Confirm & Place Order"; btn.disabled = false; btn.style.backgroundColor = "var(--primary)"; }
+            
+        } catch(error) {
             showCustomModal('alert', 'Network Error', 'Order place nahi ho paya. Please check internet connection.');
             if(btn) { btn.innerText = "Confirm & Place Order"; btn.disabled = false; btn.style.backgroundColor = "var(--primary)"; }
-        });
+        }
     }
 </script>
 </body>
-                                                                                                                        </html>
+</html>
+
