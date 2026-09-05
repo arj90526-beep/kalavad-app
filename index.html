@@ -40,7 +40,6 @@
     .noti-wrapper { position: relative; display: inline-block; cursor: pointer; }
     .red-dot { position: absolute; top: -3px; right: -2px; width: 10px; height: 10px; background: #e74c3c; border-radius: 50%; display: none; border: 2px solid var(--bg-color); }
 
-    /* 🔥 BULLET-PROOF SIDEBAR & OVERLAY 🔥 */
     .sidebar { position: fixed; left: -100%; top: 0; width: 80%; max-width: 320px; height: 100%; background: var(--white); z-index: 99999; transition: 0.3s ease; box-shadow: 2px 0 15px rgba(0,0,0,0.3); display: flex; flex-direction: column; overflow-y: auto; }
     .sidebar.open { left: 0; }
     .sidebar-header { padding: 20px; background: var(--primary); color: white; }
@@ -157,7 +156,6 @@
         </div>
     </div>
     
-    <!-- 🔥 SIDEBAR & OVERLAY 🔥 -->
     <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleMenu()"></div>
     <div class="sidebar" id="sidebar">
         <div class="sidebar-header" style="background: var(--primary); padding: 20px; color: white;">
@@ -172,7 +170,6 @@
             <li onclick="toggleMenu(); showPolicy('privacy');"><i class="fa-solid fa-shield-halved"></i> Privacy Policy</li>
             <li onclick="toggleMenu(); showPolicy('refund');"><i class="fa-solid fa-money-bill-transfer"></i> Refund Policy</li>
             <li onclick="toggleMenu(); showPolicy('about');"><i class="fa-solid fa-circle-info"></i> About Us</li>
-            <!-- 🔥 FIXED LOGOUT BUTTON 🔥 -->
             <li onclick="logoutUser()" style="margin-top: auto; border-top: 1px solid #ddd; color: var(--primary);">
                 <i class="fa-solid fa-right-from-bracket"></i> Logout
             </li>
@@ -244,7 +241,6 @@
                 <p style="grid-column: span 4; text-align: center; color: #888; font-size: 12px;">Loading...</p>
             </div>
 
-            <!-- 🔥 TODAY TRENDING SECTION 🔥 -->
             <div class="section-title" id="trendingSectionTitle"><span>Today Trending</span></div>
             <div class="trending-container" id="trendingContainer">
                 <p style="font-size:12px; color:#888;">Loading trending items...</p>
@@ -253,14 +249,12 @@
             <div class="section-title" id="restSectionTitle"><span>Restaurants & Shops</span><span onclick="openRestaurantsPopup()" style="color: var(--primary); font-size: 12px; cursor: pointer; font-weight: bold;">See All</span></div>
             <div class="restaurants-container" id="restaurantsContainer"><p style="font-size:12px; color:#888;">Loading...</p></div>
             
-            <!-- 🔥 SUB-MENU CHIPS BAR CONTAINER 🔥 -->
             <div id="subMenuChipsContainer" class="submenu-chips-container" style="display:none;"></div>
 
             <div class="section-title"><span id="itemSectionTitle">All Items</span><span id="itemSectionSeeAll" onclick="openItemsPopup()" style="color: var(--primary); font-size: 12px; cursor: pointer; font-weight: bold;">See All</span></div>
             <div id="itemsContainer"><p style="text-align:center; color:#888;">Loading Items...</p></div>
         </div>
         
-        <!-- 🔥 SINGLE LINE BOTTOM BAR 🔥 -->
         <div class="bottom-panel" id="bottomPanel">
             <div class="bottom-panel-left">
                 <span id="itemTotal">0 Items</span>
@@ -332,7 +326,8 @@
 </div>
 
 <script>
-    const RAZORPAY_KEY = "rzp_live_TReBmMOSvEpLsV"; 
+    // 🔥 NEW LIVE RAZORPAY KEY APPLIED 🔥
+    const RAZORPAY_KEY = "rzp_live_TYGwnXjugwX5Q6"; 
     const FAST2SMS_API_KEY = "8oD3wPrg4JKGayFY0lZChbs9iU71NHjxATfBpztmvqMIOXnRQksc1ne4ytXK07xYFTvgZUpDbIRi6duh"; 
     
     const firebaseConfig = {
@@ -537,8 +532,8 @@
                         </div>
                     </div>
                 `;
-        });
-        container.innerHTML = html;
+            });
+            container.innerHTML = html;
         });
 
         let uPhone = localStorage.getItem('userPhone');
@@ -975,7 +970,7 @@
         if (paymentMethod === "UPI") {
             if(RAZORPAY_KEY === "YOUR_RAZORPAY_KEY_HERE" || !RAZORPAY_KEY) { showCustomModal('alert', 'Integration Pending', 'Developer ne abhi Razorpay Key nahi daali hai. Kripya COD select karein.'); return; }
             var options = { "key": RAZORPAY_KEY, "amount": grandTotalVal * 100, "currency": "INR", "name": "Online Kalavad", "description": "Order Payment", "handler": function (response){ processOrderToFirebase("UPI - Paid (ID: " + response.razorpay_payment_id + ")"); }, "prefill": { "name": document.getElementById('addrName').value.trim(), "email": localStorage.getItem('userPhone'), "contact": document.getElementById('addrPhone').value.trim() }, "theme": { "color": "#B3391C" } };
-            var rzp1 = new Razorpay(options); rzp1.on('payment.failed', function (response){ }); rzp1.open();
+            var rzp1 = new Razorpay(options); rzp1.on('payment.failed', function (response){ showCustomModal('alert', 'Payment Failed', 'Aapka payment fail ho gaya. Kripya dobara koshish karein.'); }); rzp1.open();
         } else { processOrderToFirebase("COD"); }
     }
 
@@ -1002,12 +997,11 @@
             historyArray.unshift(newOrderObj); if(historyArray.length > 5) historyArray.pop(); localStorage.setItem('myOrdersHistory', JSON.stringify(historyArray));
             
             let codeSpan = document.getElementById('deliveryCode'); if(codeSpan) codeSpan.innerText = orderCode;
-            showScreen('successScreen'); updateRedDot(); cart = {}; updateCartTotals();
+            showScreen('successScreen'); cart = {}; updateCartTotals();
             if(btn) { btn.innerText = "Confirm & Place Order"; btn.disabled = false; btn.style.backgroundColor = "var(--primary)"; }
             
         } catch(error) {
-            let codeSpan = document.getElementById('deliveryCode'); if(codeSpan) codeSpan.innerText = orderCode;
-            showScreen('successScreen'); updateRedDot(); cart = {}; updateCartTotals();
+            showCustomModal('alert', 'Network Error', 'Order place nahi ho paya. Please check internet connection.');
             if(btn) { btn.innerText = "Confirm & Place Order"; btn.disabled = false; btn.style.backgroundColor = "var(--primary)"; }
         }
     }
