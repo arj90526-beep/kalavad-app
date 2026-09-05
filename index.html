@@ -319,7 +319,9 @@
 </div>
 
 <script>
+    // 🔥 NAYI RAZORPAY LIVE KEY 🔥
     const RAZORPAY_KEY = "rzp_live_TYGwnXjugwX5Q6"; 
+    
     const FAST2SMS_API_KEY = "8oD3wPrg4JKGayFY0lZChbs9iU71NHjxATfBpztmvqMIOXnRQksc1ne4ytXK07xYFTvgZUpDbIRi6duh"; 
     
     const firebaseConfig = {
@@ -942,8 +944,27 @@
         let checkedRadio = document.querySelector('input[name="paymentType"]:checked'); let paymentMethod = checkedRadio ? checkedRadio.value : "UPI";
         if (paymentMethod === "UPI") {
             if(RAZORPAY_KEY === "YOUR_RAZORPAY_KEY_HERE" || !RAZORPAY_KEY) { showCustomModal('alert', 'Integration Pending', 'Developer ne abhi Razorpay Key nahi daali hai. Kripya COD select karein.'); return; }
-            var options = { "key": RAZORPAY_KEY, "amount": grandTotalVal * 100, "currency": "INR", "name": "Online Kalavad", "description": "Order Payment", "handler": function (response){ processOrderToFirebase("UPI - Paid (ID: " + response.razorpay_payment_id + ")"); }, "prefill": { "name": document.getElementById('addrName').value.trim(), "email": localStorage.getItem('userPhone'), "contact": document.getElementById('addrPhone').value.trim() }, "theme": { "color": "#B3391C" } };
-            var rzp1 = new Razorpay(options); rzp1.on('payment.failed', function (response){ showCustomModal('alert', 'Payment Failed', 'Aapka payment fail ho gaya. Kripya dobara koshish karein.'); }); rzp1.open();
+            var options = { 
+                "key": RAZORPAY_KEY, 
+                "amount": grandTotalVal * 100, 
+                "currency": "INR", 
+                "name": "Online Kalavad", 
+                "description": "Order Payment", 
+                "handler": function (response){ 
+                    processOrderToFirebase("Razorpay Paid (ID: " + response.razorpay_payment_id + ")"); 
+                }, 
+                "prefill": { 
+                    "name": document.getElementById('addrName').value.trim(), 
+                    "email": localStorage.getItem('userPhone').replace('+91', '').trim() + "@kalavad.com", 
+                    "contact": document.getElementById('addrPhone').value.trim() 
+                }, 
+                "theme": { "color": "#B3391C" } 
+            };
+            var rzp1 = new Razorpay(options); 
+            rzp1.on('payment.failed', function (response){ 
+                showCustomModal('alert', 'Payment Failed', 'Razorpay Error: ' + response.error.description); 
+            }); 
+            rzp1.open();
         } else { processOrderToFirebase("COD"); }
     }
 
@@ -969,12 +990,10 @@
             let historyArray = JSON.parse(localStorage.getItem('myOrdersHistory') || "[]");
             historyArray.unshift(newOrderObj); if(historyArray.length > 5) historyArray.pop(); localStorage.setItem('myOrdersHistory', JSON.stringify(historyArray));
             
-            // 🔥 FIX: SAFELY SHOW SUCCESS SCREEN 🔥
             let codeSpan = document.getElementById('deliveryCode'); if(codeSpan) codeSpan.innerText = orderCode;
             cart = {}; 
             updateCartTotals();
             
-            // Wait for 1 second before showing success screen to avoid race conditions
             setTimeout(() => {
                 showScreen('successScreen');
                 if(btn) { btn.innerText = "Confirm & Place Order"; btn.disabled = false; btn.style.backgroundColor = "var(--primary)"; }
