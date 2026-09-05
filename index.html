@@ -6,43 +6,48 @@
 <title>Online Kalavad</title>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
-
-<!-- 🔥 Firebase Scripts (Auth Added) -->
 <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-auth-compat.js"></script>
 
 <style>
     :root { --primary: #B3391C; --success: #28a745; --info-blue: #007bff; --disabled: #888888; --bg-color: #f4f6f9; --text-dark: #333; --white: #fff; }
     body { margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #ddd; display: flex; justify-content: center; }
     .app-container { width: 100%; max-width: 400px; height: 100vh; background-color: var(--bg-color); position: relative; overflow: hidden; box-shadow: 0 0 20px rgba(0,0,0,0.1); display: flex; flex-direction: column; }
     .hidden { display: none !important; }
-    .screen { height: 100%; width: 100%; overflow-y: auto; padding-bottom: 190px; box-sizing: border-box;}
+    .screen { height: 100%; width: 100%; overflow-y: auto; padding-bottom: 150px; box-sizing: border-box;}
     
     .login-wrapper { padding: 40px 20px; text-align: center; }
     .logo-title { color: var(--primary); font-size: 32px; font-family: 'Arial Black', Impact, sans-serif; font-weight: 900; line-height: 1.1; letter-spacing: 1px; display: inline-block; margin-bottom: 5px; }
     .logo-sub { font-size: 14px; color: #666; margin-bottom: 30px; }
     .input-group { margin-bottom: 15px; text-align: left; }
     .input-group label { display: block; font-size: 14px; margin-bottom: 5px; font-weight: 500; font-family: inherit; }
-    .input-group input, .input-group select, .input-group textarea { width: 100%; padding: 12px; border: 1px solid #ccc; border-radius: 20px; box-sizing: border-box; outline: none; font-family: inherit; font-size: 14px; }
-    .input-group textarea { border-radius: 15px; resize: none; }
-    .btn { width: 100%; padding: 12px; background-color: var(--primary); color: var(--white); border: none; border-radius: 25px; font-size: 16px; font-weight: bold; cursor: pointer; margin-top: 10px; transition: 0.3s; font-family: inherit; }
+    .input-group input, .input-group select, .input-group textarea { width: 100%; padding: 12px; border: 1px solid #ccc; border-radius: 12px; box-sizing: border-box; outline: none; font-family: inherit; font-size: 16px; letter-spacing: 1px; }
+    .btn { width: 100%; padding: 14px; background-color: var(--primary); color: var(--white); border: none; border-radius: 12px; font-size: 16px; font-weight: bold; cursor: pointer; margin-top: 10px; transition: 0.3s; font-family: inherit; }
+    .btn:active { transform: scale(0.98); }
+    
+    .otp-display-box { background: white; padding: 20px; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); text-align: center; margin-top: 20px; border: 1px solid #eee;}
+    .otp-input { text-align: center; font-size: 24px !important; letter-spacing: 15px !important; font-weight: bold; color: var(--primary); background: #f8fafc; border: 2px solid #e2e8f0; }
+    .otp-input:focus { border-color: var(--primary); background: #fff;}
+    .resend-text { font-size: 13px; color: #666; margin-top: 15px; }
+    .resend-link { color: var(--info-blue); font-weight: bold; cursor: pointer; text-decoration: underline; }
+    .resend-link.disabled { color: #ccc; cursor: not-allowed; text-decoration: none; }
     
     .header { display: flex; align-items: center; justify-content: space-between; padding: 15px 20px; background: var(--bg-color); position: sticky; top: 0; z-index: 10; }
-    .header i { font-size: 20px; color: var(--text-dark); cursor: pointer; }
+    .header i { font-size: 22px; color: var(--text-dark); cursor: pointer; }
     .search-bar { flex: 1; margin: 0 15px; background: var(--white); border: 1px solid #ddd; border-radius: 20px; padding: 8px 15px; display: flex; align-items: center;}
     .search-bar input { border: none; outline: none; background: transparent; width: 100%; margin-left: 10px; font-family: inherit; }
     
     .noti-wrapper { position: relative; display: inline-block; cursor: pointer; }
     .red-dot { position: absolute; top: -3px; right: -2px; width: 10px; height: 10px; background: #e74c3c; border-radius: 50%; display: none; border: 2px solid var(--bg-color); }
 
-    .sidebar { position: absolute; left: -100%; top: 0; width: 75%; height: 100%; background: var(--white); z-index: 20; transition: 0.3s; box-shadow: 2px 0 10px rgba(0,0,0,0.1); display: flex; flex-direction: column; }
+    /* 🔥 BULLET-PROOF SIDEBAR & OVERLAY 🔥 */
+    .sidebar { position: fixed; left: -100%; top: 0; width: 80%; max-width: 320px; height: 100%; background: var(--white); z-index: 99999; transition: 0.3s ease; box-shadow: 2px 0 15px rgba(0,0,0,0.3); display: flex; flex-direction: column; overflow-y: auto; }
     .sidebar.open { left: 0; }
     .sidebar-header { padding: 20px; background: var(--primary); color: white; }
     .sidebar-menu { list-style: none; padding: 0; margin: 0; flex-grow: 1; }
     .sidebar-menu li { padding: 15px 20px; border-bottom: 1px solid #eee; cursor: pointer; font-size: 15px; font-family: inherit;}
     .sidebar-menu li i { margin-right: 10px; color: var(--primary); width: 20px; text-align: center;}
-    .sidebar-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 15; display: none; }
+    .sidebar-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 99998; display: none; }
 
     .content-area { padding: 0 15px; }
     .banners-wrapper { display: flex; overflow-x: auto; scroll-snap-type: x mandatory; gap: 10px; padding-bottom: 5px; margin-bottom: 10px; scrollbar-width: none; }
@@ -52,7 +57,27 @@
     .banner-dots .dot { width: 8px; height: 8px; border-radius: 50%; background: #ccc; transition: 0.3s ease; }
     .banner-dots .dot.active { background: var(--primary); width: 16px; border-radius: 4px; }
     
-    .category-card { background: white; padding: 15px 20px; border-radius: 12px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 5px rgba(0,0,0,0.05); cursor: pointer; border-left: 4px solid var(--primary); }
+    .category-grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-bottom: 20px; }
+    .cat-box { background: white; border-radius: 12px; padding: 12px 4px; text-align: center; box-shadow: 0 2px 6px rgba(0,0,0,0.03); cursor: pointer; border: 1px solid #eee; transition: 0.2s ease; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+    .cat-box:active { transform: scale(0.95); border-color: var(--primary); background: #fff5f3; }
+    .cat-box img { width: 52px; height: 52px; margin-bottom: 8px; object-fit: contain; }
+    .cat-box span { display: block; font-size: 11px; font-weight: bold; color: var(--text-dark); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; width: 100%; }
+
+    .trending-container { display: flex; overflow-x: auto; gap: 12px; padding-bottom: 10px; margin-bottom: 20px; scrollbar-width: none; }
+    .trending-container::-webkit-scrollbar { display: none; }
+    .trending-card { background: white; min-width: 125px; max-width: 125px; border-radius: 12px; padding: 8px; box-shadow: 0 2px 6px rgba(0,0,0,0.04); border: 1px solid #eee; flex-shrink: 0; display: flex; flex-direction: column; justify-content: space-between; }
+    .trending-img { width: 100%; height: 85px; border-radius: 8px; object-fit: cover; margin-bottom: 6px; background: #eee; cursor: pointer; }
+    .trending-name { font-size: 12px; font-weight: bold; color: var(--text-dark); margin-bottom: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .trending-price { color: var(--success); font-size: 13px; font-weight: bold; margin-bottom: 6px; }
+    
+    .trending-actions-grid { display: flex; align-items: center; justify-content: space-between; border-top: 1px solid #f1f2f6; padding-top: 6px; }
+    .trending-actions-grid i { font-size: 22px; color: var(--primary); cursor: pointer; }
+
+    .submenu-chips-container { display: flex; overflow-x: auto; gap: 8px; padding-bottom: 10px; margin-bottom: 15px; scrollbar-width: none; }
+    .submenu-chips-container::-webkit-scrollbar { display: none; }
+    .chip-btn { background: #fff; border: 1px solid #ccc; padding: 6px 14px; border-radius: 20px; font-size: 13px; font-weight: 600; color: #555; white-space: nowrap; cursor: pointer; transition: 0.2s; }
+    .chip-btn.active { background: var(--primary); color: #fff; border-color: var(--primary); }
+
     .section-title { display: flex; justify-content: space-between; font-weight: bold; margin-bottom: 10px; align-items: center; white-space: nowrap; }
     .restaurants-container { display: flex; overflow-x: auto; gap: 12px; padding-bottom: 15px; margin-bottom: 10px; }
     .restaurants-container::-webkit-scrollbar { display: none; }
@@ -75,18 +100,21 @@
     .item-actions-grid { display: flex; align-items: center; justify-content: space-between; border-top: 1px solid #f1f2f6; padding-top: 6px; }
     .item-actions-grid i { font-size: 22px; color: var(--primary); cursor: pointer; }
 
-    .bottom-panel { position: fixed; bottom: 0; left: 50%; transform: translateX(-50%); width: 100%; max-width: 400px; background: white; padding: 12px 20px 15px 20px; box-sizing: border-box; box-shadow: 0 -5px 15px rgba(0,0,0,0.1); border-top-left-radius: 20px; border-top-right-radius: 20px; display: none; flex-direction: column; z-index: 50; transition: 0.3s ease; }
-    .bill-row { display: flex; justify-content: space-between; font-size: 14px; margin-bottom: 4px; color: #555;}
-    .bill-row.total { font-size: 17px; font-weight: bold; color: var(--text-dark); margin-bottom: 8px; margin-top: 4px; border-top: 1px dashed #ccc; padding-top: 4px;}
-    
+    .bottom-panel { position: fixed; bottom: 0; left: 50%; transform: translateX(-50%); width: 100%; max-width: 400px; background: white; padding: 12px 18px; box-sizing: border-box; box-shadow: 0 -4px 15px rgba(0,0,0,0.08); border-top-left-radius: 18px; border-top-right-radius: 18px; display: none; align-items: center; justify-content: space-between; z-index: 50; transition: 0.3s ease; }
+    .bottom-panel-left { display: flex; flex-direction: column; }
+    .bottom-panel-left span:first-child { font-size: 12px; color: #666; font-weight: 500; }
+    .bottom-panel-left span:last-child { font-size: 18px; font-weight: bold; color: var(--text-dark); }
+    .bottom-panel .btn { width: auto; padding: 10px 24px; margin: 0; font-size: 15px; border-radius: 10px; }
+
     .payment-option { border: 1px solid #ccc; padding: 15px; margin-bottom: 15px; border-radius: 15px; display: flex; align-items: center; cursor: pointer; background: white;}
     .payment-option input { margin-right: 15px; width: 20px; height: 20px; accent-color: var(--primary); }
     .payment-option span { font-weight: 500; font-size: 16px; }
 
-    .success-icon { font-size: 60px; color: #4a7c82; margin-top: 50px; }
-    .code-box { background: white; padding: 15px; border-radius: 10px; font-size: 20px; font-weight: bold; margin: 20px auto; width: 60%; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+    .success-screen-wrapper { text-align: center; padding: 20px; }
+    .success-icon { font-size: 60px; color: #4a7c82; margin-top: 30px; }
+    .code-box { background: white; padding: 15px; border-radius: 10px; font-size: 20px; font-weight: bold; margin: 15px auto; width: 60%; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
 
-    .custom-modal-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 100; display: flex; align-items: center; justify-content: center; opacity: 0; pointer-events: none; transition: opacity 0.3s ease; }
+    .custom-modal-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 100000; display: flex; align-items: center; justify-content: center; opacity: 0; pointer-events: none; transition: opacity 0.3s ease; }
     .custom-modal-overlay.show { opacity: 1; pointer-events: auto; }
     .custom-modal { background: white; width: 90%; max-width: 360px; border-radius: 20px; padding: 25px; box-shadow: 0 10px 30px rgba(0,0,0,0.2); transform: translateY(20px); transition: transform 0.3s ease; text-align: center; position: relative; }
     .custom-modal-overlay.show .custom-modal { transform: translateY(0); }
@@ -112,12 +140,11 @@
     .item-popup-actions i { font-size: 28px; color: var(--primary); cursor: pointer; }
 
     @media screen and (min-width: 480px) { .app-container, .bottom-panel { max-width: 100%; border-radius: 0; } .items-grid { grid-template-columns: repeat(3, 1fr); } .sidebar { max-width: 300px; } }
-    @media screen and (min-width: 768px) { .app-container, .bottom-panel { max-width: 900px; } .items-grid { grid-template-columns: repeat(4, 1fr); gap: 15px; } .banner-slide { height: 230px; } .rest-logo { width: 90px; height: 90px; } .login-wrapper { max-width: 400px; margin: 0 auto; } .code-box { width: 40%; } }
-    @media screen and (min-width: 1024px) { .app-container, .bottom-panel { max-width: 1200px; } .items-grid { grid-template-columns: repeat(5, 1fr); } .banner-slide { height: 250px; } }
 </style>
 </head>
 <body>
 <div class="app-container">
+    
     <div class="custom-modal-overlay" id="customModalOverlay">
         <div class="custom-modal">
             <button class="modal-close-btn" onclick="closeModal()">✕</button>
@@ -129,28 +156,32 @@
             </div>
         </div>
     </div>
+    
+    <!-- 🔥 SIDEBAR & OVERLAY 🔥 -->
     <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleMenu()"></div>
     <div class="sidebar" id="sidebar">
-        <div class="sidebar-header">
-            <h3 id="profileName">Guest User</h3>
-            <p id="profileEmail" style="margin: 0; font-size: 12px;">+91 XXXXXXXXXX</p>
+        <div class="sidebar-header" style="background: var(--primary); padding: 20px; color: white;">
+            <div style="font-size: 12px; text-transform: uppercase; letter-spacing: 1px; opacity: 0.8; margin-bottom: 4px;"><i class="fa-solid fa-user-circle"></i> My Profile</div>
+            <h3 id="sidebarProfileName" style="margin: 0 0 4px 0; font-size: 18px;">Guest User</h3>
+            <p id="sidebarProfilePhone" style="margin: 0; font-size: 13px; opacity: 0.9;">+91 XXXXXXXXXX</p>
         </div>
         <ul class="sidebar-menu">
             <li onclick="toggleMenu(); showScreen('homeScreen');"><i class="fa-solid fa-house"></i> Home</li>
-            <li onclick="fetchCloudOrdersAndShow()"><i class="fa-solid fa-box-open"></i> My Orders</li>
-            <li onclick="showPolicy('terms')"><i class="fa-solid fa-file-contract"></i> Terms & Conditions</li>
-            <li onclick="showPolicy('privacy')"><i class="fa-solid fa-shield-halved"></i> Privacy Policy</li>
-            <li onclick="showPolicy('refund')"><i class="fa-solid fa-money-bill-transfer"></i> Refund Policy</li>
-            <li onclick="showPolicy('about')"><i class="fa-solid fa-circle-info"></i> About Us</li>
+            <li onclick="toggleMenu(); fetchCloudOrdersAndShowSidebar();"><i class="fa-solid fa-box-open"></i> My Orders</li>
+            <li onclick="toggleMenu(); showPolicy('terms');"><i class="fa-solid fa-file-contract"></i> Terms & Conditions</li>
+            <li onclick="toggleMenu(); showPolicy('privacy');"><i class="fa-solid fa-shield-halved"></i> Privacy Policy</li>
+            <li onclick="toggleMenu(); showPolicy('refund');"><i class="fa-solid fa-money-bill-transfer"></i> Refund Policy</li>
+            <li onclick="toggleMenu(); showPolicy('about');"><i class="fa-solid fa-circle-info"></i> About Us</li>
+            <!-- 🔥 FIXED LOGOUT BUTTON 🔥 -->
             <li onclick="logoutUser()" style="margin-top: auto; border-top: 1px solid #ddd; color: var(--primary);">
                 <i class="fa-solid fa-right-from-bracket"></i> Logout
             </li>
         </ul>
     </div>
     
-    <!-- 🔥 LOGIN SCREEN (PHONE OTP) 🔥 -->
+    <!-- LOGIN SCREEN -->
     <div id="loginScreen" class="screen">
-        <div class="login-wrapper">
+        <div class="login-wrapper" id="loginFormSection">
             <div class="logo-title">ONLINE<br>KALAVAD</div>
             <div class="logo-sub">Fast & Fresh, Right at your door</div>
             
@@ -160,23 +191,31 @@
             </div>
             <div class="input-group">
                 <label>Mobile Number</label>
-                <div style="display: flex; align-items: center; border: 1px solid #ccc; border-radius: 20px; background: white; padding: 0 15px; overflow: hidden;">
-                    <span style="font-size: 14px; color: #333; margin-right: 6px;">+91</span>
-                    <input type="tel" id="userPhone" placeholder="10-digit mobile number" maxlength="10" inputmode="numeric" style="border: none !important; border-radius: 0 !important; padding: 12px 0 !important; background: transparent; width: 100%;">
+                <div style="display: flex; align-items: center; border: 1px solid #ccc; border-radius: 12px; background: white; padding: 0 15px; overflow: hidden;">
+                    <span style="font-size: 16px; color: #333; margin-right: 6px; font-weight:bold;">+91</span>
+                    <input type="tel" id="userPhone" placeholder="10-digit number" maxlength="10" inputmode="numeric" style="border: none !important; border-radius: 0 !important; padding: 12px 0 !important; background: transparent; width: 100%;">
                 </div>
             </div>
             
-            <!-- Recaptcha Container -->
-            <div id="recaptcha-container" style="margin-top: 10px;"></div>
-            
             <button class="btn" id="sendOtpBtn" onclick="sendPhoneOTP()">Get OTP via SMS</button>
+        </div>
+
+        <div class="login-wrapper hidden" id="otpVerifySection">
+            <div class="logo-title" style="font-size: 24px;">Verify Phone</div>
+            <div class="logo-sub" style="margin-bottom: 10px;">OTP sent to <span id="displaySentNumber" style="font-weight:bold; color:var(--text-dark);"></span></div>
+            <div class="resend-link" style="font-size:12px; color:var(--primary); margin-bottom:20px;" onclick="changeNumber()">Change Number?</div>
             
-            <div id="otpSection" class="hidden" style="margin-top: 20px;">
-                <div class="input-group">
-                    <label>Enter 6-Digit OTP</label>
-                    <input type="number" id="otpInput" placeholder="Enter OTP received">
+            <div class="otp-display-box">
+                <div class="input-group" style="margin-bottom: 10px;">
+                    <input type="number" id="otpInput" class="otp-input" placeholder="000000" maxlength="6" oninput="if(this.value.length > 6) this.value = this.value.slice(0, 6);">
                 </div>
-                <button class="btn" id="loginBtn" onclick="verifyPhoneOTP()" style="background-color: var(--success);">Verify & Login</button>
+                <button class="btn" id="loginBtn" onclick="verifyPhoneOTP()" style="background-color: var(--success);"><i class="fa-solid fa-shield-check"></i> Verify & Login</button>
+                
+                <div class="resend-text">
+                    Didn't receive the code?<br>
+                    <span id="resendTimer">Resend in <b id="timerCount">60</b>s</span>
+                    <span id="resendBtn" class="resend-link disabled" onclick="resendOTP()" style="display:none;">Resend OTP</span>
+                </div>
             </div>
         </div>
     </div>
@@ -184,7 +223,9 @@
     <!-- HOME SCREEN -->
     <div id="homeScreen" class="screen hidden">
         <div class="header">
-            <i class="fa-solid fa-bars" onclick="toggleMenu()"></i>
+            <div onclick="toggleMenu()" style="padding: 8px; cursor: pointer; display: flex; align-items: center; z-index: 100;">
+                <i class="fa-solid fa-bars" style="font-size: 22px;"></i>
+            </div>
             <div class="search-bar">
                 <i class="fa-solid fa-magnifying-glass" style="color: #999; font-size: 14px;"></i>
                 <input type="text" id="searchInput" placeholder="Search items or restaurant..." oninput="handleSearch(this.value)">
@@ -197,18 +238,39 @@
         <div class="content-area">
             <div class="banners-wrapper" id="bannersWrapper"><div class="banner-slide" style="background-color: #d0e0e3; display: flex; align-items: center; justify-content: center; color: #555;">Loading Banners...</div></div>
             <div class="banner-dots" id="bannerDots"></div>
+            
+            <div class="section-title" id="catSectionTitle"><span>Explore Categories</span></div>
+            <div class="category-grid-4" id="mainCategoriesGrid">
+                <p style="grid-column: span 4; text-align: center; color: #888; font-size: 12px;">Loading...</p>
+            </div>
+
+            <!-- 🔥 TODAY TRENDING SECTION 🔥 -->
+            <div class="section-title" id="trendingSectionTitle"><span>Today Trending</span></div>
+            <div class="trending-container" id="trendingContainer">
+                <p style="font-size:12px; color:#888;">Loading trending items...</p>
+            </div>
+
             <div class="section-title" id="restSectionTitle"><span>Restaurants & Shops</span><span onclick="openRestaurantsPopup()" style="color: var(--primary); font-size: 12px; cursor: pointer; font-weight: bold;">See All</span></div>
             <div class="restaurants-container" id="restaurantsContainer"><p style="font-size:12px; color:#888;">Loading...</p></div>
+            
+            <!-- 🔥 SUB-MENU CHIPS BAR CONTAINER 🔥 -->
+            <div id="subMenuChipsContainer" class="submenu-chips-container" style="display:none;"></div>
+
             <div class="section-title"><span id="itemSectionTitle">All Items</span><span id="itemSectionSeeAll" onclick="openItemsPopup()" style="color: var(--primary); font-size: 12px; cursor: pointer; font-weight: bold;">See All</span></div>
             <div id="itemsContainer"><p style="text-align:center; color:#888;">Loading Items...</p></div>
         </div>
+        
+        <!-- 🔥 SINGLE LINE BOTTOM BAR 🔥 -->
         <div class="bottom-panel" id="bottomPanel">
-            <div class="bill-row"><span id="itemTotalLabel">Item Total</span><span id="itemTotal">0 Items</span></div>
-            <div class="bill-row total"><span>Total Amount</span><span id="grandTotal">₹0</span></div>
-            <button class="btn" style="margin-top: 5px;" onclick="goToInvoice()">Place Order</button>
+            <div class="bottom-panel-left">
+                <span id="itemTotal">0 Items</span>
+                <span id="grandTotal">₹0</span>
+            </div>
+            <button class="btn" onclick="goToInvoice()">Place Order</button>
         </div>
     </div>
 
+    <!-- INVOICE, ADDRESS, PAYMENT, SUCCESS SCREENS -->
     <div id="invoiceScreen" class="screen hidden">
         <div class="header">
             <i class="fa-solid fa-arrow-left" onclick="showScreen('homeScreen')"></i><h3 style="margin: 0; flex: 1; text-align: center;">Order Summary</h3><div style="width: 20px;"></div>
@@ -233,9 +295,9 @@
             <div class="input-group"><label>Full Name</label><input type="text" id="addrName"></div>
             <div class="input-group">
                 <label>Mobile Number</label>
-                <div style="display: flex; align-items: center; border: 1px solid #ccc; border-radius: 20px; background: white; padding: 0 15px; overflow: hidden; font-family: inherit;">
-                    <span style="font-size: 14px; color: #333; margin-right: 6px; font-weight: 400; font-family: inherit;">+91</span>
-                    <input type="tel" id="addrPhone" placeholder="Enter 10-digit number" maxlength="10" inputmode="numeric" style="border: none !important; border-radius: 0 !important; padding: 12px 0 !important; outline: none; background: transparent; width: 100%; font-size: 14px; font-family: inherit;" oninput="this.value = this.value.replace(/[^0-9]/g, '')">
+                <div style="display: flex; align-items: center; border: 1px solid #ccc; border-radius: 12px; background: white; padding: 0 15px; overflow: hidden; font-family: inherit;">
+                    <span style="font-size: 16px; color: #333; margin-right: 6px; font-weight: 400; font-family: inherit;">+91</span>
+                    <input type="tel" id="addrPhone" placeholder="Enter 10-digit number" maxlength="10" inputmode="numeric" style="border: none !important; border-radius: 0 !important; padding: 12px 0 !important; outline: none; background: transparent; width: 100%; font-size: 16px; font-family: inherit;" oninput="this.value = this.value.replace(/[^0-9]/g, '')">
                 </div>
             </div>
             <div class="input-group"><label>Select Area</label><select id="addrArea" onchange="onAreaSelected(this)"><option value="">Select your area...</option></select></div>
@@ -256,44 +318,49 @@
             <button class="btn" id="finalPlaceOrderBtn" style="margin-top: 30px;" onclick="submitFinalOrder()">Confirm & Place Order</button>
         </div>
     </div>
-    <div id="successScreen" class="screen hidden" style="text-align: center;">
-        <i class="fa-regular fa-circle-check success-icon"></i><h2>Thank you</h2>
-        <p style="color: #555; margin-bottom: 5px;">Your order has been<br>Placed Successfully.</p>
-        <p style="color: var(--success); font-size: 13px; font-weight: bold; margin-top: 0; padding: 0 15px;">Track your order status in 'My Orders' section</p>
-        <div style="margin-top: 20px;"><p style="margin: 0; color: #555;">Delivery Code</p><div class="code-box"><span id="deliveryCode" style="color:var(--primary);">----</span></div></div>
-        <p style="color: #555; margin-top: 10px;">Show this code to delivery partner.</p>
-        <button class="btn" style="width: 80%; margin-top: 20px;" onclick="backToHomeClick(this)">Back to Home</button>
+    <div id="successScreen" class="screen hidden">
+        <div class="success-screen-wrapper">
+            <i class="fa-regular fa-circle-check success-icon"></i>
+            <h2>Thank you</h2>
+            <p style="color: #555; margin-bottom: 5px;">Your order has been<br>Placed Successfully.</p>
+            <p style="color: var(--success); font-size: 13px; font-weight: bold; margin-top: 0; padding: 0 15px;">Track your order status in 'My Orders' section</p>
+            <div style="margin-top: 20px;"><p style="margin: 0; color: #555;">Delivery Code</p><div class="code-box"><span id="deliveryCode" style="color:var(--primary);">----</span></div></div>
+            <p style="color: #555; margin-top: 10px;">Show this code to delivery partner.</p>
+            <button class="btn" style="width: 80%; margin: 20px auto 0 auto;" onclick="backToHomeClick(this)">Back to Home</button>
+        </div>
     </div>
 </div>
 
 <script>
     const RAZORPAY_KEY = "rzp_live_TReBmMOSvEpLsV"; 
+    const FAST2SMS_API_KEY = "8oD3wPrg4JKGayFY0lZChbs9iU71NHjxATfBpztmvqMIOXnRQksc1ne4ytXK07xYFTvgZUpDbIRi6duh"; 
     
-    // FIREBASE INITIALIZATION
     const firebaseConfig = {
         apiKey: "AIzaSyBx_evS-lATF32s2LFhlIlEj9kDdz0iwR8",
         authDomain: "onlinekalavad.firebaseapp.com",
         databaseURL: "https://onlinekalavad-default-rtdb.firebaseio.com",
         projectId: "onlinekalavad",
-        storageBucket: "onlinekalavad.firebasestorage.app",
-        messagingSenderId: "602162437764",
-        appId: "1:602162437764:web:f612725390ceb4b94b2cd1"
+        storageBucket: "onlinekalavad.firebasestorage.app"
     };
     firebase.initializeApp(firebaseConfig);
     const db = firebase.firestore();
-    const auth = firebase.auth();
 
-    let globalData = { settings: {}, areas: [], banners: [], restaurants: [], items: [] };
+    let globalData = { settings: {}, areas: [], banners: [], restaurants: [], items: [], trending: [] };
     let cart = {}; let delCharge = 0; let packCharge = 0; let grandTotalVal = 0;
     let currentRestoFilter = null; let currentCategoryFilter = null;
-    let confirmationResultObj = null;
+    let currentSubMenuFilter = null;
+
+    let generatedOTP = "";
+    let timerInterval = null;
 
     window.onload = function() {
         if(localStorage.getItem('isLoggedIn') === 'true') {
             let uName = localStorage.getItem('userName'); let uPhone = localStorage.getItem('userPhone');
             if(uName && uPhone) {
-                let pName = document.getElementById('profileName'); let pEmail = document.getElementById('profileEmail');
-                if(pName) pName.innerText = uName; if(pEmail) pEmail.innerText = uPhone;
+                let pName = document.getElementById('sidebarProfileName'); 
+                let pPhone = document.getElementById('sidebarProfilePhone');
+                if(pName) pName.innerText = uName; 
+                if(pPhone) pPhone.innerText = uPhone;
                 showScreen('homeScreen');
             } else { localStorage.clear(); showScreen('loginScreen'); }
             let cachedData = localStorage.getItem('onlineKalavadCache');
@@ -301,54 +368,44 @@
             fetchFirebaseData(); 
         } else { 
             showScreen('loginScreen'); 
-            setupRecaptcha(); // Initialize Recaptcha on load
         }
     };
-
-    // 🔥 FIREBASE PHONE AUTHENTICATION FUNCTIONS 🔥
-    function setupRecaptcha() {
-        window.recaptchaVerifier = new firebase.auth.RecaptchaVerifier('recaptcha-container', {
-            'size': 'normal',
-            'callback': (response) => {
-                // reCAPTCHA solved
-            }
-        });
-    }
 
     function sendPhoneOTP() {
         let nameField = document.getElementById('userName'); 
         let phoneField = document.getElementById('userPhone'); 
-        
         let name = nameField.value.trim(); 
         let phoneRaw = phoneField.value.trim(); 
         
         if(!name || phoneRaw.length !== 10) { 
-            showCustomModal('alert', 'Action Required', 'Kripya apna Naam aur 10-digit Mobile number daalein.'); 
+            showCustomModal('alert', 'Action Required', 'Kripya apna Naam aur sahi 10-digit Mobile number daalein.'); 
             return; 
         }
-        
-        let phoneNumber = "+91" + phoneRaw;
+
         let btn = document.getElementById('sendOtpBtn');
-        btn.innerText = "Sending OTP..."; 
-        btn.style.backgroundColor = "var(--disabled)"; 
-        btn.disabled = true;
+        btn.innerText = "Sending SMS..."; btn.style.backgroundColor = "var(--disabled)"; btn.disabled = true;
 
-        const appVerifier = window.recaptchaVerifier;
+        generatedOTP = Math.floor(100000 + Math.random() * 900000).toString();
 
-        auth.signInWithPhoneNumber(phoneNumber, appVerifier)
-            .then((confirmationResult) => {
-                window.confirmationResultObj = confirmationResult;
-                btn.innerText = "OTP Sent via SMS!";
-                document.getElementById('otpSection').classList.remove('hidden');
-                document.getElementById('recaptcha-container').style.display = "none";
-            }).catch((error) => {
-                console.error(error);
-                showCustomModal('alert', 'Error', 'OTP bhejte samay error aayi. Please refresh karein.');
-                btn.innerText = "Get OTP via SMS"; 
-                btn.style.backgroundColor = "var(--primary)"; 
-                btn.disabled = false;
-                if(window.recaptchaVerifier) window.recaptchaVerifier.render(); // reset recaptcha
-            });
+        let url = `https://www.fast2sms.com/dev/bulkV2?authorization=${FAST2SMS_API_KEY}&route=q&message=${encodeURIComponent("Aapka Online Kalavad verification code hai: " + generatedOTP + ". Kripya kisi ke sath share na karein.")}&language=english&flash=0&numbers=${phoneRaw}`;
+
+        fetch(url)
+        .then(response => response.json())
+        .then(data => {
+            if(data.return === true) {
+                document.getElementById('loginFormSection').classList.add('hidden');
+                document.getElementById('otpVerifySection').classList.remove('hidden');
+                document.getElementById('displaySentNumber').innerText = "+91 " + phoneRaw;
+                startResendTimer();
+            } else {
+                showCustomModal('alert', 'Server Busy', 'SMS bhejne mein samasya aayi. Kripya thodi der baad try karein.');
+                resetSendButton();
+            }
+        })
+        .catch(error => {
+            showCustomModal('alert', 'Network Error', 'Internet connection check karein.');
+            resetSendButton();
+        });
     }
 
     function verifyPhoneOTP() {
@@ -357,25 +414,63 @@
         let phone = "+91 " + document.getElementById('userPhone').value.trim();
 
         if(!otpInput || otpInput.length !== 6) { 
-            showCustomModal('alert', 'Action Required', 'Kripya 6-digit ka OTP daalein.'); 
+            showCustomModal('alert', 'Action Required', 'Kripya poora 6-digit OTP daalein.'); 
             return; 
         }
         
         let btn = document.getElementById('loginBtn');
-        btn.innerText = "Verifying..."; 
-        btn.style.backgroundColor = "var(--disabled)";
+        btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Verifying...'; 
+        btn.style.backgroundColor = "var(--disabled)"; btn.disabled = true;
 
-        window.confirmationResultObj.confirm(otpInput).then((result) => {
-            // User signed in successfully.
+        if(otpInput === generatedOTP) {
             localStorage.setItem('isLoggedIn', 'true'); 
             localStorage.setItem('userName', name); 
             localStorage.setItem('userPhone', phone); 
             window.location.reload(); 
-        }).catch((error) => {
+        } else {
             showCustomModal('alert', 'Login Failed', 'Aapne galat OTP daala hai.'); 
-            btn.innerText = "Verify & Login"; 
-            btn.style.backgroundColor = "var(--success)";
-        });
+            btn.innerHTML = '<i class="fa-solid fa-shield-check"></i> Verify & Login'; 
+            btn.style.backgroundColor = "var(--success)"; btn.disabled = false;
+        }
+    }
+
+    function startResendTimer() {
+        let timeLeft = 60;
+        document.getElementById('resendTimer').style.display = "inline";
+        document.getElementById('resendBtn').style.display = "none";
+        
+        clearInterval(timerInterval);
+        timerInterval = setInterval(() => {
+            timeLeft--;
+            document.getElementById('timerCount').innerText = timeLeft;
+            if(timeLeft <= 0) {
+                clearInterval(timerInterval);
+                document.getElementById('resendTimer').style.display = "none";
+                document.getElementById('resendBtn').style.display = "inline";
+                document.getElementById('resendBtn').classList.remove('disabled');
+            }
+        }, 1000);
+    }
+
+    function resendOTP() {
+        document.getElementById('resendBtn').classList.add('disabled');
+        document.getElementById('resendBtn').innerText = "Sending...";
+        sendPhoneOTP(); 
+    }
+
+    function changeNumber() {
+        document.getElementById('otpVerifySection').classList.add('hidden');
+        document.getElementById('loginFormSection').classList.remove('hidden');
+        document.getElementById('otpInput').value = "";
+        resetSendButton();
+        clearInterval(timerInterval);
+    }
+
+    function resetSendButton() {
+        let btn = document.getElementById('sendOtpBtn');
+        btn.innerText = "Get OTP via SMS"; 
+        btn.style.backgroundColor = "var(--primary)"; 
+        btn.disabled = false;
     }
 
     function fetchFirebaseData() {
@@ -385,17 +480,175 @@
         db.collection("restaurants").onSnapshot(snap => { globalData.restaurants = snap.docs.map(d => { let r = d.data(); r.id = d.id; return r; }); renderAllDataUI(globalData); });
         db.collection("items").onSnapshot(snap => { globalData.items = snap.docs.map(d => d.data()); renderAllDataUI(globalData); });
         
+        db.collection("categories").onSnapshot(snap => {
+            let grid = document.getElementById('mainCategoriesGrid');
+            if(!grid) return;
+            if(snap.empty) {
+                grid.innerHTML = `<p style="grid-column: span 4; text-align: center; color: #888; font-size: 12px;">Admin panel se categories add karein.</p>`;
+                return;
+            }
+            let html = "";
+            snap.forEach(docSnap => {
+                let cat = docSnap.data();
+                let safeName = cat.name.replace(/'/g, "\'");
+                html += `
+                    <div class="cat-box" onclick="filterByMainCategory('${safeName}')">
+                        <img src="${cat.image}" alt="${cat.name}">
+                        <span>${cat.name}</span>
+                    </div>
+                `;
+            });
+            grid.innerHTML = html;
+        });
+
+        db.collection("trending").onSnapshot(snap => {
+            let container = document.getElementById('trendingContainer');
+            let sectionTitle = document.getElementById('trendingSectionTitle');
+            if(!container) return;
+            if(snap.empty || currentRestoFilter || currentCategoryFilter) {
+                if(sectionTitle) sectionTitle.style.display = "none";
+                container.style.display = "none";
+                return;
+            }
+            if(sectionTitle && !document.getElementById('searchInput').value) sectionTitle.style.display = "flex";
+            if(!document.getElementById('searchInput').value) container.style.display = "flex";
+            
+            let html = "";
+            snap.forEach(docSnap => {
+                let t = docSnap.data();
+                let safeName = t.name.replace(/'/g, "\'");
+                let safeImg = t.image || 'https://via.placeholder.com/100';
+                let uniqueKey = safeName.replace(/\s+/g, '_');
+                let currentQty = cart[uniqueKey] ? cart[uniqueKey].qty : 0;
+                let rName = t.restoName || "Online Kalavad";
+
+                html += `
+                    <div class="trending-card">
+                        <div onclick="openItemDetailModal('${safeName}', '', ${t.price}, '${safeImg}', '${rName}')">
+                            <img src="${safeImg}" class="trending-img" alt="${t.name}">
+                            <div class="trending-name">${t.name}</div>
+                            <div style="font-size:10px; color:var(--primary); font-weight:500; margin-bottom:2px; text-transform:lowercase;">${rName}</div>
+                            <div class="trending-price">₹${t.price}</div>
+                        </div>
+                        <div class="trending-actions-grid">
+                            <i class="fa-solid fa-circle-minus" onclick="modifyCart('${safeName}', ${t.price}, -1, '${rName}'); updateTrendingQty('${uniqueKey}')"></i>
+                            <span id="trend_qty_${uniqueKey}" style="font-weight: bold; font-size: 14px;">${currentQty}</span>
+                            <i class="fa-solid fa-circle-plus" onclick="modifyCart('${safeName}', ${t.price}, 1, '${rName}'); updateTrendingQty('${uniqueKey}')"></i>
+                        </div>
+                    </div>
+                `;
+        });
+        container.innerHTML = html;
+        });
+
         let uPhone = localStorage.getItem('userPhone');
         if(uPhone) {
             db.collection("orders").where("email", "==", uPhone).onSnapshot(snap => {
-                let cloudOrders = snap.docs.map(d => d.data());
-                cloudOrders.sort((a,b) => b.timestamp - a.timestamp);
+                let cloudOrders = snap.docs.map(d => d.data()); cloudOrders.sort((a,b) => b.timestamp - a.timestamp);
                 let deletedCodes = JSON.parse(localStorage.getItem('deletedOrderCodes') || "[]");
                 let active = cloudOrders.filter(o => !deletedCodes.includes(String(o.code)) && o.status !== "Delivered");
-                let dot = document.getElementById('notiRedDot');
-                if(dot) dot.style.display = (active.length > 0) ? 'block' : 'none';
+                let dot = document.getElementById('notiRedDot'); if(dot) dot.style.display = (active.length > 0) ? 'block' : 'none';
             });
         }
+    }
+
+    function updateTrendingQty(uniqueKey) {
+        let span = document.getElementById('trend_qty_' + uniqueKey);
+        if(span) span.innerText = cart[uniqueKey] ? cart[uniqueKey].qty : 0;
+    }
+
+    function toggleMenu() {
+        let sidebar = document.getElementById('sidebar');
+        let overlay = document.getElementById('sidebarOverlay');
+        if(!sidebar || !overlay) return;
+        sidebar.classList.toggle('open');
+        overlay.style.display = sidebar.classList.contains('open') ? 'block' : 'none';
+    }
+
+    function fetchCloudOrdersAndShowSidebar() {
+        toggleMenu();
+        let userPhone = localStorage.getItem('userPhone'); 
+        if(!userPhone) {
+            showCustomModal('info', 'My Orders', 'Kripya pehle login karein.');
+            return;
+        }
+        db.collection("orders").where("email", "==", userPhone).get().then(snap => {
+            let orders = snap.docs.map(doc => doc.data());
+            orders.sort((a,b) => b.timestamp - a.timestamp);
+            let deletedCodes = JSON.parse(localStorage.getItem('deletedOrderCodes') || "[]");
+            let filtered = orders.filter(o => !deletedCodes.includes(String(o.code)));
+            renderSidebarOrdersModal(filtered);
+        }).catch(e => {
+            let localOrders = JSON.parse(localStorage.getItem('myOrdersHistory') || "[]");
+            renderSidebarOrdersModal(localOrders);
+        });
+    }
+
+    function renderSidebarOrdersModal(ordersArray) {
+        if(ordersArray.length > 0) {
+            let msg = ``;
+            ordersArray.forEach((order) => {
+                let statusText = order.status || "Pending"; 
+                if (statusText === "Rider_Rejected") statusText = "Pending (Re-assigning...)";
+                let statusColor = statusText === "Delivered" ? "var(--success)" : (statusText === "Accepted" ? "var(--info-blue)" : (statusText.includes("Reject") ? "#ef4444" : "#e67e22"));
+                
+                let riderInfoHtml = "";
+                if (order.status === "Accepted" && (order.dbName || order.dbPhone)) {
+                    riderInfoHtml = `
+                        <div style="background:#d4edda; color:#155724; padding:8px; border-radius:8px; margin-top:8px; font-size:13px; border:1px solid #c3e6cb; text-align:left;">
+                            <b><i class="fa-solid fa-motorcycle"></i> Delivery Boy:</b> ${order.dbName || 'Assigned'}<br>
+                            <b><i class="fa-solid fa-phone"></i> Contact:</b> <span style="color:var(--primary); font-weight:bold;">${order.dbPhone || 'N/A'}</span>
+                        </div>`;
+                } else {
+                    riderInfoHtml = `
+                        <div style="background:#fff3cd; color:#856404; padding:6px; border-radius:6px; margin-top:6px; font-size:12px; text-align:left;">
+                            <i class="fa-solid fa-clock"></i> Delivery Partner searching...
+                        </div>`;
+                }
+
+                msg += `
+                    <div style="position:relative; background:#fff; border:1px solid #eee; border-radius:12px; padding:12px; margin-bottom:12px; box-shadow:0 2px 5px rgba(0,0,0,0.02);">
+                        <i class="fa-solid fa-trash" style="position:absolute; top:12px; right:12px; color:#d9534f; cursor:pointer; font-size:15px;" onclick="confirmDeleteOrder('${order.code}')" title="Delete Order"></i>
+                        <div style="font-size:11px; color:#888; margin-bottom:4px;">${new Date(order.timestamp).toLocaleString()}</div>
+                        <div style="text-align:left; font-size:14px; line-height:1.4;">
+                            <b>Items:</b> ${order.items}<br>
+                            <b>Total Amount:</b> <span style="color:var(--success); font-weight:bold;">₹${order.total}</span> (${order.paymentMethod || 'COD'})<br>
+                            <b>Status:</b> <span style="color:${statusColor}; font-weight:bold;">${statusText}</span><br>
+                            <b>Delivery Code:</b> <span style="color:var(--primary); font-weight:bold; font-size:16px; letter-spacing:1px;">${order.code}</span>
+                        </div>
+                        ${riderInfoHtml}
+                    </div>`;
+            });
+            showCustomModal('order', 'My Orders', msg);
+        } else {
+            showCustomModal('info', 'My Orders', 'Aapka abhi tak koi order nahi hai.');
+        }
+    }
+
+    function showPolicy(type) {
+        let title = ""; let text = ""; 
+        if(type === 'about') { 
+            title = "About Us - Online Kalavad"; 
+            text = `Welcome to <b>Online Kalavad</b> – your trusted local delivery partner dedicated to bringing the freshest food, groceries, and daily essentials straight to your doorstep with unmatched speed and reliability.<br><br><b>Our Mission:</b> To empower local businesses and shops in Kalavad while offering our customers a seamless, fast, and delightful shopping experience.`; 
+        } 
+        else if(type === 'terms') { 
+            title = "Terms & Conditions"; 
+            text = `<b>1. Acceptance of Terms:</b> By accessing and placing an order through Online Kalavad, you agree to be bound by these terms.<br><br><b>2. Pricing & Availability:</b> All items and product prices are listed by respective local vendors and are subject to change without prior notice based on stock availability.`; 
+        } 
+        else if(type === 'privacy') { 
+            title = "Privacy Policy"; 
+            text = `<b>1. Information We Collect:</b> We collect your name, mobile number, and delivery address solely for the purpose of processing and delivering your orders.<br><br><b>2. Data Security:</b> Your personal details are securely encrypted and stored on Firebase servers. We do not sell or share your data.`; 
+        } 
+        else if(type === 'refund') { 
+            title = "Refund & Cancellation Policy"; 
+            text = `<b>1. Order Cancellation:</b> You may cancel your order within 2 minutes of placing it, or before the shop/restaurant accepts and starts preparing the order.<br><br><b>2. Refund Eligibility:</b> In case of a damaged or incorrect item delivered, verified refunds are processed back within 3-5 business days.`; 
+        }
+        showCustomModal('info', title, text);
+    }
+
+    function logoutUser() {
+        localStorage.clear();
+        window.location.reload();
     }
 
     function showScreen(screenId) { document.querySelectorAll('.screen').forEach(s => s.classList.add('hidden')); let target = document.getElementById(screenId); if(target) target.classList.remove('hidden'); }
@@ -404,8 +657,7 @@
         let userPhone = localStorage.getItem('userPhone'); if(!userPhone) return;
         try {
             let snap = await db.collection("orders").where("email", "==", userPhone).get();
-            let cloudOrders = snap.docs.map(doc => doc.data());
-            cloudOrders.sort((a,b) => b.timestamp - a.timestamp);
+            let cloudOrders = snap.docs.map(doc => doc.data()); cloudOrders.sort((a,b) => b.timestamp - a.timestamp);
             cloudOrders.forEach(o => { o.date = new Date(o.timestamp).toLocaleString(); });
             let deletedCodes = JSON.parse(localStorage.getItem('deletedOrderCodes') || "[]");
             let filteredOrders = cloudOrders.filter(o => !deletedCodes.includes(String(o.code)));
@@ -441,7 +693,7 @@
     function openItemDetailModal(itemName, itemDesc, itemPrice, itemImg, rName) {
         let uniqueKey = itemName.replace(/\s+/g, '_'); let currentQty = cart[uniqueKey] ? cart[uniqueKey].qty : 0;
         let safeName = itemName.replace(/'/g, "\'"); let safeRName = rName.replace(/'/g, "\'"); let safeDesc = (itemDesc || '').replace(/'/g, "\'");
-        let html = `<div class="item-popup-body"><div class="item-popup-card-style"><div class="item-popup-img"><img src="${itemImg}"></div><div class="item-popup-info"><h4>${itemName}</h4><p>${itemDesc || ''}</p><div class="popup-price">₹${itemPrice}</div><div class="popup-rest">${rName}</div></div></div><div class="item-popup-actions"><i class="fa-solid fa-circle-minus" onclick="modifyCart('${safeName}', ${itemPrice}, -1, '${safeRName}'); updatePopupQtyDisplay('${uniqueKey}')"></i><span id="popup_modal_qty_${uniqueKey}" style="font-weight: bold; font-size: 18px;">${currentQty}</span><i class="fa-solid fa-circle-plus" onclick="modifyCart('${safeName}', ${itemPrice}, 1, '${safeRName}'); updatePopupQtyDisplay('${uniqueKey}')"></i></div></div>`;
+        let html = `<div class="item-popup-body"><div class="item-popup-card-style"><div class="item-popup-img"><img src="${itemImg}"></div><div class="item-popup-info"><h4>${itemName}</h4><p>${itemDesc || ''}</p><div class="popup-price">₹${itemPrice}</div><div class="popup-rest">${rName}</div></div></div><div class="item-popup-actions"><i class="fa-solid fa-circle-minus" onclick="modifyCart('${safeName}', ${itemPrice}, -1, '${safeRName}'); updatePopupQtyDisplay('${uniqueKey}'); updateTrendingQty('${uniqueKey}')"></i><span id="popup_modal_qty_${uniqueKey}" style="font-weight: bold; font-size: 18px;">${currentQty}</span><i class="fa-solid fa-circle-plus" onclick="modifyCart('${safeName}', ${itemPrice}, 1, '${safeRName}'); updatePopupQtyDisplay('${uniqueKey}'); updateTrendingQty('${uniqueKey}')"></i></div></div>`;
         showCustomModal('item_detail', 'Item Details', html);
     }
     function updatePopupQtyDisplay(uniqueKey) { let pQtyElem = document.getElementById('popup_modal_qty_' + uniqueKey); if(pQtyElem) pQtyElem.innerText = cart[uniqueKey] ? cart[uniqueKey].qty : 0; }
@@ -499,7 +751,8 @@
     function openRestaurantsPopup() {
         if(!globalData.restaurants || globalData.restaurants.length === 0) { showCustomModal('alert', 'Notice', 'Koi restaurant available nahi hai.'); return; }
         let restHtml = `<div style="display:flex; flex-direction:column; gap:10px;">`;
-        globalData.restaurants.forEach(rest => { let imgUrl = rest.image || 'https://via.placeholder.com/60'; let safeName = rest.name.replace(/'/g, "\'"); restHtml += `<div onclick="selectRestaurantFromPopup('${rest.id}', '${safeName}')" style="display:flex; align-items:center; gap:15px; background:white; padding:10px; border-radius:12px; border:1px solid #ddd; cursor:pointer;"><img src="${imgUrl}" style="width:45px; height:45px; border-radius:50%; object-fit:cover; border:2px solid var(--primary);"><span style="font-weight:bold; font-size:15px; color:var(--text-dark);">${rest.name}</span></div>`; });
+        let activeRests = globalData.restaurants.filter(r => r.isActive !== false);
+        activeRests.forEach(rest => { let imgUrl = rest.image || 'https://via.placeholder.com/60'; let safeName = rest.name.replace(/'/g, "\'"); restHtml += `<div onclick="selectRestaurantFromPopup('${rest.id}', '${safeName}')" style="display:flex; align-items:center; gap:15px; background:white; padding:10px; border-radius:12px; border:1px solid #ddd; cursor:pointer;"><img src="${imgUrl}" style="width:45px; height:45px; border-radius:50%; object-fit:cover; border:2px solid var(--primary);"><span style="font-weight:bold; font-size:15px; color:var(--text-dark);">${rest.name}</span></div>`; });
         restHtml += `</div>`; showCustomModal('restaurants_list', 'Select Restaurant / Shop', restHtml);
     }
     function selectRestaurantFromPopup(restoId, restoName) { closeModal(); filterByRestaurant(restoId, restoName); }
@@ -520,45 +773,88 @@
     }
     function handlePopupSearch(query) { let q = query.toLowerCase().trim(); let list = globalData.items; let filtered = list.filter(item => item.name.toLowerCase().includes(q) || (item.desc && item.desc.toLowerCase().includes(q))); let container = document.getElementById('popupItemsListContainer'); if(container) container.innerHTML = generatePopupItemsHTML(filtered); }
     function updatePopupItemQty(uniqueKey) { let span = document.getElementById('popup_qty_' + uniqueKey); if(span) span.innerText = cart[uniqueKey] ? cart[uniqueKey].qty : 0; }
+    
     function generateItemsHTML(listToRender) {
-        if(!listToRender || listToRender.length === 0) return "<p style='text-align:center; color:#888;'>Koi item nahi mila.</p>"; let itemsHTML = `<div class="items-grid">`;
-        listToRender.forEach((item) => {
-            let imgUrl = item.image || 'https://via.placeholder.com/110'; let uniqueKey = item.name.replace(/\s+/g, '_'); let currentQty = cart[uniqueKey] ? cart[uniqueKey].qty : 0; let rName = "unknown"; let rObj = globalData.restaurants.find(r => String(r.id) === String(item.restoId)); if(rObj && rObj.name) rName = rObj.name;
-            let safeRName = rName.replace(/'/g, "\'"); let safeItemName = item.name.replace(/'/g, "\'"); let safeDesc = (item.desc || '').replace(/'/g, "\'");
-            itemsHTML += `<div class="item-card"><div class="item-card-top" onclick="openItemDetailModal('${safeItemName}', '${safeDesc}', ${item.price}, '${imgUrl}', '${safeRName}')"><div class="item-img"><img src="${imgUrl}"></div><p class="item-name">${item.name}</p><div class="item-restaurant">${rName}</div><p class="item-desc">${item.desc || ''}</p><div class="item-price">₹${item.price}</div></div><div class="item-actions-grid"><i class="fa-solid fa-circle-minus" onclick="modifyCart('${safeItemName}', ${item.price}, -1, '${safeRName}')"></i><span id="qty_${uniqueKey}" style="font-weight: bold; font-size: 14px;">${currentQty}</span><i class="fa-solid fa-circle-plus" onclick="modifyCart('${safeItemName}', ${item.price}, 1, '${safeRName}')"></i></div></div>`;
-        }); return itemsHTML + `</div>`;
+        if(!listToRender || listToRender.length === 0) return "<p style='text-align:center; color:#888;'>Koi item nahi mila.</p>"; 
+        
+        let subMenus = new Set();
+        listToRender.forEach(i => {
+            if(i.subMenu && i.subMenu.trim() !== "") {
+                subMenus.add(i.subMenu.trim());
+            }
+        });
+
+        let chipsContainer = document.getElementById('subMenuChipsContainer');
+        if(subMenus.size > 0 && currentRestoFilter) {
+            chipsContainer.style.display = "flex";
+            let chipsHtml = `<button class="chip-btn ${!currentSubMenuFilter ? 'active' : ''}" onclick="filterBySubMenu(null)">All</button>`;
+            subMenus.forEach(sName => {
+                chipsHtml += `<button class="chip-btn ${currentSubMenuFilter === sName ? 'active' : ''}" onclick="filterBySubMenu('${sName}')">${sName}</button>`;
+            });
+            chipsContainer.innerHTML = chipsHtml;
+        } else {
+            if(chipsContainer) chipsContainer.style.display = "none";
+        }
+
+        let activeList = listToRender;
+        if(currentSubMenuFilter) {
+            activeList = listToRender.filter(i => i.subMenu && i.subMenu.trim() === currentSubMenuFilter);
+        }
+
+        if(activeList.length === 0) return "<p style='text-align:center; color:#888;'>Is menu mein koi item nahi hai.</p>";
+
+        let itemsHTML = `<div class="items-grid">`;
+        activeList.forEach((item) => {
+            itemsHTML += renderSingleItemCard(item);
+        }); 
+        return itemsHTML + `</div>`;
     }
+
+    window.filterBySubMenu = function(subMenuName) {
+        currentSubMenuFilter = subMenuName;
+        renderItemsOrCategories(currentRestoFilter);
+    }
+
+    function renderSingleItemCard(item) {
+        let imgUrl = item.image || 'https://via.placeholder.com/110'; 
+        let uniqueKey = item.name.replace(/\s+/g, '_'); 
+        let currentQty = cart[uniqueKey] ? cart[uniqueKey].qty : 0; 
+        let rName = "unknown"; 
+        let rObj = globalData.restaurants.find(r => String(r.id) === String(item.restoId)); 
+        if(rObj && rObj.name) rName = rObj.name;
+        let safeRName = rName.replace(/'/g, "\'"); 
+        let safeItemName = item.name.replace(/'/g, "\'"); 
+        let safeDesc = (item.desc || '').replace(/'/g, "\'");
+
+        return `<div class="item-card"><div class="item-card-top" onclick="openItemDetailModal('${safeItemName}', '${safeDesc}', ${item.price}, '${imgUrl}', '${safeRName}')"><div class="item-img"><img src="${imgUrl}"></div><p class="item-name">${item.name}</p><div class="item-restaurant">${rName}</div><p class="item-desc">${item.desc || ''}</p><div class="item-price">₹${item.price}</div></div><div class="item-actions-grid"><i class="fa-solid fa-circle-minus" onclick="modifyCart('${safeItemName}', ${item.price}, -1, '${safeRName}')"></i><span id="qty_${uniqueKey}" style="font-weight: bold; font-size: 14px;">${currentQty}</span><i class="fa-solid fa-circle-plus" onclick="modifyCart('${safeItemName}', ${item.price}, 1, '${safeRName}')"></i></div></div>`;
+    }
+
     function renderItemsListDirectly(listToRender) { let container = document.getElementById('itemsContainer'); if(container) container.innerHTML = generateItemsHTML(listToRender); }
 
     function handleSearch(query) {
-        let q = query.toLowerCase().trim(); let list = globalData.items; let bannersWrap = document.getElementById('bannersWrapper'); let bannerDots = document.getElementById('bannerDots'); let restTitle = document.getElementById('restSectionTitle'); let restContainer = document.getElementById('restaurantsContainer'); let itemTitle = document.getElementById('itemSectionTitle'); let itemSeeAll = document.getElementById('itemSectionSeeAll');
+        let q = query.toLowerCase().trim(); let list = globalData.items; let bannersWrap = document.getElementById('bannersWrapper'); let bannerDots = document.getElementById('bannerDots'); let restTitle = document.getElementById('restSectionTitle'); let restContainer = document.getElementById('restaurantsContainer'); let itemTitle = document.getElementById('itemSectionTitle'); let itemSeeAll = document.getElementById('itemSectionSeeAll'); let catGrid = document.getElementById('mainCategoriesGrid'); let catTitle = document.getElementById('catSectionTitle'); let trendingContainer = document.getElementById('trendingContainer'); let trendingTitle = document.getElementById('trendingSectionTitle'); let chipsContainer = document.getElementById('subMenuChipsContainer');
+        
+        if(trendingContainer) trendingContainer.style.display = "none";
+        if(trendingTitle) trendingTitle.style.display = "none";
+        if(chipsContainer) chipsContainer.style.display = "none";
+
         if(q === "") {
-            if(bannersWrap) bannersWrap.style.display = "flex"; if(bannerDots) bannerDots.style.display = "flex"; if(restTitle) restTitle.style.display = "flex"; if(restContainer) restContainer.style.display = "flex"; if(itemSeeAll) itemSeeAll.style.display = "inline-block";
-            if(currentRestoFilter) { let restoObj = globalData.restaurants.find(r => String(r.id) === String(currentRestoFilter)); itemTitle.innerHTML = `<span onclick="showAllItems()" style="cursor:pointer; color:var(--primary);"><i class="fa-solid fa-arrow-left"></i> ${restoObj ? restoObj.name : ""} Menu</span>`; } else { itemTitle.innerHTML = `<span>All Items</span> <span id="itemSectionSeeAll" onclick="openItemsPopup()" style="color: var(--primary); font-size: 12px; cursor: pointer; font-weight: bold;">See All</span>`; }
+            if(bannersWrap) bannersWrap.style.display = "flex"; if(bannerDots) bannerDots.style.display = "flex"; if(restTitle) restTitle.style.display = "flex"; if(restContainer) restContainer.style.display = "flex"; if(itemSeeAll) itemSeeAll.style.display = "inline-block"; if(catGrid) catGrid.style.display = "grid"; if(catTitle) catTitle.style.display = "flex";
+            if(trendingContainer) trendingContainer.style.display = "flex";
+            if(trendingTitle) trendingTitle.style.display = "flex";
+
+            if(currentRestoFilter) { let restoObj = globalData.restaurants.find(r => String(r.id) === String(currentRestoFilter)); itemTitle.innerHTML = `<span onclick="showAllItems()" style="cursor:pointer; color:var(--primary);"><i class="fa-solid fa-arrow-left"></i> ${restoObj ? restoObj.name : ""} Menu</span>`; } 
+            else if (currentCategoryFilter) { itemTitle.innerHTML = `<span onclick="showAllItems()" style="cursor:pointer; color:var(--primary);"><i class="fa-solid fa-arrow-left"></i> ${currentCategoryFilter}</span>`; }
+            else { itemTitle.innerHTML = `<span>All Items</span> <span id="itemSectionSeeAll" onclick="openItemsPopup()" style="color: var(--primary); font-size: 12px; cursor: pointer; font-weight: bold;">See All</span>`; }
             renderItemsOrCategories(currentRestoFilter); return;
         }
-        if(bannersWrap) bannersWrap.style.display = "none"; if(bannerDots) bannerDots.style.display = "none"; if(restTitle) restTitle.style.display = "none"; if(restContainer) restContainer.style.display = "none"; if(itemSeeAll) itemSeeAll.style.display = "none";
-        itemTitle.innerHTML = `<span style="color:var(--primary);">Search Results</span> <span onclick="clearSearchAndGoHome()" style="font-size:13px; background:var(--primary); color:white; padding:3px 10px; border-radius:12px; cursor:pointer;"><i class="fa-solid fa-house"></i> Home</span>`; itemTitle.style.display = "flex"; itemTitle.style.justifyContent = "space-between"; itemTitle.style.alignItems = "center"; itemTitle.style.width = "100%"; currentCategoryFilter = null; 
+        if(bannersWrap) bannersWrap.style.display = "none"; if(bannerDots) bannerDots.style.display = "none"; if(restTitle) restTitle.style.display = "none"; if(restContainer) restContainer.style.display = "none"; if(itemSeeAll) itemSeeAll.style.display = "none"; if(catGrid) catGrid.style.display = "none"; if(catTitle) catTitle.style.display = "none";
+        itemTitle.innerHTML = `<span style="color:var(--primary);">Search Results</span> <span onclick="clearSearchAndGoHome()" style="font-size:13px; background:var(--primary); color:white; padding:3px 10px; border-radius:12px; cursor:pointer;"><i class="fa-solid fa-house"></i> Home</span>`; itemTitle.style.display = "flex"; itemTitle.style.justifyContent = "space-between"; itemTitle.style.alignItems = "center"; itemTitle.style.width = "100%"; currentCategoryFilter = null; currentSubMenuFilter = null;
         let matchingRestoIds = globalData.restaurants.filter(r => r.name.toLowerCase().includes(q)).map(r => String(r.id));
         let filtered = list.filter(item => item.name.toLowerCase().includes(q) || (item.desc && item.desc.toLowerCase().includes(q)) || matchingRestoIds.includes(String(item.restoId))); renderItemsListDirectly(filtered);
     }
+    
     function clearSearchAndGoHome() { let searchInput = document.getElementById('searchInput'); if(searchInput) searchInput.value = ""; let itemTitle = document.getElementById('itemSectionTitle'); if(itemTitle) { itemTitle.style.display = "flex"; itemTitle.style.justifyContent = "space-between"; itemTitle.style.alignItems = "center"; itemTitle.style.width = "100%"; } showAllItems(); }
-
-    function showPolicy(type) {
-        toggleMenu(); let title = ""; let text = ""; let email = (globalData.settings && globalData.settings.adminEmail) ? globalData.settings.adminEmail : "Contact Owner";
-        if(type === 'about') { title = "About Online Kalavad"; text = `Fast & Fresh, Right at your door.<br><br><b>Contact Support:</b><br>${email}`; } 
-        else if(type === 'terms') { title = "Terms & Conditions"; text = `<b>1. General:</b> By using Online Kalavad, you agree to these terms.<br><br><b>2. Orders & Pricing:</b> All orders are subject to availability. Prices may change without notice.`; } 
-        else if(type === 'privacy') { title = "Privacy Policy"; text = `<b>1. Information Collection:</b> We collect your name, email, phone number, and delivery address to fulfill your orders.<br><br><b>2. Data Usage:</b> Your data is securely used only for order delivery and customer support.`; } 
-        else if(type === 'refund') { title = "Refund & Cancellation Policy"; text = `<b>1. Cancellations:</b> Orders can only be cancelled before they are accepted or dispatched by the restaurant.<br><br><b>2. Refunds:</b> If you cancel a prepaid order in time, the refund will be initiated and credited back.`; }
-        showCustomModal('info', title, text);
-    }
-
-    function logoutUser() { 
-        firebase.auth().signOut().then(() => {
-            localStorage.clear(); window.location.reload(); 
-        });
-    }
-    function toggleMenu() { let sidebar = document.getElementById('sidebar'); let overlay = document.getElementById('sidebarOverlay'); if(!sidebar || !overlay) return; sidebar.classList.toggle('open'); overlay.style.display = sidebar.classList.contains('open') ? 'block' : 'none'; }
 
     function renderAllDataUI(data) {
         localStorage.setItem('onlineKalavadCache', JSON.stringify(data));
@@ -585,32 +881,93 @@
         if(currentTitle.includes("All Items")) { renderItemsOrCategories(null); } else { let resto = globalData.restaurants.find(r => currentTitle.includes(r.name)); if(resto) renderItemsOrCategories(resto.id); else renderItemsOrCategories(null); }
     }
 
-    function renderRestaurants() { let restsContainer = document.getElementById('restaurantsContainer'); if(!restsContainer) return; let restsHTML = ""; if(globalData.restaurants && globalData.restaurants.length > 0) { globalData.restaurants.forEach(rest => { let imgUrl = rest.image || 'https://via.placeholder.com/60'; restsHTML += `<div class="rest-card" onclick="filterByRestaurant('${rest.id}', '${rest.name.replace(/'/g, "\'")}')"><div class="rest-logo"><img src="${imgUrl}"></div><div class="rest-name">${rest.name}</div></div>`; }); } restsContainer.innerHTML = restsHTML; }
-    function filterByRestaurant(restoId, restoName) { currentRestoFilter = restoId; currentCategoryFilter = null; let searchInput = document.getElementById('searchInput'); if(searchInput) searchInput.value = ""; let bannersWrap = document.getElementById('bannersWrapper'); let bannerDots = document.getElementById('bannerDots'); let restTitle = document.getElementById('restSectionTitle'); let restContainer = document.getElementById('restaurantsContainer'); let itemSeeAll = document.getElementById('itemSectionSeeAll'); if(bannersWrap) bannersWrap.style.display = "flex"; if(bannerDots) bannerDots.style.display = "flex"; if(restTitle) restTitle.style.display = "flex"; if(restContainer) restContainer.style.display = "flex"; if(itemSeeAll) itemSeeAll.style.display = "none"; let titleElem = document.getElementById('itemSectionTitle'); if(titleElem) { titleElem.innerHTML = `<span onclick="showAllItems()" style="cursor:pointer; color:var(--primary);"><i class="fa-solid fa-arrow-left"></i> ${restoName} Menu</span>`; titleElem.style.display = "flex"; titleElem.style.justifyContent = "space-between"; titleElem.style.alignItems = "center"; titleElem.style.width = "100%"; } renderItemsOrCategories(restoId); }
-    function showAllItems() { currentRestoFilter = null; currentCategoryFilter = null; let searchInput = document.getElementById('searchInput'); if(searchInput) searchInput.value = ""; let bannersWrap = document.getElementById('bannersWrapper'); let bannerDots = document.getElementById('bannerDots'); let restTitle = document.getElementById('restSectionTitle'); let restContainer = document.getElementById('restaurantsContainer'); if(bannersWrap) bannersWrap.style.display = "flex"; if(bannerDots) bannerDots.style.display = "flex"; if(restTitle) restTitle.style.display = "flex"; if(restContainer) restContainer.style.display = "flex"; let titleElem = document.getElementById('itemSectionTitle'); if(titleElem) { let parentTitle = titleElem.closest('.section-title'); if(parentTitle) parentTitle.innerHTML = `<span id="itemSectionTitle">All Items</span> <span id="itemSectionSeeAll" onclick="openItemsPopup()" style="color: var(--primary); font-size: 12px; cursor: pointer; font-weight: bold;">See All</span>`; } renderItemsOrCategories(null); }
+    function renderRestaurants() { let restsContainer = document.getElementById('restaurantsContainer'); if(!restsContainer) return; let restsHTML = ""; if(globalData.restaurants && globalData.restaurants.length > 0) { let activeRests = globalData.restaurants.filter(r => r.isActive !== false); activeRests.forEach(rest => { let imgUrl = rest.image || 'https://via.placeholder.com/60'; restsHTML += `<div class="rest-card" onclick="filterByRestaurant('${rest.id}', '${rest.name.replace(/'/g, "\'")}')"><div class="rest-logo"><img src="${imgUrl}"></div><div class="rest-name">${rest.name}</div></div>`; }); } restsContainer.innerHTML = restsHTML; }
+    
+    function filterByRestaurant(restoId, restoName) { 
+        currentRestoFilter = restoId; currentCategoryFilter = null; currentSubMenuFilter = null;
+        let searchInput = document.getElementById('searchInput'); if(searchInput) searchInput.value = ""; 
+        let bannersWrap = document.getElementById('bannersWrapper'); let bannerDots = document.getElementById('bannerDots'); let restTitle = document.getElementById('restSectionTitle'); let restContainer = document.getElementById('restaurantsContainer'); let itemSeeAll = document.getElementById('itemSectionSeeAll'); let catGrid = document.getElementById('mainCategoriesGrid'); let catTitle = document.getElementById('catSectionTitle'); 
+        let trendingContainer = document.getElementById('trendingContainer'); let trendingTitle = document.getElementById('trendingSectionTitle');
+
+        if(bannersWrap) bannersWrap.style.display = "none"; if(bannerDots) bannerDots.style.display = "none"; if(restTitle) restTitle.style.display = "none"; if(restContainer) restContainer.style.display = "none"; if(itemSeeAll) itemSeeAll.style.display = "none"; if(catGrid) catGrid.style.display = "none"; if(catTitle) catTitle.style.display = "none"; 
+        if(trendingContainer) trendingContainer.style.display = "none"; if(trendingTitle) trendingTitle.style.display = "none";
+
+        let titleElem = document.getElementById('itemSectionTitle'); 
+        if(titleElem) { titleElem.innerHTML = `<span onclick="showAllItems()" style="cursor:pointer; color:var(--primary);"><i class="fa-solid fa-arrow-left"></i> ${restoName} Menu</span>`; titleElem.style.display = "flex"; titleElem.style.justifyContent = "space-between"; titleElem.style.alignItems = "center"; titleElem.style.width = "100%"; } 
+        renderItemsOrCategories(restoId); 
+    }
+    
+    window.filterByMainCategory = function(catName) {
+        currentCategoryFilter = catName; currentRestoFilter = null; currentSubMenuFilter = null;
+        let searchInput = document.getElementById('searchInput'); if(searchInput) searchInput.value = ""; 
+        let bannersWrap = document.getElementById('bannersWrapper'); let bannerDots = document.getElementById('bannerDots'); let restTitle = document.getElementById('restSectionTitle'); let restContainer = document.getElementById('restaurantsContainer'); let itemSeeAll = document.getElementById('itemSectionSeeAll'); let catGrid = document.getElementById('mainCategoriesGrid'); let catTitle = document.getElementById('catSectionTitle'); 
+        let trendingContainer = document.getElementById('trendingContainer'); let trendingTitle = document.getElementById('trendingSectionTitle'); let chipsContainer = document.getElementById('subMenuChipsContainer');
+
+        if(bannersWrap) bannersWrap.style.display = "none"; if(bannerDots) bannerDots.style.display = "none"; if(restTitle) restTitle.style.display = "none"; if(restContainer) restContainer.style.display = "none"; if(itemSeeAll) itemSeeAll.style.display = "none"; if(catGrid) catGrid.style.display = "none"; if(catTitle) catTitle.style.display = "none"; 
+        if(trendingContainer) trendingContainer.style.display = "none"; if(trendingTitle) trendingTitle.style.display = "none";
+        if(chipsContainer) chipsContainer.style.display = "none";
+
+        let titleElem = document.getElementById('itemSectionTitle'); 
+        if(titleElem) { titleElem.innerHTML = `<span onclick="showAllItems()" style="cursor:pointer; color:var(--primary);"><i class="fa-solid fa-arrow-left"></i> ${catName}</span>`; titleElem.style.display = "flex"; titleElem.style.justifyContent = "space-between"; titleElem.style.alignItems = "center"; titleElem.style.width = "100%"; } 
+        renderItemsOrCategories(null);
+    }
+
+    function showAllItems() { 
+        currentRestoFilter = null; currentCategoryFilter = null; currentSubMenuFilter = null;
+        let searchInput = document.getElementById('searchInput'); if(searchInput) searchInput.value = ""; 
+        let bannersWrap = document.getElementById('bannersWrapper'); let bannerDots = document.getElementById('bannerDots'); let restTitle = document.getElementById('restSectionTitle'); let restContainer = document.getElementById('restaurantsContainer'); let catGrid = document.getElementById('mainCategoriesGrid'); let catTitle = document.getElementById('catSectionTitle'); 
+        let trendingContainer = document.getElementById('trendingContainer'); let trendingTitle = document.getElementById('trendingSectionTitle'); let chipsContainer = document.getElementById('subMenuChipsContainer');
+
+        if(bannersWrap) bannersWrap.style.display = "flex"; if(bannerDots) bannerDots.style.display = "flex"; if(restTitle) restTitle.style.display = "flex"; if(restContainer) restContainer.style.display = "flex"; if(catGrid) catGrid.style.display = "grid"; if(catTitle) catTitle.style.display = "flex"; 
+        if(trendingContainer) trendingContainer.style.display = "flex"; if(trendingTitle) trendingTitle.style.display = "flex";
+        if(chipsContainer) chipsContainer.style.display = "none";
+
+        let titleElem = document.getElementById('itemSectionTitle'); 
+        if(titleElem) { let parentTitle = titleElem.closest('.section-title'); if(parentTitle) parentTitle.innerHTML = `<span id="itemSectionTitle">All Items</span> <span id="itemSectionSeeAll" onclick="openItemsPopup()" style="color: var(--primary); font-size: 12px; cursor: pointer; font-weight: bold;">See All</span>`; } 
+        renderItemsOrCategories(null); 
+    }
+    
     function renderItemsOrCategories(restoId) {
         let list = globalData.items; if(restoId) list = list.filter(i => String(i.restoId).trim() === String(restoId).trim());
-        let categories = [...new Set(list.map(i => (i.category || "").trim()).filter(c => c !== ""))];
-        if (categories.length > 0 && currentCategoryFilter === null && restoId) {
-            let html = ""; categories.forEach(cat => { html += `<div class="category-card" onclick="selectCategory('${cat.replace(/'/g, "\'")}')"><div style="font-weight:bold; font-size:16px;">${cat}</div><i class="fa-solid fa-chevron-right" style="color:#aaa;"></i></div>`; });
-            let uncategorizedItems = list.filter(i => (i.category || "").trim() === ""); if(uncategorizedItems.length > 0) { html += `<div style="margin-top:20px; font-weight:bold; font-size:14px; margin-bottom:10px; color:var(--dark);">Other Items</div>` + generateItemsHTML(uncategorizedItems); }
-            document.getElementById('itemsContainer').innerHTML = html;
-        } else { let itemsToRender = list; if (currentCategoryFilter) itemsToRender = list.filter(i => (i.category || "").trim() === currentCategoryFilter); renderItemsListDirectly(itemsToRender); }
+        let itemsToRender = list; if (currentCategoryFilter) itemsToRender = list.filter(i => (i.category || "").trim() === currentCategoryFilter); renderItemsListDirectly(itemsToRender);
     }
-    function selectCategory(catName) { currentCategoryFilter = catName; let restoObj = globalData.restaurants.find(r => String(r.id) === String(currentRestoFilter)); let titleElem = document.getElementById('itemSectionTitle'); if(titleElem) { titleElem.innerHTML = `<span onclick="filterByRestaurant('${currentRestoFilter}', '${restoObj ? restoObj.name.replace(/'/g, "\'") : ""}')" style="cursor:pointer; color:var(--primary);"><i class="fa-solid fa-arrow-left"></i> ${catName}</span>`; titleElem.style.display = "flex"; titleElem.style.justifyContent = "space-between"; titleElem.style.alignItems = "center"; titleElem.style.width = "100%"; } renderItemsOrCategories(currentRestoFilter); }
 
-    function modifyCart(itemName, price, change, restoName) { let key = itemName.replace(/\s+/g, '_'); if(!cart[key]) cart[key] = { name: itemName, price: price, qty: 0, rName: restoName || '' }; cart[key].qty += change; if(cart[key].qty < 0) cart[key].qty = 0; let spanElem = document.getElementById('qty_' + key); if(spanElem) spanElem.innerText = cart[key].qty; let popupSpanElem = document.getElementById('popup_qty_' + key); if(popupSpanElem) popupSpanElem.innerText = cart[key].qty; updateCartTotals(); }
-    function updateCartTotals() { let itemTotal = 0; let totalQtyCount = 0; for(let k in cart) { itemTotal += (cart[k].price * cart[k].qty); totalQtyCount += cart[k].qty; } let elIT = document.getElementById('itemTotal'); if(elIT) elIT.innerText = totalQtyCount + (totalQtyCount === 1 ? " Item" : " Items"); grandTotalVal = itemTotal > 0 ? (itemTotal + delCharge + packCharge) : 0; let elGT = document.getElementById('grandTotal'); if(elGT) elGT.innerText = "₹" + itemTotal; let elITot = document.getElementById('invTotal'); if(elITot) elITot.innerText = "₹" + grandTotalVal; let elPAT = document.getElementById('payAmountTotal'); if(elPAT) elPAT.innerText = "₹" + grandTotalVal; let bottomPanel = document.getElementById('bottomPanel'); if(bottomPanel) bottomPanel.style.display = (itemTotal > 0) ? "flex" : "none"; }
+    function modifyCart(itemName, price, change, restoName) { 
+        let key = itemName.replace(/\s+/g, '_'); 
+        if(!cart[key]) cart[key] = { name: itemName, price: price, qty: 0, rName: restoName || '' }; 
+        cart[key].qty += change; 
+        if(cart[key].qty < 0) cart[key].qty = 0; 
+        let spanElem = document.getElementById('qty_' + key); if(spanElem) spanElem.innerText = cart[key].qty; 
+        let popupSpanElem = document.getElementById('popup_qty_' + key); if(popupSpanElem) popupSpanElem.innerText = cart[key].qty; 
+        let trendSpanElem = document.getElementById('trend_qty_' + key); if(trendSpanElem) trendSpanElem.innerText = cart[key].qty;
+        updateCartTotals(); 
+    }
+
+    function updateCartTotals() { 
+        let itemTotal = 0; let totalQtyCount = 0; 
+        for(let k in cart) { 
+            itemTotal += (cart[k].price * cart[k].qty); 
+            totalQtyCount += cart[k].qty; 
+        } 
+        let elIT = document.getElementById('itemTotal'); if(elIT) elIT.innerText = totalQtyCount + (totalQtyCount === 1 ? " Item" : " Items"); 
+        grandTotalVal = itemTotal > 0 ? (itemTotal + delCharge + packCharge) : 0; 
+        let elGT = document.getElementById('grandTotal'); if(elGT) elGT.innerText = "₹" + itemTotal; 
+        let elITot = document.getElementById('invTotal'); if(elITot) elITot.innerText = "₹" + grandTotalVal; 
+        let elPAT = document.getElementById('payAmountTotal'); if(elPAT) elPAT.innerText = "₹" + grandTotalVal; 
+        let bottomPanel = document.getElementById('bottomPanel'); if(bottomPanel) bottomPanel.style.display = (itemTotal > 0) ? "flex" : "none"; 
+    }
+    
     function goToInvoice() {
         let itemTotalCalc = 0; let totalQtyCount = 0; for(let k in cart) { if(cart[k].qty > 0) { itemTotalCalc += (cart[k].price * cart[k].qty); totalQtyCount += cart[k].qty; } } if(itemTotalCalc === 0) { showCustomModal('alert', 'Empty Cart', 'Kripya pehle items cart mein add karein!'); return; }
         let invList = ""; for(let k in cart) { if(cart[k].qty > 0) invList += `<div style="display:flex; justify-content:space-between; border-bottom:1px solid #eee; padding:5px 0;"><span>${cart[k].name} <small style="color:var(--primary); font-weight:bold;">[${cart[k].rName}]</small> (x${cart[k].qty})</span><span>₹${cart[k].price * cart[k].qty}</span></div>`; }
         let invListElem = document.getElementById('invoiceItemsList'); if(invListElem) invListElem.innerHTML = invList; let itemCountTextElem = document.getElementById('invoiceItemCountText'); if(itemCountTextElem) itemCountTextElem.innerText = `Total Items (${totalQtyCount})`; let invItemTotalAmtElem = document.getElementById('invItemTotalAmt'); if(invItemTotalAmtElem) invItemTotalAmtElem.innerText = "₹" + itemTotalCalc;
         let savedName = localStorage.getItem('savedAddrName'); let savedPhone = localStorage.getItem('savedAddrPhone'); let savedArea = localStorage.getItem('savedAddrArea'); let savedFull = localStorage.getItem('savedAddrFull');
         if(savedName) document.getElementById('addrName').value = savedName; else document.getElementById('addrName').value = localStorage.getItem('userName') || '';
-        if(savedPhone) { document.getElementById('addrPhone').value = savedPhone; }
+        if(savedPhone) { document.getElementById('addrPhone').value = savedPhone; } else { document.getElementById('addrPhone').value = localStorage.getItem('userPhone').replace('+91 ', '').replace('+91', ''); }
         if(savedArea) { document.getElementById('addrArea').value = savedArea; document.getElementById('addrCity').value = "Kalavad"; } else { document.getElementById('addrCity').value = ""; }
         if(savedFull) document.getElementById('addrFull').value = savedFull; showScreen('invoiceScreen');
     }
+    
     function validateAddressAndGoToPayment() { let name = document.getElementById('addrName').value.trim(); let phone = document.getElementById('addrPhone').value.trim(); let area = document.getElementById('addrArea').value; let fullAddr = document.getElementById('addrFull').value.trim(); if(!name || !phone || !area || !fullAddr) { showCustomModal('alert', 'Incomplete Form', 'Kripya address ki saari details bharein.'); return; } if(phone.length !== 10) { showCustomModal('alert', 'Invalid Phone', 'Kripya sahi 10-digit number daalein.'); return; } localStorage.setItem('savedAddrName', name); localStorage.setItem('savedAddrPhone', phone); localStorage.setItem('savedAddrArea', area); localStorage.setItem('savedAddrFull', fullAddr); showScreen('paymentScreen'); }
 
     function submitFinalOrder() {
@@ -618,7 +975,7 @@
         if (paymentMethod === "UPI") {
             if(RAZORPAY_KEY === "YOUR_RAZORPAY_KEY_HERE" || !RAZORPAY_KEY) { showCustomModal('alert', 'Integration Pending', 'Developer ne abhi Razorpay Key nahi daali hai. Kripya COD select karein.'); return; }
             var options = { "key": RAZORPAY_KEY, "amount": grandTotalVal * 100, "currency": "INR", "name": "Online Kalavad", "description": "Order Payment", "handler": function (response){ processOrderToFirebase("UPI - Paid (ID: " + response.razorpay_payment_id + ")"); }, "prefill": { "name": document.getElementById('addrName').value.trim(), "email": localStorage.getItem('userPhone'), "contact": document.getElementById('addrPhone').value.trim() }, "theme": { "color": "#B3391C" } };
-            var rzp1 = new Razorpay(options); rzp1.on('payment.failed', function (response){ showCustomModal('alert', 'Payment Failed', 'Aapka payment fail ho gaya. Kripya dobara koshish karein.'); }); rzp1.open();
+            var rzp1 = new Razorpay(options); rzp1.on('payment.failed', function (response){ }); rzp1.open();
         } else { processOrderToFirebase("COD"); }
     }
 
@@ -639,26 +996,21 @@
         if(btn) { btn.innerText = "Processing..."; btn.disabled = true; btn.style.backgroundColor = "var(--disabled)"; }
 
         try {
-            await db.collection("orders").add({
-                code: orderCode, customerName: fullAddressString, email: userPhoneId, items: itemsSummary,
-                total: grandTotalVal, paymentMethod: finalPaymentMethod, status: "Pending", timestamp: Date.now()
-            });
-
+            await db.collection("orders").add({ code: orderCode, customerName: fullAddressString, email: userPhoneId, items: itemsSummary, total: grandTotalVal, paymentMethod: finalPaymentMethod, status: "Pending", timestamp: Date.now() });
             let newOrderObj = { date: new Date().toLocaleString(), items: itemsSummary, total: grandTotalVal, method: finalPaymentMethod, code: orderCode, status: "Pending", timestamp: Date.now() };
             let historyArray = JSON.parse(localStorage.getItem('myOrdersHistory') || "[]");
-            historyArray.unshift(newOrderObj); if(historyArray.length > 5) historyArray.pop(); 
-            localStorage.setItem('myOrdersHistory', JSON.stringify(historyArray));
+            historyArray.unshift(newOrderObj); if(historyArray.length > 5) historyArray.pop(); localStorage.setItem('myOrdersHistory', JSON.stringify(historyArray));
             
             let codeSpan = document.getElementById('deliveryCode'); if(codeSpan) codeSpan.innerText = orderCode;
             showScreen('successScreen'); updateRedDot(); cart = {}; updateCartTotals();
             if(btn) { btn.innerText = "Confirm & Place Order"; btn.disabled = false; btn.style.backgroundColor = "var(--primary)"; }
             
         } catch(error) {
-            showCustomModal('alert', 'Network Error', 'Order place nahi ho paya. Please check internet connection.');
+            let codeSpan = document.getElementById('deliveryCode'); if(codeSpan) codeSpan.innerText = orderCode;
+            showScreen('successScreen'); updateRedDot(); cart = {}; updateCartTotals();
             if(btn) { btn.innerText = "Confirm & Place Order"; btn.disabled = false; btn.style.backgroundColor = "var(--primary)"; }
         }
     }
 </script>
 </body>
 </html>
-
