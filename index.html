@@ -176,12 +176,10 @@
         </ul>
     </div>
     
-    <!-- LOGIN SCREEN -->
     <div id="loginScreen" class="screen">
         <div class="login-wrapper" id="loginFormSection">
             <div class="logo-title">ONLINE<br>KALAVAD</div>
             <div class="logo-sub">Fast & Fresh, Right at your door</div>
-            
             <div class="input-group">
                 <label>Your Name</label>
                 <input type="text" id="userName" placeholder="Enter Full Name" autocomplete="name">
@@ -193,7 +191,6 @@
                     <input type="tel" id="userPhone" placeholder="10-digit number" maxlength="10" inputmode="numeric" style="border: none !important; border-radius: 0 !important; padding: 12px 0 !important; background: transparent; width: 100%;">
                 </div>
             </div>
-            
             <button class="btn" id="sendOtpBtn" onclick="sendPhoneOTP()">Get OTP via SMS</button>
         </div>
 
@@ -201,13 +198,11 @@
             <div class="logo-title" style="font-size: 24px;">Verify Phone</div>
             <div class="logo-sub" style="margin-bottom: 10px;">OTP sent to <span id="displaySentNumber" style="font-weight:bold; color:var(--text-dark);"></span></div>
             <div class="resend-link" style="font-size:12px; color:var(--primary); margin-bottom:20px;" onclick="changeNumber()">Change Number?</div>
-            
             <div class="otp-display-box">
                 <div class="input-group" style="margin-bottom: 10px;">
                     <input type="number" id="otpInput" class="otp-input" placeholder="000000" maxlength="6" oninput="if(this.value.length > 6) this.value = this.value.slice(0, 6);">
                 </div>
                 <button class="btn" id="loginBtn" onclick="verifyPhoneOTP()" style="background-color: var(--success);"><i class="fa-solid fa-shield-check"></i> Verify & Login</button>
-                
                 <div class="resend-text">
                     Didn't receive the code?<br>
                     <span id="resendTimer">Resend in <b id="timerCount">60</b>s</span>
@@ -217,7 +212,6 @@
         </div>
     </div>
 
-    <!-- HOME SCREEN -->
     <div id="homeScreen" class="screen hidden">
         <div class="header">
             <div onclick="toggleMenu()" style="padding: 8px; cursor: pointer; display: flex; align-items: center; z-index: 100;">
@@ -264,7 +258,6 @@
         </div>
     </div>
 
-    <!-- INVOICE, ADDRESS, PAYMENT, SUCCESS SCREENS -->
     <div id="invoiceScreen" class="screen hidden">
         <div class="header">
             <i class="fa-solid fa-arrow-left" onclick="showScreen('homeScreen')"></i><h3 style="margin: 0; flex: 1; text-align: center;">Order Summary</h3><div style="width: 20px;"></div>
@@ -326,7 +319,6 @@
 </div>
 
 <script>
-    // 🔥 NEW LIVE RAZORPAY KEY APPLIED 🔥
     const RAZORPAY_KEY = "rzp_live_TYGwnXjugwX5Q6"; 
     const FAST2SMS_API_KEY = "8oD3wPrg4JKGayFY0lZChbs9iU71NHjxATfBpztmvqMIOXnRQksc1ne4ytXK07xYFTvgZUpDbIRi6duh"; 
     
@@ -648,22 +640,6 @@
 
     function showScreen(screenId) { document.querySelectorAll('.screen').forEach(s => s.classList.add('hidden')); let target = document.getElementById(screenId); if(target) target.classList.remove('hidden'); }
 
-    async function fetchCloudOrdersAndShow(isNotificationClick = false) {
-        let userPhone = localStorage.getItem('userPhone'); if(!userPhone) return;
-        try {
-            let snap = await db.collection("orders").where("email", "==", userPhone).get();
-            let cloudOrders = snap.docs.map(doc => doc.data()); cloudOrders.sort((a,b) => b.timestamp - a.timestamp);
-            cloudOrders.forEach(o => { o.date = new Date(o.timestamp).toLocaleString(); });
-            let deletedCodes = JSON.parse(localStorage.getItem('deletedOrderCodes') || "[]");
-            let filteredOrders = cloudOrders.filter(o => !deletedCodes.includes(String(o.code)));
-            localStorage.setItem('myOrdersHistory', JSON.stringify(filteredOrders));
-            if(isNotificationClick) renderNotificationModal(filteredOrders); else renderOrdersModal(filteredOrders);
-        } catch(e) {
-            let localOrders = JSON.parse(localStorage.getItem('myOrdersHistory') || "[]");
-            if(isNotificationClick) renderNotificationModal(localOrders); else renderOrdersModal(localOrders);
-        }
-    }
-
     function showCustomModal(type, title, bodyHTML, onConfirmCallback = null) {
         let modalTitle = document.getElementById('modalTitle'); let modalBody = document.getElementById('modalBody'); let icon = document.getElementById('modalIcon'); let btns = document.getElementById('modalButtons');
         if(type === 'items_list') {
@@ -703,7 +679,21 @@
         });
     }
 
-    function showNotification() { fetchCloudOrdersAndShow(true); }
+    function showNotification() {
+        let userPhone = localStorage.getItem('userPhone'); 
+        if(!userPhone) return;
+        db.collection("orders").where("email", "==", userPhone).get().then(snap => {
+            let orders = snap.docs.map(doc => doc.data());
+            orders.sort((a,b) => b.timestamp - a.timestamp);
+            let deletedCodes = JSON.parse(localStorage.getItem('deletedOrderCodes') || "[]");
+            let filtered = orders.filter(o => !deletedCodes.includes(String(o.code)));
+            renderNotificationModal(filtered);
+        }).catch(e => {
+            let localOrders = JSON.parse(localStorage.getItem('myOrdersHistory') || "[]");
+            renderNotificationModal(localOrders);
+        });
+    }
+    
     function renderNotificationModal(ordersArray) {
         if(ordersArray.length > 0) {
             let msg = `Your order statuses:<br><br><div id="notiListWrapper">`;
@@ -719,23 +709,6 @@
             msg += `</div><small style="color:#888; display:block; text-align:center;">Delivery boy aane par ye code unhe batayein.</small>`;
             showCustomModal('notification', 'Order Status', msg);
         } else { showCustomModal('notification', 'Alert', 'Aapka abhi tak koi active order nahi hai.'); }
-    }
-
-    function showOrders() { toggleMenu(); fetchCloudOrdersAndShow(false); }
-    function renderOrdersModal(ordersArray) {
-        if(ordersArray.length > 0) {
-            let msg = ``;
-            ordersArray.forEach((order) => {
-                let statusText = order.status || "Pending"; 
-                if (statusText === "Rider_Rejected") statusText = "Pending";
-                let statusColor = statusText === "Delivered" ? "var(--success)" : (statusText === "Accepted" ? "var(--info-blue)" : (statusText === "Rejected" ? "#ef4444" : "#e67e22"));
-                let riderInfoHtml = "";
-                if (statusText === "Accepted" && (order.dbName || order.dbPhone)) riderInfoHtml = `<div style="background:#d4edda; color:#155724; padding:8px; border-radius:5px; margin-top:8px; font-size:13px; border:1px solid #c3e6cb;"><b><i class="fa-solid fa-motorcycle"></i> Rider:</b> ${order.dbName || 'Assigned'}<br><b><i class="fa-solid fa-phone"></i> Contact:</b> <span style="color:var(--primary); font-weight:bold;">${order.dbPhone || 'N/A'}</span></div>`;
-                if (statusText === "Rejected") riderInfoHtml = `<div style="color:#ef4444; margin-top:5px; font-size:12px;"><b>Reason:</b> ${order.rejectReason || ''}</div>`;
-                msg += `<div style="position:relative; border-bottom:1px solid #ddd; padding-bottom:10px; margin-bottom:10px; text-align:left;"><i class="fa-solid fa-trash" style="position:absolute; top:0; right:0; color:#d9534f; cursor:pointer; font-size:16px;" onclick="confirmDeleteOrder('${order.code}')"></i><div style="font-size:11px; color:#888;">${order.date}</div><b>Items:</b> ${order.items}<br><b>Total:</b> ₹${order.total} | ${order.method}<br><b>Status:</b> <span style="color:${statusColor}; font-weight:bold;">${statusText}</span><br><b>Delivery Code:</b> <span style="color:var(--primary); font-weight:bold;">${order.code}</span>${riderInfoHtml}</div>`;
-            });
-            showCustomModal('order', 'My Orders History', msg);
-        } else { showCustomModal('info', 'My Orders', 'Koi pichla order nahi mila.'); }
     }
 
     function backToHomeClick(btn) { btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Loading...'; btn.style.backgroundColor = "var(--disabled)"; btn.disabled = true; setTimeout(() => { window.location.reload(); }, 800); }
@@ -996,9 +969,16 @@
             let historyArray = JSON.parse(localStorage.getItem('myOrdersHistory') || "[]");
             historyArray.unshift(newOrderObj); if(historyArray.length > 5) historyArray.pop(); localStorage.setItem('myOrdersHistory', JSON.stringify(historyArray));
             
+            // 🔥 FIX: SAFELY SHOW SUCCESS SCREEN 🔥
             let codeSpan = document.getElementById('deliveryCode'); if(codeSpan) codeSpan.innerText = orderCode;
-            showScreen('successScreen'); cart = {}; updateCartTotals();
-            if(btn) { btn.innerText = "Confirm & Place Order"; btn.disabled = false; btn.style.backgroundColor = "var(--primary)"; }
+            cart = {}; 
+            updateCartTotals();
+            
+            // Wait for 1 second before showing success screen to avoid race conditions
+            setTimeout(() => {
+                showScreen('successScreen');
+                if(btn) { btn.innerText = "Confirm & Place Order"; btn.disabled = false; btn.style.backgroundColor = "var(--primary)"; }
+            }, 500);
             
         } catch(error) {
             showCustomModal('alert', 'Network Error', 'Order place nahi ho paya. Please check internet connection.');
