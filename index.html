@@ -319,7 +319,7 @@
 </div>
 
 <script>
-    // 🔥 NAYI RAZORPAY LIVE KEY 🔥
+    // 🔥 LIVE RAZORPAY KEY 🔥
     const RAZORPAY_KEY = "rzp_live_TYGwnXjugwX5Q6"; 
     
     const FAST2SMS_API_KEY = "8oD3wPrg4JKGayFY0lZChbs9iU71NHjxATfBpztmvqMIOXnRQksc1ne4ytXK07xYFTvgZUpDbIRi6duh"; 
@@ -335,7 +335,10 @@
     const db = firebase.firestore();
 
     let globalData = { settings: {}, areas: [], banners: [], restaurants: [], items: [], trending: [] };
-    let cart = {}; let delCharge = 0; let packCharge = 0; let grandTotalVal = 0;
+    
+    // 🔥 FIX 2: CART MEMORY 🔥
+    let cart = JSON.parse(localStorage.getItem('ok_cart')) || {}; 
+    let delCharge = 0; let packCharge = 0; let grandTotalVal = 0;
     let currentRestoFilter = null; let currentCategoryFilter = null;
     let currentSubMenuFilter = null;
 
@@ -350,6 +353,9 @@
                 let pPhone = document.getElementById('sidebarProfilePhone');
                 if(pName) pName.innerText = uName; 
                 if(pPhone) pPhone.innerText = uPhone;
+                
+                // UI update automatically agar cart me pehle se kuch ho
+                updateCartTotals(); 
                 showScreen('homeScreen');
             } else { localStorage.clear(); showScreen('loginScreen'); }
             let cachedData = localStorage.getItem('onlineKalavadCache');
@@ -578,7 +584,10 @@
             let msg = ``;
             ordersArray.forEach((order) => {
                 let statusText = order.status || "Pending"; 
+                // Agar payment pending ho
+                if (statusText === "Payment_Pending") statusText = "Pending (Payment Verification)";
                 if (statusText === "Rider_Rejected") statusText = "Pending (Re-assigning...)";
+                
                 let statusColor = statusText === "Delivered" ? "var(--success)" : (statusText === "Accepted" ? "var(--info-blue)" : (statusText.includes("Reject") ? "#ef4444" : "#e67e22"));
                 
                 let riderInfoHtml = "";
@@ -705,6 +714,7 @@
                 else if(order.status === "Accepted") statusHtml = `<div style="background:#d4edda; color:#155724; padding:8px; border-radius:5px; margin-top:5px; border:1px solid #c3e6cb;"><b style="font-size:14px;"><i class="fa-solid fa-motorcycle"></i> Order Accepted!</b><br><span style="color:#555;">Rider: ${order.dbName || 'Assigned'}</span><br><span style="color:var(--primary); font-weight:bold;"><i class="fa-solid fa-phone"></i> ${order.dbPhone || ''}</span></div>`;
                 else if(order.status === "Rider_Rejected") statusHtml = `<span style="color:#e67e22; font-weight:bold;"><i class="fa-solid fa-clock"></i> Re-assigning Rider...</span>`;
                 else if(order.status === "Rejected") statusHtml = `<div style="background:#f8d7da; color:#721c24; padding:8px; border-radius:5px; margin-top:5px;"><b style="font-size:14px;"><i class="fa-solid fa-xmark"></i> Order Rejected</b><br><span style="color:#555;">Reason: ${order.rejectReason || 'Shop busy'}</span></div>`;
+                else if(order.status === "Payment_Pending") statusHtml = `<span style="color:#f59e0b; font-weight:bold;"><i class="fa-solid fa-spinner"></i> Payment Verifying...</span>`;
                 else if(order.status === "Delivered") statusHtml = `<span style="color:var(--success); font-weight:bold;"><i class="fa-solid fa-check-circle"></i> Delivered Successfully</span>`;
                 msg += `<div style="position:relative; text-align:center; margin-bottom:15px; padding:15px 10px 10px 10px; background:#fff; border-radius:10px; box-shadow:0 2px 5px rgba(0,0,0,0.1);"><i class="fa-solid fa-trash" style="position:absolute; top:12px; right:12px; color:#d9534f; cursor:pointer; font-size:16px;" onclick="confirmDeleteOrder('${order.code}')"></i><span style="font-size:12px; color:#666;">Code:</span><span style="font-size:20px; font-weight:bold; color:var(--primary); letter-spacing:2px; margin-left:10px;">${order.code}</span><div style="margin-top:8px; font-size:13px;">${statusHtml}</div></div>`;
             });
@@ -906,10 +916,16 @@
         let key = itemName.replace(/\s+/g, '_'); 
         if(!cart[key]) cart[key] = { name: itemName, price: price, qty: 0, rName: restoName || '' }; 
         cart[key].qty += change; 
-        if(cart[key].qty < 0) cart[key].qty = 0; 
-        let spanElem = document.getElementById('qty_' + key); if(spanElem) spanElem.innerText = cart[key].qty; 
-        let popupSpanElem = document.getElementById('popup_qty_' + key); if(popupSpanElem) popupSpanElem.innerText = cart[key].qty; 
-        let trendSpanElem = document.getElementById('trend_qty_' + key); if(trendSpanElem) trendSpanElem.innerText = cart[key].qty;
+        if(cart[key].qty <= 0) {
+            delete cart[key]; 
+        }
+        
+        let spanElem = document.getElementById('qty_' + key); if(spanElem) spanElem.innerText = cart[key] ? cart[key].qty : 0; 
+        let popupSpanElem = document.getElementById('popup_qty_' + key); if(popupSpanElem) popupSpanElem.innerText = cart[key] ? cart[key].qty : 0; 
+        let trendSpanElem = document.getElementById('trend_qty_' + key); if(trendSpanElem) trendSpanElem.innerText = cart[key] ? cart[key].qty : 0;
+        
+        // 🔥 FIX 2: UPDATE CART TO MEMORY 🔥
+        localStorage.setItem('ok_cart', JSON.stringify(cart));
         updateCartTotals(); 
     }
 
@@ -940,35 +956,83 @@
     
     function validateAddressAndGoToPayment() { let name = document.getElementById('addrName').value.trim(); let phone = document.getElementById('addrPhone').value.trim(); let area = document.getElementById('addrArea').value; let fullAddr = document.getElementById('addrFull').value.trim(); if(!name || !phone || !area || !fullAddr) { showCustomModal('alert', 'Incomplete Form', 'Kripya address ki saari details bharein.'); return; } if(phone.length !== 10) { showCustomModal('alert', 'Invalid Phone', 'Kripya sahi 10-digit number daalein.'); return; } localStorage.setItem('savedAddrName', name); localStorage.setItem('savedAddrPhone', phone); localStorage.setItem('savedAddrArea', area); localStorage.setItem('savedAddrFull', fullAddr); showScreen('paymentScreen'); }
 
-    function submitFinalOrder() {
-        let checkedRadio = document.querySelector('input[name="paymentType"]:checked'); let paymentMethod = checkedRadio ? checkedRadio.value : "UPI";
+    // 🔥 FIX 1: PRE-ORDER CREATION (BULLETPROOF) 🔥
+    async function submitFinalOrder() {
+        let checkedRadio = document.querySelector('input[name="paymentType"]:checked'); 
+        let paymentMethod = checkedRadio ? checkedRadio.value : "UPI";
+        
+        let btn = document.getElementById('finalPlaceOrderBtn');
+        btn.innerText = "Opening Payment..."; btn.disabled = true;
+
         if (paymentMethod === "UPI") {
-            if(RAZORPAY_KEY === "YOUR_RAZORPAY_KEY_HERE" || !RAZORPAY_KEY) { showCustomModal('alert', 'Integration Pending', 'Developer ne abhi Razorpay Key nahi daali hai. Kripya COD select karein.'); return; }
-            var options = { 
-                "key": RAZORPAY_KEY, 
-                "amount": grandTotalVal * 100, 
-                "currency": "INR", 
-                "name": "Online Kalavad", 
-                "description": "Order Payment", 
-                "handler": function (response){ 
-                    processOrderToFirebase("Razorpay Paid (ID: " + response.razorpay_payment_id + ")"); 
-                }, 
-                "prefill": { 
-                    "name": document.getElementById('addrName').value.trim(), 
-                    "email": localStorage.getItem('userPhone').replace('+91', '').trim() + "@kalavad.com", 
-                    "contact": document.getElementById('addrPhone').value.trim() 
-                }, 
-                "theme": { "color": "#B3391C" } 
-            };
-            var rzp1 = new Razorpay(options); 
-            rzp1.on('payment.failed', function (response){ 
-                showCustomModal('alert', 'Payment Failed', 'Razorpay Error: ' + response.error.description); 
-            }); 
-            rzp1.open();
-        } else { processOrderToFirebase("COD"); }
+            
+            // PRE-SAVE ORDER IN FIREBASE
+            let orderCode = Math.floor(1000 + Math.random() * 9000).toString(); 
+            let docRef = await createOrderInFirebase("UPI (Processing)", orderCode, "Payment_Pending");
+
+            try {
+                var options = { 
+                    "key": RAZORPAY_KEY, 
+                    "amount": Math.round(grandTotalVal * 100), // 🔥 FIX 3: ROUND OFF ISSUE 🔥
+                    "currency": "INR", 
+                    "name": "Online Kalavad", 
+                    "description": "Order #" + orderCode, 
+                    "handler": async function (response) { 
+                        alert("Payment Received! Don't close the app, finalizing your order...");
+                        
+                        // UPDATE STATUS AFTER SUCCESS
+                        await db.collection("orders").doc(docRef.id).update({
+                            status: "Pending",
+                            paymentMethod: "UPI - Paid (" + response.razorpay_payment_id + ")"
+                        });
+
+                        let codeSpan = document.getElementById('deliveryCode'); if(codeSpan) codeSpan.innerText = orderCode;
+                        cart = {}; localStorage.removeItem('ok_cart'); updateCartTotals();
+                        
+                        setTimeout(() => {
+                            showScreen('successScreen');
+                            btn.innerText = "Confirm & Place Order"; btn.disabled = false;
+                        }, 500);
+                    }, 
+                    "prefill": { 
+                        "name": document.getElementById('addrName').value.trim(), 
+                        "email": "customer@onlinekalavad.com", 
+                        "contact": document.getElementById('addrPhone').value.trim() 
+                    }, 
+                    "theme": { "color": "#B3391C" } 
+                };
+                
+                var rzp1 = new Razorpay(options); 
+                rzp1.on('payment.failed', async function (response){ 
+                    alert("Payment Failed: " + response.error.description);
+                    await db.collection("orders").doc(docRef.id).update({ status: "Payment_Failed" });
+                    btn.innerText = "Confirm & Place Order"; btn.disabled = false;
+                }); 
+                
+                rzp1.on('payment.cancel', function() {
+                    btn.innerText = "Confirm & Place Order"; btn.disabled = false;
+                });
+
+                rzp1.open();
+                
+            } catch(err) {
+                alert("Razorpay Error: " + err.message);
+                btn.innerText = "Confirm & Place Order"; btn.disabled = false;
+            }
+        } else { 
+            let orderCode = Math.floor(1000 + Math.random() * 9000).toString(); 
+            await createOrderInFirebase("COD", orderCode, "Pending");
+            let codeSpan = document.getElementById('deliveryCode'); if(codeSpan) codeSpan.innerText = orderCode;
+            cart = {}; localStorage.removeItem('ok_cart'); updateCartTotals();
+            
+            setTimeout(() => {
+                showScreen('successScreen');
+                btn.innerText = "Confirm & Place Order"; btn.disabled = false;
+            }, 500);
+        }
     }
 
-    async function processOrderToFirebase(finalPaymentMethod) {
+    async function createOrderInFirebase(paymentMethodStr, orderCode, initialStatus) {
         let name = document.getElementById('addrName').value.trim(); 
         let phone = "+91 " + document.getElementById('addrPhone').value.trim(); 
         let area = document.getElementById('addrArea').value; 
@@ -979,31 +1043,27 @@
         for(let k in cart) { if(cart[k].qty > 0) itemsSummary += `${cart[k].name} [${cart[k].rName}] (x${cart[k].qty}), `; }
         
         let fullAddressString = name + " | Ph: " + phone + " | Area: " + area + " (City: Kalavad) | Addr: " + fullAddr;
-        let orderCode = Math.floor(1000 + Math.random() * 9000).toString(); 
 
-        let btn = document.getElementById('finalPlaceOrderBtn');
-        if(btn) { btn.innerText = "Processing..."; btn.disabled = true; btn.style.backgroundColor = "var(--disabled)"; }
-
-        try {
-            await db.collection("orders").add({ code: orderCode, customerName: fullAddressString, email: userPhoneId, items: itemsSummary, total: grandTotalVal, paymentMethod: finalPaymentMethod, status: "Pending", timestamp: Date.now() });
-            let newOrderObj = { date: new Date().toLocaleString(), items: itemsSummary, total: grandTotalVal, method: finalPaymentMethod, code: orderCode, status: "Pending", timestamp: Date.now() };
-            let historyArray = JSON.parse(localStorage.getItem('myOrdersHistory') || "[]");
-            historyArray.unshift(newOrderObj); if(historyArray.length > 5) historyArray.pop(); localStorage.setItem('myOrdersHistory', JSON.stringify(historyArray));
-            
-            let codeSpan = document.getElementById('deliveryCode'); if(codeSpan) codeSpan.innerText = orderCode;
-            cart = {}; 
-            updateCartTotals();
-            
-            setTimeout(() => {
-                showScreen('successScreen');
-                if(btn) { btn.innerText = "Confirm & Place Order"; btn.disabled = false; btn.style.backgroundColor = "var(--primary)"; }
-            }, 500);
-            
-        } catch(error) {
-            showCustomModal('alert', 'Network Error', 'Order place nahi ho paya. Please check internet connection.');
-            if(btn) { btn.innerText = "Confirm & Place Order"; btn.disabled = false; btn.style.backgroundColor = "var(--primary)"; }
-        }
+        let newOrder = { 
+            code: orderCode, 
+            customerName: fullAddressString, 
+            email: userPhoneId, 
+            items: itemsSummary, 
+            total: grandTotalVal, 
+            paymentMethod: paymentMethodStr, 
+            status: initialStatus, 
+            timestamp: Date.now() 
+        };
+        
+        let docRef = await db.collection("orders").add(newOrder);
+        
+        let newOrderObj = { date: new Date().toLocaleString(), items: itemsSummary, total: grandTotalVal, method: paymentMethodStr, code: orderCode, status: initialStatus, timestamp: Date.now() };
+        let historyArray = JSON.parse(localStorage.getItem('myOrdersHistory') || "[]");
+        historyArray.unshift(newOrderObj); if(historyArray.length > 5) historyArray.pop(); localStorage.setItem('myOrdersHistory', JSON.stringify(historyArray));
+        
+        return docRef;
     }
 </script>
 </body>
 </html>
+
