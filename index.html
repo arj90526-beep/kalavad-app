@@ -5,6 +5,9 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Online Kalavad</title>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<!-- Razorpay Library -->
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+<!-- Firebase Libraries -->
 <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore-compat.js"></script>
 
@@ -136,12 +139,6 @@
     .item-popup-info .popup-rest { font-size: 12px; color: var(--primary); font-weight: 500; margin-top: 2px; }
     .item-popup-actions { display: flex; align-items: center; justify-content: center; gap: 20px; margin-top: 5px; background: #f4f6f9; padding: 10px; border-radius: 25px; width: 100%; }
     .item-popup-actions i { font-size: 28px; color: var(--primary); cursor: pointer; }
-
-    /* 🔥 UPI APP ICONS STYLING 🔥 */
-    .upi-app-box { flex: 1; background: #fff; border: 1px solid #ddd; border-radius: 12px; padding: 10px 5px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); text-align: center; cursor: pointer; transition: 0.2s; }
-    .upi-app-box:active { transform: scale(0.95); border-color: var(--primary); }
-    .upi-app-box img { width: 35px; height: 35px; object-fit: contain; margin-bottom: 5px; }
-    .upi-app-box div { font-size: 11px; font-weight: 600; color: #444; }
 
     @media screen and (min-width: 480px) { .app-container, .bottom-panel { max-width: 100%; border-radius: 0; } .items-grid { grid-template-columns: repeat(3, 1fr); } .sidebar { max-width: 300px; } }
 </style>
@@ -315,7 +312,7 @@
             <i class="fa-regular fa-circle-check success-icon"></i>
             <h2>Thank you</h2>
             <p style="color: #555; margin-bottom: 5px;">Your order has been<br>Placed Successfully.</p>
-            <p style="color: var(--primary); font-size: 12px; font-weight: bold; margin-top: 5px; padding: 0 15px;" id="verifyingMsgText">Aapka payment verify ho raha hai...</p>
+            <p style="color: var(--success); font-size: 13px; font-weight: bold; margin-top: 0; padding: 0 15px;">Track your order status in 'My Orders' section</p>
             <div style="margin-top: 20px;"><p style="margin: 0; color: #555;">Delivery Code</p><div class="code-box"><span id="deliveryCode" style="color:var(--primary);">----</span></div></div>
             <p style="color: #555; margin-top: 10px;">Show this code to delivery partner.</p>
             <button class="btn" style="width: 80%; margin: 20px auto 0 auto;" onclick="backToHomeClick(this)">Back to Home</button>
@@ -324,8 +321,8 @@
 </div>
 
 <script>
-    // 🔥 AAPKA DIRECT UPI ID YAHAN DALEIN 🔥
-    const UPI_ID = "arjunsinhmahipa817053.rzp@rxairtel"; 
+    // 🔥 LIVE RAZORPAY KEY 🔥
+    const RAZORPAY_KEY = "rzp_live_TYGwnXjugwX5Q6"; 
     
     const FAST2SMS_API_KEY = "8oD3wPrg4JKGayFY0lZChbs9iU71NHjxATfBpztmvqMIOXnRQksc1ne4ytXK07xYFTvgZUpDbIRi6duh"; 
     
@@ -357,21 +354,8 @@
                 if(pName) pName.innerText = uName; 
                 if(pPhone) pPhone.innerText = uPhone;
                 
-                // 🔥 RELOAD FIX: CHECK IF RETURNING FROM UPI APP 🔥
-                let pendingUpiOrder = localStorage.getItem('pending_upi_order');
-                if (pendingUpiOrder) {
-                    // Browser remembers that customer went to pay
-                    document.getElementById('deliveryCode').innerText = pendingUpiOrder;
-                    document.getElementById('verifyingMsgText').style.display = "block";
-                    showScreen('successScreen');
-                    
-                    // Clear the memory so it doesn't happen again
-                    localStorage.removeItem('pending_upi_order');
-                    cart = {}; localStorage.removeItem('ok_cart'); updateCartTotals();
-                } else {
-                    updateCartTotals(); 
-                    showScreen('homeScreen');
-                }
+                updateCartTotals(); 
+                showScreen('homeScreen');
             } else { localStorage.clear(); showScreen('loginScreen'); }
             
             let cachedData = localStorage.getItem('onlineKalavadCache');
@@ -386,7 +370,7 @@
     function cleanUpStuckOrders() {
         let uPhone = localStorage.getItem('userPhone');
         if(!uPhone) return;
-        db.collection("orders").where("email", "==", uPhone).where("status", "==", "Payment_Verifying").get().then(snap => {
+        db.collection("orders").where("email", "==", uPhone).where("status", "==", "Payment_Pending").get().then(snap => {
             snap.forEach(docSnap => {
                 let data = docSnap.data();
                 if(Date.now() - data.timestamp > 3 * 60 * 1000) { 
@@ -614,7 +598,7 @@
             let msg = ``;
             ordersArray.forEach((order) => {
                 let statusText = order.status || "Pending"; 
-                if (statusText === "Payment_Verifying") return; // Do not show pending verifications here to avoid confusion
+                if (statusText === "Payment_Pending") statusText = "Pending (Payment Verification)";
                 if (statusText === "Rider_Rejected") statusText = "Pending (Re-assigning...)";
                 
                 let statusColor = statusText === "Delivered" ? "var(--success)" : (statusText === "Accepted" ? "var(--info-blue)" : (statusText.includes("Reject") ? "#ef4444" : "#e67e22"));
@@ -743,7 +727,7 @@
                 else if(order.status === "Accepted") statusHtml = `<div style="background:#d4edda; color:#155724; padding:8px; border-radius:5px; margin-top:5px; border:1px solid #c3e6cb;"><b style="font-size:14px;"><i class="fa-solid fa-motorcycle"></i> Order Accepted!</b><br><span style="color:#555;">Rider: ${order.dbName || 'Assigned'}</span><br><span style="color:var(--primary); font-weight:bold;"><i class="fa-solid fa-phone"></i> ${order.dbPhone || ''}</span></div>`;
                 else if(order.status === "Rider_Rejected") statusHtml = `<span style="color:#e67e22; font-weight:bold;"><i class="fa-solid fa-clock"></i> Re-assigning Rider...</span>`;
                 else if(order.status === "Rejected") statusHtml = `<div style="background:#f8d7da; color:#721c24; padding:8px; border-radius:5px; margin-top:5px;"><b style="font-size:14px;"><i class="fa-solid fa-xmark"></i> Order Rejected</b><br><span style="color:#555;">Reason: ${order.rejectReason || 'Shop busy'}</span></div>`;
-                else if(order.status === "Payment_Verifying") statusHtml = `<span style="color:#f59e0b; font-weight:bold;"><i class="fa-solid fa-spinner"></i> Verifying Payment...</span>`;
+                else if(order.status === "Payment_Pending") statusHtml = `<span style="color:#f59e0b; font-weight:bold;"><i class="fa-solid fa-spinner"></i> Payment Verifying...</span>`;
                 else if(order.status === "Delivered") statusHtml = `<span style="color:var(--success); font-weight:bold;"><i class="fa-solid fa-check-circle"></i> Delivered Successfully</span>`;
                 msg += `<div style="position:relative; text-align:center; margin-bottom:15px; padding:15px 10px 10px 10px; background:#fff; border-radius:10px; box-shadow:0 2px 5px rgba(0,0,0,0.1);"><i class="fa-solid fa-trash" style="position:absolute; top:12px; right:12px; color:#d9534f; cursor:pointer; font-size:16px;" onclick="confirmDeleteOrder('${order.code}')"></i><span style="font-size:12px; color:#666;">Code:</span><span style="font-size:20px; font-weight:bold; color:var(--primary); letter-spacing:2px; margin-left:10px;">${order.code}</span><div style="margin-top:8px; font-size:13px;">${statusHtml}</div></div>`;
             });
@@ -984,85 +968,92 @@
     
     function validateAddressAndGoToPayment() { let name = document.getElementById('addrName').value.trim(); let phone = document.getElementById('addrPhone').value.trim(); let area = document.getElementById('addrArea').value; let fullAddr = document.getElementById('addrFull').value.trim(); if(!name || !phone || !area || !fullAddr) { showCustomModal('alert', 'Incomplete Form', 'Kripya address ki saari details bharein.'); return; } if(phone.length !== 10) { showCustomModal('alert', 'Invalid Phone', 'Kripya sahi 10-digit number daalein.'); return; } localStorage.setItem('savedAddrName', name); localStorage.setItem('savedAddrPhone', phone); localStorage.setItem('savedAddrArea', area); localStorage.setItem('savedAddrFull', fullAddr); showScreen('paymentScreen'); }
 
-    // 🔥 FIX 1: PRO-LEVEL SWIGGY/ZOMATO STYLE UPI INTEGRATION 🔥
-    function submitFinalOrder() {
+    // 🔥 FINAL PROFESSIONAL RAZORPAY WITH VERCEL 🔥
+    async function submitFinalOrder() {
         let checkedRadio = document.querySelector('input[name="paymentType"]:checked'); 
         let paymentMethod = checkedRadio ? checkedRadio.value : "UPI";
         
         let btn = document.getElementById('finalPlaceOrderBtn');
+        btn.innerText = "Securing Payment..."; btn.disabled = true;
 
         if (paymentMethod === "UPI") {
-            
-            // Show Professional Swiggy-Style App Selection Modal
-            let upiHtml = `
-                <div style="text-align:left; margin-bottom:10px;">
-                    <p style="font-size:14px; color:#555;">Choose your UPI app to pay <b>₹<span id="modalUpiAmt">${grandTotalVal}</span></b></p>
-                </div>
-                <div style="display:flex; justify-content:space-between; gap:10px; margin-top:15px;">
-                    <div onclick="openUpiApp('gpay')" class="upi-app-box">
-                        <img src="https://upload.wikimedia.org/wikipedia/commons/f/f2/Google_Pay_Logo.svg">
-                        <div>GPay</div>
-                    </div>
-                    <div onclick="openUpiApp('phonepe')" class="upi-app-box">
-                        <img src="https://download.logo.wine/logo/PhonePe/PhonePe-Logo.wine.png">
-                        <div>PhonePe</div>
-                    </div>
-                    <div onclick="openUpiApp('paytm')" class="upi-app-box">
-                        <img src="https://upload.wikimedia.org/wikipedia/commons/2/24/Paytm_Logo_%28standalone%29.svg">
-                        <div>Paytm</div>
-                    </div>
-                    <div onclick="openUpiApp('bhim')" class="upi-app-box">
-                        <img src="https://upload.wikimedia.org/wikipedia/commons/e/e1/UPI-Logo-vector.svg">
-                        <div>Other</div>
-                    </div>
-                </div>
-            `;
-            showCustomModal('info', 'Pay via UPI', upiHtml);
-            
-        } else { 
-            btn.innerText = "Please Wait..."; btn.disabled = true;
-            let orderCode = Math.floor(1000 + Math.random() * 9000).toString(); 
-            createOrderInFirebase("COD", orderCode, "Pending").then(() => {
-                let codeSpan = document.getElementById('deliveryCode'); if(codeSpan) codeSpan.innerText = orderCode;
-                document.getElementById('verifyingMsgText').style.display = "none";
+            try {
+                // Step 1: VERCEL BACKEND SE ORDER ID MANGWANA
+                let response = await fetch("https://kalavad-backend.vercel.app/api/create-order", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ amount: grandTotalVal })
+                });
                 
-                cart = {}; localStorage.removeItem('ok_cart'); updateCartTotals();
-                
-                setTimeout(() => {
-                    showScreen('successScreen');
-                    btn.innerText = "Confirm & Place Order"; btn.disabled = false;
-                }, 500);
-            });
-        }
-    }
+                let orderData = await response.json();
 
-    // Handles the Click on App Icons
-    window.openUpiApp = async function(appType) {
-        document.getElementById('modalButtons').innerHTML = `<p style="color:var(--primary); font-weight:bold;"><i class="fa-solid fa-spinner fa-spin"></i> Processing Order...</p>`;
-        
-        let orderCode = Math.floor(1000 + Math.random() * 9000).toString();
-        let upiId = "arjunsinhmahipa817053.rzp@rxairtel"; 
-        
-        // SAVE ORDER AS VERIFYING
-        await createOrderInFirebase("UPI (Verifying)", orderCode, "Payment_Verifying");
-        
-        let params = `?pa=${upiId}&pn=Online%20Kalavad&tr=${orderCode}&am=${grandTotalVal}&cu=INR`;
-        let upiLink = "";
-        
-        if(appType === 'gpay') upiLink = 'tez://upi/pay' + params;
-        else if(appType === 'phonepe') upiLink = 'phonepe://pay' + params;
-        else if(appType === 'paytm') upiLink = 'paytmmp://pay' + params;
-        else upiLink = 'upi://pay' + params;
-        
-        // 🔥 MAGIC MEMORY TRICK: APP KO YAAD DILANA KI SUCCESS SCREEN DIKHANI HAI 🔥
-        localStorage.setItem('pending_upi_order', orderCode);
-        
-        closeModal();
-        
-        // Slightly delay the redirect
-        setTimeout(() => {
-            window.location.href = upiLink;
-        }, 300);
+                if (!orderData.id) {
+                    alert("Backend Error: " + (orderData.error || "Order ID nahi aayi."));
+                    btn.innerText = "Confirm & Place Order"; btn.disabled = false;
+                    return;
+                }
+
+                // Step 2: Firebase mein pre-save karna
+                let orderCode = Math.floor(1000 + Math.random() * 9000).toString(); 
+                let docRef = await createOrderInFirebase("Razorpay (Processing)", orderCode, "Payment_Pending");
+
+                // Step 3: ORIGINAL RAZORPAY POPUP KHOOLNA
+                var options = { 
+                    "key": RAZORPAY_KEY, 
+                    "amount": Math.round(grandTotalVal * 100), 
+                    "currency": "INR", 
+                    "name": "Online Kalavad", 
+                    "description": "Order #" + orderCode, 
+                    "order_id": orderData.id, 
+                    "handler": async function (rzp_response) { 
+                        try {
+                            await db.collection("orders").doc(docRef.id).update({
+                                status: "Pending",
+                                paymentMethod: "UPI - Paid (" + rzp_response.razorpay_payment_id + ")"
+                            });
+                            let codeSpan = document.getElementById('deliveryCode'); if(codeSpan) codeSpan.innerText = orderCode;
+                            cart = {}; localStorage.removeItem('ok_cart'); updateCartTotals();
+                            
+                            showScreen('successScreen');
+                            btn.innerText = "Confirm & Place Order"; btn.disabled = false;
+                        } catch(err) {
+                            alert("Payment aagayi hai, par Firebase update fail hua!");
+                        }
+                    }, 
+                    "prefill": { 
+                        "name": document.getElementById('addrName').value.trim(), 
+                        "email": "customer@onlinekalavad.com", 
+                        "contact": document.getElementById('addrPhone').value.trim() 
+                    }, 
+                    "theme": { "color": "#B3391C" } 
+                };
+                
+                var rzp1 = new Razorpay(options); 
+                rzp1.on('payment.failed', async function (err_resp){ 
+                    await db.collection("orders").doc(docRef.id).update({ status: "Rejected", rejectReason: "Payment Failed" });
+                    alert("Payment Failed: " + err_resp.error.description); 
+                    btn.innerText = "Confirm & Place Order"; btn.disabled = false;
+                }); 
+                rzp1.open();
+                
+                // Popup band karne par wapas button activate karna
+                setTimeout(() => { btn.innerText = "Confirm & Place Order"; btn.disabled = false; }, 3000);
+                
+            } catch(e) {
+                alert("Vercel Backend Issue: " + e.message);
+                btn.innerText = "Confirm & Place Order"; btn.disabled = false;
+            }
+        } else { 
+            let orderCode = Math.floor(1000 + Math.random() * 9000).toString(); 
+            await createOrderInFirebase("COD", orderCode, "Pending");
+            let codeSpan = document.getElementById('deliveryCode'); if(codeSpan) codeSpan.innerText = orderCode;
+            cart = {}; localStorage.removeItem('ok_cart'); updateCartTotals();
+            
+            setTimeout(() => {
+                showScreen('successScreen');
+                btn.innerText = "Confirm & Place Order"; btn.disabled = false;
+            }, 500);
+        }
     }
 
     async function createOrderInFirebase(paymentMethodStr, orderCode, initialStatus) {
@@ -1099,4 +1090,3 @@
 </script>
 </body>
 </html>
-
