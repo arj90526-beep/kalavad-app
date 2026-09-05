@@ -968,7 +968,7 @@
     
     function validateAddressAndGoToPayment() { let name = document.getElementById('addrName').value.trim(); let phone = document.getElementById('addrPhone').value.trim(); let area = document.getElementById('addrArea').value; let fullAddr = document.getElementById('addrFull').value.trim(); if(!name || !phone || !area || !fullAddr) { showCustomModal('alert', 'Incomplete Form', 'Kripya address ki saari details bharein.'); return; } if(phone.length !== 10) { showCustomModal('alert', 'Invalid Phone', 'Kripya sahi 10-digit number daalein.'); return; } localStorage.setItem('savedAddrName', name); localStorage.setItem('savedAddrPhone', phone); localStorage.setItem('savedAddrArea', area); localStorage.setItem('savedAddrFull', fullAddr); showScreen('paymentScreen'); }
 
-    // 🔥 FINAL PROFESSIONAL RAZORPAY WITH VERCEL 🔥
+    // 🔥 FINAL PROFESSIONAL RAZORPAY WITH VERCEL BACKEND 🔥
     async function submitFinalOrder() {
         let checkedRadio = document.querySelector('input[name="paymentType"]:checked'); 
         let paymentMethod = checkedRadio ? checkedRadio.value : "UPI";
