@@ -324,8 +324,9 @@
 </div>
 
 <script>
-    // 🔥 AAPKA DIRECT UPI ID YAHAN DALEIN 🔥
-    const UPI_ID = "arjunsinhmahipa817053.rzp@rxairtel"; 
+    // 🔥 YAHAN APNA ASLI GPAY YA PHONEPE WALA UPI ID DALEIN 🔥
+    // Udaharan: 9876543210@ybl, arjun@sbi, 8849790526@paytm
+    const UPI_ID = "aapka_asli_upi_id_yaha_dalein"; 
     
     const FAST2SMS_API_KEY = "8oD3wPrg4JKGayFY0lZChbs9iU71NHjxATfBpztmvqMIOXnRQksc1ne4ytXK07xYFTvgZUpDbIRi6duh"; 
     
@@ -601,7 +602,7 @@
             let msg = ``;
             ordersArray.forEach((order) => {
                 let statusText = order.status || "Pending"; 
-                if (statusText === "Payment_Verifying") return; // Do not show pending verifications here to avoid confusion
+                if (statusText === "Payment_Verifying") return; 
                 if (statusText === "Rider_Rejected") statusText = "Pending (Re-assigning...)";
                 
                 let statusColor = statusText === "Delivered" ? "var(--success)" : (statusText === "Accepted" ? "var(--info-blue)" : (statusText.includes("Reject") ? "#ef4444" : "#e67e22"));
@@ -852,125 +853,6 @@
     
     function clearSearchAndGoHome() { let searchInput = document.getElementById('searchInput'); if(searchInput) searchInput.value = ""; let itemTitle = document.getElementById('itemSectionTitle'); if(itemTitle) { itemTitle.style.display = "flex"; itemTitle.style.justifyContent = "space-between"; itemTitle.style.alignItems = "center"; itemTitle.style.width = "100%"; } showAllItems(); }
 
-    function renderAllDataUI(data) {
-        localStorage.setItem('onlineKalavadCache', JSON.stringify(data));
-        if(data.settings && data.settings.status && data.settings.status.toLowerCase() === 'closed') { let containerElem = document.querySelector('.app-container'); if(containerElem) containerElem.innerHTML = `<div style="padding:50px; text-align:center; margin-top:50px;"><h2 style="color:var(--primary);">Store is Closed</h2><p>${data.settings.closeMsg || 'Humein khed hai, abhi order lena band hai.'}</p></div>`; return; }
-        if(data.settings) {
-            delCharge = Number(data.settings.deliveryCharge) || 0; packCharge = Number(data.settings.packingCharge) || 0;
-            let el3 = document.getElementById('invDel'); if(el3) el3.innerText = "₹" + delCharge; let el4 = document.getElementById('invPack'); if(el4) el4.innerText = "₹" + packCharge;
-            let codWrapper = document.getElementById('codWrapper'); let upiWrapper = document.getElementById('upiWrapper'); let radioCOD = document.getElementById('radioCOD'); let radioUPI = document.getElementById('radioUPI'); let placeBtn = document.getElementById('finalPlaceOrderBtn'); let errorMsg = document.getElementById('noPaymentMsg');
-            let isCodOn = (data.settings.codStatus !== "OFF"); let isUpiOn = (data.settings.upiStatus !== "OFF");
-            if(codWrapper && radioCOD && radioUPI) { if(!isCodOn) { codWrapper.style.display = "none"; radioCOD.checked = false; radioUPI.checked = true; } else { codWrapper.style.display = "flex"; } }
-            if(upiWrapper && radioUPI && radioCOD) { if(!isUpiOn) { upiWrapper.style.display = "none"; radioUPI.checked = false; if(isCodOn) radioCOD.checked = true; } else { upiWrapper.style.display = "flex"; } }
-            if(placeBtn && errorMsg) { if(!isCodOn && !isUpiOn) { errorMsg.style.display = "block"; placeBtn.disabled = true; placeBtn.style.backgroundColor = "var(--disabled)"; } else { errorMsg.style.display = "none"; placeBtn.disabled = false; placeBtn.style.backgroundColor = "var(--primary)"; } }
-        }
-        let bannersWrapper = document.getElementById('bannersWrapper'); let bannerDots = document.getElementById('bannerDots');
-        if(bannersWrapper && data.banners && data.banners.length > 0) {
-            let bHtml = ""; let dotsHtml = "";
-            data.banners.forEach((b, index) => { if(b.link) bHtml += `<a href="${b.link}" target="_blank" class="banner-slide" style="background-image: url('${b.image}'); display:block;"></a>`; else bHtml += `<div class="banner-slide" style="background-image: url('${b.image}');"></div>`; dotsHtml += `<div class="dot ${index === 0 ? 'active' : ''}"></div>`; });
-            bannersWrapper.innerHTML = bHtml; if(bannerDots) bannerDots.innerHTML = dotsHtml;
-            if(!bannersWrapper.dataset.listenerAttached) { bannersWrapper.addEventListener('scroll', function() { let slideIndex = Math.round(bannersWrapper.scrollLeft / bannersWrapper.offsetWidth); let allDots = bannerDots.querySelectorAll('.dot'); allDots.forEach((d, idx) => { if(idx === slideIndex) d.classList.add('active'); else d.classList.remove('active'); }); }); bannersWrapper.dataset.listenerAttached = 'true'; }
-        } else if (bannersWrapper) { bannersWrapper.innerHTML = `<div class="banner-slide" style="background-color: #d0e0e3; display: flex; align-items: center; justify-content: center; color: #555;">Welcome to Kalavad</div>`; if(bannerDots) bannerDots.innerHTML = ""; }
-        let areaSelect = document.getElementById('addrArea');
-        if(areaSelect) { let oldAreaVal = areaSelect.value; areaSelect.innerHTML = '<option value="">Select your area...</option>'; if(data.areas && data.areas.length > 0) { data.areas.forEach(a => { let opt = document.createElement('option'); opt.value = a; opt.innerText = a; areaSelect.appendChild(opt); }); } areaSelect.value = oldAreaVal; }
-        renderRestaurants(); let titleElem = document.getElementById('itemSectionTitle'); let currentTitle = titleElem ? titleElem.innerText : "All Items";
-        if(currentTitle.includes("All Items")) { renderItemsOrCategories(null); } else { let resto = globalData.restaurants.find(r => currentTitle.includes(r.name)); if(resto) renderItemsOrCategories(resto.id); else renderItemsOrCategories(null); }
-    }
-
-    function renderRestaurants() { let restsContainer = document.getElementById('restaurantsContainer'); if(!restsContainer) return; let restsHTML = ""; if(globalData.restaurants && globalData.restaurants.length > 0) { let activeRests = globalData.restaurants.filter(r => r.isActive !== false); activeRests.forEach(rest => { let imgUrl = rest.image || 'https://via.placeholder.com/60'; restsHTML += `<div class="rest-card" onclick="filterByRestaurant('${rest.id}', '${rest.name.replace(/'/g, "\'")}')"><div class="rest-logo"><img src="${imgUrl}"></div><div class="rest-name">${rest.name}</div></div>`; }); } restsContainer.innerHTML = restsHTML; }
-    
-    function filterByRestaurant(restoId, restoName) { 
-        currentRestoFilter = restoId; currentCategoryFilter = null; currentSubMenuFilter = null;
-        let searchInput = document.getElementById('searchInput'); if(searchInput) searchInput.value = ""; 
-        let bannersWrap = document.getElementById('bannersWrapper'); let bannerDots = document.getElementById('bannerDots'); let restTitle = document.getElementById('restSectionTitle'); let restContainer = document.getElementById('restaurantsContainer'); let itemSeeAll = document.getElementById('itemSectionSeeAll'); let catGrid = document.getElementById('mainCategoriesGrid'); let catTitle = document.getElementById('catSectionTitle'); 
-        let trendingContainer = document.getElementById('trendingContainer'); let trendingTitle = document.getElementById('trendingSectionTitle');
-
-        if(bannersWrap) bannersWrap.style.display = "none"; if(bannerDots) bannerDots.style.display = "none"; if(restTitle) restTitle.style.display = "none"; if(restContainer) restContainer.style.display = "none"; if(itemSeeAll) itemSeeAll.style.display = "none"; if(catGrid) catGrid.style.display = "none"; if(catTitle) catTitle.style.display = "none"; 
-        if(trendingContainer) trendingContainer.style.display = "none"; if(trendingTitle) trendingTitle.style.display = "none";
-
-        let titleElem = document.getElementById('itemSectionTitle'); 
-        if(titleElem) { titleElem.innerHTML = `<span onclick="showAllItems()" style="cursor:pointer; color:var(--primary);"><i class="fa-solid fa-arrow-left"></i> ${restoName} Menu</span>`; titleElem.style.display = "flex"; titleElem.style.justifyContent = "space-between"; titleElem.style.alignItems = "center"; titleElem.style.width = "100%"; } 
-        renderItemsOrCategories(restoId); 
-    }
-    
-    window.filterByMainCategory = function(catName) {
-        currentCategoryFilter = catName; currentRestoFilter = null; currentSubMenuFilter = null;
-        let searchInput = document.getElementById('searchInput'); if(searchInput) searchInput.value = ""; 
-        let bannersWrap = document.getElementById('bannersWrapper'); let bannerDots = document.getElementById('bannerDots'); let restTitle = document.getElementById('restSectionTitle'); let restContainer = document.getElementById('restaurantsContainer'); let itemSeeAll = document.getElementById('itemSectionSeeAll'); let catGrid = document.getElementById('mainCategoriesGrid'); let catTitle = document.getElementById('catSectionTitle'); 
-        let trendingContainer = document.getElementById('trendingContainer'); let trendingTitle = document.getElementById('trendingSectionTitle'); let chipsContainer = document.getElementById('subMenuChipsContainer');
-
-        if(bannersWrap) bannersWrap.style.display = "none"; if(bannerDots) bannerDots.style.display = "none"; if(restTitle) restTitle.style.display = "none"; if(restContainer) restContainer.style.display = "none"; if(itemSeeAll) itemSeeAll.style.display = "none"; if(catGrid) catGrid.style.display = "none"; if(catTitle) catTitle.style.display = "none"; 
-        if(trendingContainer) trendingContainer.style.display = "none"; if(trendingTitle) trendingTitle.style.display = "none";
-        if(chipsContainer) chipsContainer.style.display = "none";
-
-        let titleElem = document.getElementById('itemSectionTitle'); 
-        if(titleElem) { titleElem.innerHTML = `<span onclick="showAllItems()" style="cursor:pointer; color:var(--primary);"><i class="fa-solid fa-arrow-left"></i> ${catName}</span>`; titleElem.style.display = "flex"; titleElem.style.justifyContent = "space-between"; titleElem.style.alignItems = "center"; titleElem.style.width = "100%"; } 
-        renderItemsOrCategories(null);
-    }
-
-    function showAllItems() { 
-        currentRestoFilter = null; currentCategoryFilter = null; currentSubMenuFilter = null;
-        let searchInput = document.getElementById('searchInput'); if(searchInput) searchInput.value = ""; 
-        let bannersWrap = document.getElementById('bannersWrapper'); let bannerDots = document.getElementById('bannerDots'); let restTitle = document.getElementById('restSectionTitle'); let restContainer = document.getElementById('restaurantsContainer'); let catGrid = document.getElementById('mainCategoriesGrid'); let catTitle = document.getElementById('catSectionTitle'); 
-        let trendingContainer = document.getElementById('trendingContainer'); let trendingTitle = document.getElementById('trendingSectionTitle'); let chipsContainer = document.getElementById('subMenuChipsContainer');
-
-        if(bannersWrap) bannersWrap.style.display = "flex"; if(bannerDots) bannerDots.style.display = "flex"; if(restTitle) restTitle.style.display = "flex"; if(restContainer) restContainer.style.display = "flex"; if(catGrid) catGrid.style.display = "grid"; if(catTitle) catTitle.style.display = "flex"; 
-        if(trendingContainer) trendingContainer.style.display = "flex"; if(trendingTitle) trendingTitle.style.display = "flex";
-        if(chipsContainer) chipsContainer.style.display = "none";
-
-        let titleElem = document.getElementById('itemSectionTitle'); 
-        if(titleElem) { let parentTitle = titleElem.closest('.section-title'); if(parentTitle) parentTitle.innerHTML = `<span id="itemSectionTitle">All Items</span> <span id="itemSectionSeeAll" onclick="openItemsPopup()" style="color: var(--primary); font-size: 12px; cursor: pointer; font-weight: bold;">See All</span>`; } 
-        renderItemsOrCategories(null); 
-    }
-    
-    function renderItemsOrCategories(restoId) {
-        let list = globalData.items; if(restoId) list = list.filter(i => String(i.restoId).trim() === String(restoId).trim());
-        let itemsToRender = list; if (currentCategoryFilter) itemsToRender = list.filter(i => (i.category || "").trim() === currentCategoryFilter); renderItemsListDirectly(itemsToRender);
-    }
-
-    function modifyCart(itemName, price, change, restoName) { 
-        let key = itemName.replace(/\s+/g, '_'); 
-        if(!cart[key]) cart[key] = { name: itemName, price: price, qty: 0, rName: restoName || '' }; 
-        cart[key].qty += change; 
-        if(cart[key].qty <= 0) {
-            delete cart[key]; 
-        }
-        
-        let spanElem = document.getElementById('qty_' + key); if(spanElem) spanElem.innerText = cart[key] ? cart[key].qty : 0; 
-        let popupSpanElem = document.getElementById('popup_qty_' + key); if(popupSpanElem) popupSpanElem.innerText = cart[key] ? cart[key].qty : 0; 
-        let trendSpanElem = document.getElementById('trend_qty_' + key); if(trendSpanElem) trendSpanElem.innerText = cart[key] ? cart[key].qty : 0;
-        
-        localStorage.setItem('ok_cart', JSON.stringify(cart));
-        updateCartTotals(); 
-    }
-
-    function updateCartTotals() { 
-        let itemTotal = 0; let totalQtyCount = 0; 
-        for(let k in cart) { 
-            itemTotal += (cart[k].price * cart[k].qty); 
-            totalQtyCount += cart[k].qty; 
-        } 
-        let elIT = document.getElementById('itemTotal'); if(elIT) elIT.innerText = totalQtyCount + (totalQtyCount === 1 ? " Item" : " Items"); 
-        grandTotalVal = itemTotal > 0 ? (itemTotal + delCharge + packCharge) : 0; 
-        let elGT = document.getElementById('grandTotal'); if(elGT) elGT.innerText = "₹" + itemTotal; 
-        let elITot = document.getElementById('invTotal'); if(elITot) elITot.innerText = "₹" + grandTotalVal; 
-        let elPAT = document.getElementById('payAmountTotal'); if(elPAT) elPAT.innerText = "₹" + grandTotalVal; 
-        let bottomPanel = document.getElementById('bottomPanel'); if(bottomPanel) bottomPanel.style.display = (itemTotal > 0) ? "flex" : "none"; 
-    }
-    
-    function goToInvoice() {
-        let itemTotalCalc = 0; let totalQtyCount = 0; for(let k in cart) { if(cart[k].qty > 0) { itemTotalCalc += (cart[k].price * cart[k].qty); totalQtyCount += cart[k].qty; } } if(itemTotalCalc === 0) { showCustomModal('alert', 'Empty Cart', 'Kripya pehle items cart mein add karein!'); return; }
-        let invList = ""; for(let k in cart) { if(cart[k].qty > 0) invList += `<div style="display:flex; justify-content:space-between; border-bottom:1px solid #eee; padding:5px 0;"><span>${cart[k].name} <small style="color:var(--primary); font-weight:bold;">[${cart[k].rName}]</small> (x${cart[k].qty})</span><span>₹${cart[k].price * cart[k].qty}</span></div>`; }
-        let invListElem = document.getElementById('invoiceItemsList'); if(invListElem) invListElem.innerHTML = invList; let itemCountTextElem = document.getElementById('invoiceItemCountText'); if(itemCountTextElem) itemCountTextElem.innerText = `Total Items (${totalQtyCount})`; let invItemTotalAmtElem = document.getElementById('invItemTotalAmt'); if(invItemTotalAmtElem) invItemTotalAmtElem.innerText = "₹" + itemTotalCalc;
-        let savedName = localStorage.getItem('savedAddrName'); let savedPhone = localStorage.getItem('savedAddrPhone'); let savedArea = localStorage.getItem('savedAddrArea'); let savedFull = localStorage.getItem('savedAddrFull');
-        if(savedName) document.getElementById('addrName').value = savedName; else document.getElementById('addrName').value = localStorage.getItem('userName') || '';
-        if(savedPhone) { document.getElementById('addrPhone').value = savedPhone; } else { document.getElementById('addrPhone').value = localStorage.getItem('userPhone').replace('+91 ', '').replace('+91', ''); }
-        if(savedArea) { document.getElementById('addrArea').value = savedArea; document.getElementById('addrCity').value = "Kalavad"; } else { document.getElementById('addrCity').value = ""; }
-        if(savedFull) document.getElementById('addrFull').value = savedFull; showScreen('invoiceScreen');
-    }
-    
-    function validateAddressAndGoToPayment() { let name = document.getElementById('addrName').value.trim(); let phone = document.getElementById('addrPhone').value.trim(); let area = document.getElementById('addrArea').value; let fullAddr = document.getElementById('addrFull').value.trim(); if(!name || !phone || !area || !fullAddr) { showCustomModal('alert', 'Incomplete Form', 'Kripya address ki saari details bharein.'); return; } if(phone.length !== 10) { showCustomModal('alert', 'Invalid Phone', 'Kripya sahi 10-digit number daalein.'); return; } localStorage.setItem('savedAddrName', name); localStorage.setItem('savedAddrPhone', phone); localStorage.setItem('savedAddrArea', area); localStorage.setItem('savedAddrFull', fullAddr); showScreen('paymentScreen'); }
-
     // 🔥 FIX 1: PRO-LEVEL SWIGGY/ZOMATO STYLE UPI INTEGRATION 🔥
     function submitFinalOrder() {
         let checkedRadio = document.querySelector('input[name="paymentType"]:checked'); 
@@ -980,6 +862,11 @@
 
         if (paymentMethod === "UPI") {
             
+            if(UPI_ID === "aapka_asli_upi_id_yaha_dalein") {
+                showCustomModal('alert', 'Setup Pending', 'Admin ne apna UPI ID set nahi kiya hai. Kripya COD chunein.');
+                return;
+            }
+
             // Show Professional Swiggy-Style App Selection Modal
             let upiHtml = `
                 <div style="text-align:left; margin-bottom:10px;">
@@ -1028,12 +915,12 @@
         document.getElementById('modalButtons').innerHTML = `<p style="color:var(--primary); font-weight:bold;"><i class="fa-solid fa-spinner fa-spin"></i> Processing Order...</p>`;
         
         let orderCode = Math.floor(1000 + Math.random() * 9000).toString();
-        let upiId = "arjunsinhmahipa817053.rzp@rxairtel"; 
         
         // SAVE ORDER AS VERIFYING
         await createOrderInFirebase("UPI (Verifying)", orderCode, "Payment_Verifying");
         
-        let params = `?pa=${upiId}&pn=Online%20Kalavad&tr=${orderCode}&am=${grandTotalVal}&cu=INR`;
+        // 🔥 Proper parameter formatting to prevent bank rejection 🔥
+        let params = `?pa=${UPI_ID}&pn=Online%20Kalavad&tr=${orderCode}&tn=Order_${orderCode}&am=${grandTotalVal}&cu=INR`;
         let upiLink = "";
         
         if(appType === 'gpay') upiLink = 'tez://upi/pay' + params;
@@ -1090,3 +977,4 @@
 </script>
 </body>
 </html>
+
