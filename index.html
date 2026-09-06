@@ -323,7 +323,7 @@
 </div>
 
 <script>
-    const RAZORPAY_KEY = "rzp_live_TReBmMOSvEpLsV"; 
+    const RAZORPAY_KEY = "rzp_live_TYGwnXjugwX5Q6"; 
     const FAST2SMS_API_KEY = "8oD3wPrg4JKGayFY0lZChbs9iU71NHjxATfBpztmvqMIOXnRQksc1ne4ytXK07xYFTvgZUpDbIRi6duh"; 
     
     const firebaseConfig = {
@@ -974,7 +974,6 @@
             btn.innerText = "Connecting Bank..."; btn.disabled = true; btn.style.backgroundColor = "var(--disabled)";
 
             try {
-                // Connecting to your new deployed Firebase Function
                 let response = await fetch('https://us-central1-onlinekalavad.cloudfunctions.net/createOrder', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -987,11 +986,11 @@
 
                 var options = { 
                     "key": RAZORPAY_KEY, 
-                    "amount": orderData.amount, // amount calculated securely on backend
+                    "amount": orderData.amount,
                     "currency": "INR", 
                     "name": "Online Kalavad", 
                     "description": "Order Payment", 
-                    "order_id": orderData.id, // THE CRITICAL ADDITION (Razorpay Order ID)
+                    "order_id": orderData.id, 
                     "handler": function (response){ 
                         processOrderToFirebase("UPI - Paid (ID: " + response.razorpay_payment_id + ")"); 
                     }, 
