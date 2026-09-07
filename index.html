@@ -354,7 +354,6 @@
                 if(pPhone) pPhone.innerText = uPhone;
                 showScreen('homeScreen');
                 
-                // AUTO-RECOVERY CHECK
                 checkPendingPayment();
                 
             } else { localStorage.clear(); showScreen('loginScreen'); }
@@ -366,12 +365,10 @@
         }
     };
 
-    // YEH FUNCTION PAGE RELOAD PAR BANK SE PAYMENT CHECK KAREGA
     async function checkPendingPayment() {
         let pending = localStorage.getItem('pendingRzpOrder');
         if(pending) {
             let pData = JSON.parse(pending);
-            // Agar pichle 15 minute mein order hua tha tabhi check karo
             if(Date.now() - pData.timestamp < 15 * 60 * 1000) {
                 
                 let overlay = document.createElement('div');
@@ -380,7 +377,7 @@
                 document.body.appendChild(overlay);
 
                 try {
-                    let response = await fetch('https://us-central1-onlinekalavad.cloudfunctions.net/verifyPayment', {
+                    let response = await fetch('https://verifypayment-ct45kue4ka-uc.a.run.app', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({ orderId: pData.orderId })
@@ -1028,7 +1025,7 @@
             btn.innerText = "Connecting Bank..."; btn.disabled = true; btn.style.backgroundColor = "var(--disabled)";
 
             try {
-                let response = await fetch('https://us-central1-onlinekalavad.cloudfunctions.net/createOrder', {
+                let response = await fetch('https://createorder-ct45kue4ka-uc.a.run.app', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ amount: grandTotalVal })
@@ -1038,7 +1035,6 @@
                 
                 if (orderData.error) throw new Error(orderData.error);
 
-                // YAHAN HUM STATE SAVE KAR RAHE HAIN TAKI BROWSER KILL HONE PAR BHI DATA RAHE
                 localStorage.setItem('pendingRzpOrder', JSON.stringify({
                     cart: cart,
                     grandTotalVal: grandTotalVal,
@@ -1058,7 +1054,6 @@
                     "description": "Order Payment", 
                     "order_id": orderData.id, 
                     "handler": function (response){ 
-                        // Agar browser kill NAHI hua, toh normal tarike se yahan clear karke aage badhenge
                         localStorage.removeItem('pendingRzpOrder');
                         processOrderToFirebase("UPI - Paid (ID: " + response.razorpay_payment_id + ")"); 
                     }, 
