@@ -324,6 +324,8 @@
 
 <script>
     const RAZORPAY_KEY = "rzp_live_TYGwnXjugwX5Q6"; 
+    const CREATE_ORDER_URL = "https://us-central1-onlinekalavad.cloudfunctions.net/createOrder";
+    const SEND_OTP_URL = "https://us-central1-onlinekalavad.cloudfunctions.net/sendOtpSecure";
     
     const firebaseConfig = {
         apiKey: "AIzaSyBx_evS-lATF32s2LFhlIlEj9kDdz0iwR8",
@@ -428,8 +430,7 @@
 
         generatedOTP = Math.floor(100000 + Math.random() * 900000).toString();
 
-        // सुरक्षित रूप से नए Cloud Function URL को कॉल किया जा रहा है
-        fetch('https://us-central1-onlinekalavad.cloudfunctions.net/sendOtpSecure', {
+        fetch(SEND_OTP_URL, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ phone: phoneRaw, otp: generatedOTP })
@@ -1028,7 +1029,7 @@
             btn.innerText = "Connecting Bank..."; btn.disabled = true; btn.style.backgroundColor = "var(--disabled)";
 
             try {
-                let response = await fetch('https://createorder-ct45kue4ka-uc.a.run.app', {
+                let response = await fetch(CREATE_ORDER_URL, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ amount: grandTotalVal })
