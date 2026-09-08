@@ -324,7 +324,6 @@
 
 <script>
     const RAZORPAY_KEY = "rzp_live_TYGwnXjugwX5Q6"; 
-    const FAST2SMS_API_KEY = "8oD3wPrg4JKGayFY0lZChbs9iU71NHjxATfBpztmvqMIOXnRQksc1ne4ytXK07xYFTvgZUpDbIRi6duh"; 
     
     const firebaseConfig = {
         apiKey: "AIzaSyBx_evS-lATF32s2LFhlIlEj9kDdz0iwR8",
@@ -429,12 +428,15 @@
 
         generatedOTP = Math.floor(100000 + Math.random() * 900000).toString();
 
-        let url = `https://www.fast2sms.com/dev/bulkV2?authorization=${FAST2SMS_API_KEY}&route=q&message=${encodeURIComponent("Aapka Online Kalavad verification code hai: " + generatedOTP + ". Kripya kisi ke sath share na karein.")}&language=english&flash=0&numbers=${phoneRaw}`;
-
-        fetch(url)
+        // सुरक्षित रूप से नए Cloud Function URL को कॉल किया जा रहा है
+        fetch('https://us-central1-onlinekalavad.cloudfunctions.net/sendOtpSecure', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ phone: phoneRaw, otp: generatedOTP })
+        })
         .then(response => response.json())
-        .then(data => {
-            if(data.return === true) {
+        .then(result => {
+            if(result.success) {
                 document.getElementById('loginFormSection').classList.add('hidden');
                 document.getElementById('otpVerifySection').classList.remove('hidden');
                 document.getElementById('displaySentNumber').innerText = "+91 " + phoneRaw;
@@ -444,7 +446,8 @@
                 resetSendButton();
             }
         })
-        .catch(error => {
+        .catch((error) => {
+            console.error(error);
             showCustomModal('alert', 'Network Error', 'Internet connection check karein.');
             resetSendButton();
         });
