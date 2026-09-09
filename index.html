@@ -194,6 +194,9 @@
                 </div>
             </div>
             
+            <!-- Visible Recaptcha added for better mobile support if needed by Firebase -->
+            <div id="recaptcha-container" style="margin: 10px 0;"></div>
+            
             <button class="btn" id="sendOtpBtn" onclick="sendPhoneOTP()">Get OTP via SMS</button>
         </div>
 
@@ -344,7 +347,7 @@
     let timerInterval = null;
 
     window.onload = function() {
-        window.recaptchaVerifier = new firebase.auth.RecaptchaVerifier('sendOtpBtn', { 'size': 'invisible' });
+        window.recaptchaVerifier = new firebase.auth.RecaptchaVerifier('recaptcha-container', { 'size': 'normal' });
 
         if(localStorage.getItem('isLoggedIn') === 'true') {
             let uName = localStorage.getItem('userName'); let uPhone = localStorage.getItem('userPhone');
@@ -392,7 +395,8 @@
         })
         .catch((error) => {
             console.error(error);
-            showCustomModal('alert', 'Error', 'OTP bhejne mein samasya aayi. Page refresh karein.');
+            // 🔥 YAHAN REAL FIREBASE ERROR DIKHEGA 🔥
+            showCustomModal('alert', 'Firebase Auth Error', error.message);
             resetSendButton();
             if(window.recaptchaVerifier) window.recaptchaVerifier.render().then(widgetId => grecaptcha.reset(widgetId));
         });
