@@ -8,6 +8,7 @@
 <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-auth-compat.js"></script>
 
 <style>
     :root { --primary: #B3391C; --success: #28a745; --info-blue: #007bff; --disabled: #888888; --bg-color: #f4f6f9; --text-dark: #333; --white: #fff; }
@@ -324,7 +325,6 @@
 
 <script>
     const RAZORPAY_KEY = "rzp_live_TYGwnXjugwX5Q6"; 
-    const FAST2SMS_API_KEY = "8oD3wPrg4JKGayFY0lZChbs9iU71NHjxATfBpztmvqMIOXnRQksc1ne4ytXK07xYFTvgZUpDbIRi6duh"; 
     
     const firebaseConfig = {
         apiKey: "AIzaSyBx_evS-lATF32s2LFhlIlEj9kDdz0iwR8",
@@ -341,10 +341,11 @@
     let currentRestoFilter = null; let currentCategoryFilter = null;
     let currentSubMenuFilter = null;
 
-    let generatedOTP = "";
     let timerInterval = null;
 
     window.onload = function() {
+        window.recaptchaVerifier = new firebase.auth.RecaptchaVerifier('sendOtpBtn', { 'size': 'invisible' });
+
         if(localStorage.getItem('isLoggedIn') === 'true') {
             let uName = localStorage.getItem('userName'); let uPhone = localStorage.getItem('userPhone');
             if(uName && uPhone) {
@@ -364,6 +365,103 @@
             showScreen('loginScreen'); 
         }
     };
+
+    function sendPhoneOTP() {
+        let nameField = document.getElementById('userName'); 
+        let phoneField = document.getElementById('userPhone'); 
+        let name = nameField.value.trim(); 
+        let phoneRaw = phoneField.value.trim(); 
+        
+        if(!name || phoneRaw.length !== 10) { 
+            showCustomModal('alert', 'Action Required', 'Kripya apna Naam aur sahi 10-digit Mobile number daalein.'); 
+            return; 
+        }
+
+        let btn = document.getElementById('sendOtpBtn');
+        btn.innerText = "Sending OTP..."; btn.style.backgroundColor = "var(--disabled)"; btn.disabled = true;
+
+        let phoneForAuth = "+91" + phoneRaw;
+
+        firebase.auth().signInWithPhoneNumber(phoneForAuth, window.recaptchaVerifier)
+        .then((confirmationResult) => {
+            window.confirmationResult = confirmationResult;
+            document.getElementById('loginFormSection').classList.add('hidden');
+            document.getElementById('otpVerifySection').classList.remove('hidden');
+            document.getElementById('displaySentNumber').innerText = "+91 " + phoneRaw;
+            startResendTimer();
+        })
+        .catch((error) => {
+            console.error(error);
+            showCustomModal('alert', 'Error', 'OTP bhejne mein samasya aayi. Page refresh karein.');
+            resetSendButton();
+            if(window.recaptchaVerifier) window.recaptchaVerifier.render().then(widgetId => grecaptcha.reset(widgetId));
+        });
+    }
+
+    function verifyPhoneOTP() {
+        let otpInput = document.getElementById('otpInput').value.trim();
+        let name = document.getElementById('userName').value.trim();
+        let phoneToSave = "+91 " + document.getElementById('userPhone').value.trim();
+
+        if(!otpInput || otpInput.length !== 6) { 
+            showCustomModal('alert', 'Action Required', 'Kripya poora 6-digit OTP daalein.'); 
+            return; 
+        }
+        
+        let btn = document.getElementById('loginBtn');
+        btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Verifying...'; 
+        btn.style.backgroundColor = "var(--disabled)"; btn.disabled = true;
+
+        window.confirmationResult.confirm(otpInput).then((result) => {
+            localStorage.setItem('isLoggedIn', 'true'); 
+            localStorage.setItem('userName', name); 
+            localStorage.setItem('userPhone', phoneToSave); 
+            window.location.reload(); 
+        }).catch((error) => {
+            showCustomModal('alert', 'Login Failed', 'Aapne galat OTP daala hai.'); 
+            btn.innerHTML = '<i class="fa-solid fa-shield-check"></i> Verify & Login'; 
+            btn.style.backgroundColor = "var(--success)"; btn.disabled = false;
+        });
+    }
+
+    function startResendTimer() {
+        let timeLeft = 60;
+        document.getElementById('resendTimer').style.display = "inline";
+        document.getElementById('resendBtn').style.display = "none";
+        
+        clearInterval(timerInterval);
+        timerInterval = setInterval(() => {
+            timeLeft--;
+            document.getElementById('timerCount').innerText = timeLeft;
+            if(timeLeft <= 0) {
+                clearInterval(timerInterval);
+                document.getElementById('resendTimer').style.display = "none";
+                document.getElementById('resendBtn').style.display = "inline";
+                document.getElementById('resendBtn').classList.remove('disabled');
+            }
+        }, 1000);
+    }
+
+    function resendOTP() {
+        document.getElementById('resendBtn').classList.add('disabled');
+        document.getElementById('resendBtn').innerText = "Sending...";
+        sendPhoneOTP(); 
+    }
+
+    function changeNumber() {
+        document.getElementById('otpVerifySection').classList.add('hidden');
+        document.getElementById('loginFormSection').classList.remove('hidden');
+        document.getElementById('otpInput').value = "";
+        resetSendButton();
+        clearInterval(timerInterval);
+    }
+
+    function resetSendButton() {
+        let btn = document.getElementById('sendOtpBtn');
+        btn.innerText = "Get OTP via SMS"; 
+        btn.style.backgroundColor = "var(--primary)"; 
+        btn.disabled = false;
+    }
 
     async function checkPendingPayment() {
         let pending = localStorage.getItem('pendingRzpOrder');
@@ -412,108 +510,6 @@
         }
     }
 
-
-    function sendPhoneOTP() {
-        let nameField = document.getElementById('userName'); 
-        let phoneField = document.getElementById('userPhone'); 
-        let name = nameField.value.trim(); 
-        let phoneRaw = phoneField.value.trim(); 
-        
-        if(!name || phoneRaw.length !== 10) { 
-            showCustomModal('alert', 'Action Required', 'Kripya apna Naam aur sahi 10-digit Mobile number daalein.'); 
-            return; 
-        }
-
-        let btn = document.getElementById('sendOtpBtn');
-        btn.innerText = "Sending SMS..."; btn.style.backgroundColor = "var(--disabled)"; btn.disabled = true;
-
-        generatedOTP = Math.floor(100000 + Math.random() * 900000).toString();
-
-        let url = `https://www.fast2sms.com/dev/bulkV2?authorization=${FAST2SMS_API_KEY}&route=q&message=${encodeURIComponent("Aapka Online Kalavad verification code hai: " + generatedOTP + ". Kripya kisi ke sath share na karein.")}&language=english&flash=0&numbers=${phoneRaw}`;
-
-        fetch(url)
-        .then(response => response.json())
-        .then(data => {
-            if(data.return === true) {
-                document.getElementById('loginFormSection').classList.add('hidden');
-                document.getElementById('otpVerifySection').classList.remove('hidden');
-                document.getElementById('displaySentNumber').innerText = "+91 " + phoneRaw;
-                startResendTimer();
-            } else {
-                showCustomModal('alert', 'Server Busy', 'SMS bhejne mein samasya aayi. Kripya thodi der baad try karein.');
-                resetSendButton();
-            }
-        })
-        .catch(error => {
-            showCustomModal('alert', 'Network Error', 'Internet connection check karein.');
-            resetSendButton();
-        });
-    }
-
-    function verifyPhoneOTP() {
-        let otpInput = document.getElementById('otpInput').value.trim();
-        let name = document.getElementById('userName').value.trim();
-        let phone = "+91 " + document.getElementById('userPhone').value.trim();
-
-        if(!otpInput || otpInput.length !== 6) { 
-            showCustomModal('alert', 'Action Required', 'Kripya poora 6-digit OTP daalein.'); 
-            return; 
-        }
-        
-        let btn = document.getElementById('loginBtn');
-        btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Verifying...'; 
-        btn.style.backgroundColor = "var(--disabled)"; btn.disabled = true;
-
-        if(otpInput === generatedOTP) {
-            localStorage.setItem('isLoggedIn', 'true'); 
-            localStorage.setItem('userName', name); 
-            localStorage.setItem('userPhone', phone); 
-            window.location.reload(); 
-        } else {
-            showCustomModal('alert', 'Login Failed', 'Aapne galat OTP daala hai.'); 
-            btn.innerHTML = '<i class="fa-solid fa-shield-check"></i> Verify & Login'; 
-            btn.style.backgroundColor = "var(--success)"; btn.disabled = false;
-        }
-    }
-
-    function startResendTimer() {
-        let timeLeft = 60;
-        document.getElementById('resendTimer').style.display = "inline";
-        document.getElementById('resendBtn').style.display = "none";
-        
-        clearInterval(timerInterval);
-        timerInterval = setInterval(() => {
-            timeLeft--;
-            document.getElementById('timerCount').innerText = timeLeft;
-            if(timeLeft <= 0) {
-                clearInterval(timerInterval);
-                document.getElementById('resendTimer').style.display = "none";
-                document.getElementById('resendBtn').style.display = "inline";
-                document.getElementById('resendBtn').classList.remove('disabled');
-            }
-        }, 1000);
-    }
-
-    function resendOTP() {
-        document.getElementById('resendBtn').classList.add('disabled');
-        document.getElementById('resendBtn').innerText = "Sending...";
-        sendPhoneOTP(); 
-    }
-
-    function changeNumber() {
-        document.getElementById('otpVerifySection').classList.add('hidden');
-        document.getElementById('loginFormSection').classList.remove('hidden');
-        document.getElementById('otpInput').value = "";
-        resetSendButton();
-        clearInterval(timerInterval);
-    }
-
-    function resetSendButton() {
-        let btn = document.getElementById('sendOtpBtn');
-        btn.innerText = "Get OTP via SMS"; 
-        btn.style.backgroundColor = "var(--primary)"; 
-        btn.disabled = false;
-    }
 
     function fetchFirebaseData() {
         db.collection("settings").doc("general").onSnapshot(doc => { if(doc.exists) { globalData.settings = doc.data(); renderAllDataUI(globalData); } });
