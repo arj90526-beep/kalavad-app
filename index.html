@@ -194,7 +194,6 @@
                 </div>
             </div>
             
-            <!-- Visible Recaptcha added for better mobile support if needed by Firebase -->
             <div id="recaptcha-container" style="margin: 10px 0;"></div>
             
             <button class="btn" id="sendOtpBtn" onclick="sendPhoneOTP()">Get OTP via SMS</button>
@@ -902,7 +901,7 @@
             let codWrapper = document.getElementById('codWrapper'); let upiWrapper = document.getElementById('upiWrapper'); let radioCOD = document.getElementById('radioCOD'); let radioUPI = document.getElementById('radioUPI'); let placeBtn = document.getElementById('finalPlaceOrderBtn'); let errorMsg = document.getElementById('noPaymentMsg');
             let isCodOn = (data.settings.codStatus !== "OFF"); let isUpiOn = (data.settings.upiStatus !== "OFF");
             if(codWrapper && radioCOD && radioUPI) { if(!isCodOn) { codWrapper.style.display = "none"; radioCOD.checked = false; radioUPI.checked = true; } else { codWrapper.style.display = "flex"; } }
-            if(upiWrapper && radioUPI && radioCOD) { if(!isUpiOn) { upiWrapper.style.display = "none"; radioUPI.checked = false; if(isCodOn) radioCOD.checked = true; } else { upiWrapper.style.display = "flex"; } }
+            if(upiWrapper && radioUPI && radioCOD) { if(!isUpiOn) { comicWrapper.style.display = "none"; radioUPI.checked = false; if(isCodOn) radioCOD.checked = true; } else { upiWrapper.style.display = "flex"; } }
             if(placeBtn && errorMsg) { if(!isCodOn && !isUpiOn) { errorMsg.style.display = "block"; placeBtn.disabled = true; placeBtn.style.backgroundColor = "var(--disabled)"; } else { errorMsg.style.display = "none"; placeBtn.disabled = false; placeBtn.style.backgroundColor = "var(--primary)"; } }
         }
         let bannersWrapper = document.getElementById('bannersWrapper'); let bannerDots = document.getElementById('bannerDots');
@@ -1055,16 +1054,7 @@
                     "order_id": orderData.razorpayOrderId, 
                     "handler": async function (response){ 
                         localStorage.removeItem('pendingRzpOrder');
-                        
-                        let itemsSummary = ""; 
-                        for(let k in cart) { if(cart[k].qty > 0) itemsSummary += `${cart[k].name} [${cart[k].rName}] (x${cart[k].qty}), `; }
-
-                        let newOrderObj = { date: new Date().toLocaleString(), items: itemsSummary, total: orderData.total, method: "UPI - Paid (ID: " + response.razorpay_payment_id + ")", code: orderData.code, status: "Pending", timestamp: Date.now() };
-                        let historyArray = JSON.parse(localStorage.getItem('myOrdersHistory') || "[]");
-                        historyArray.unshift(newOrderObj); if(historyArray.length > 5) historyArray.pop(); localStorage.setItem('myOrdersHistory', JSON.stringify(historyArray));
-                        
-                        let codeSpan = document.getElementById('deliveryCode'); if(codeSpan) codeSpan.innerText = orderData.code;
-                        showScreen('successScreen'); updateRedDot(); cart = {}; updateCartTotals();
+                        await submitOrderViaCloudFunction("UPI - Paid (ID: " + response.razorpay_payment_id + ")", name, phone, area, fullAddr);
                     }, 
                     "prefill": { 
                         "name": name, 
@@ -1114,7 +1104,7 @@
             if(resData.error) throw new Error(resData.error);
 
             let itemsSummary = ""; 
-            for(let k in cart) { if(cart[k].qty > 0) itemsSummary += `${cart[k].name} [${cart[k].rName}] (x${cart[k].qty}), `; }
+            for(let k in cart) { if(cart[k].qty > 0) itemsSummary += `${cart[k].name} [${cart[k].rName || 'Shop'}] (x${cart[k].qty}), `; }
 
             let newOrderObj = { date: new Date().toLocaleString(), items: itemsSummary, total: resData.total, method: finalPaymentMethod, code: resData.code, status: "Pending", timestamp: Date.now() };
             let historyArray = JSON.parse(localStorage.getItem('myOrdersHistory') || "[]");
