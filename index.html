@@ -493,7 +493,7 @@
                         let areaVal = pData.addrArea;
                         let fullVal = pData.addrFull;
                         
-                        await submitOrderViaCloudFunction("UPI - Paid (Recovered)", nameVal, phoneVal, areaVal, fullVal, pData.orderId);
+                        await submitOrderViaCloudFunction("UPI - Paid (Recovered)", nameVal, phoneVal, areaVal, fullVal);
                     } else {
                         showCustomModal('alert', 'Payment Incomplete', 'Aapka pichla payment bank se successful nahi hua. Kripya cart mein jaakar dobara try karein.');
                     }
@@ -577,7 +577,7 @@
 
         let uPhone = localStorage.getItem('userPhone');
         if(uPhone) {
-            let cleanPhone = uPhone.replace(/\s+/g, '');
+            let cleanPhone = uPhone.replace(/\s+/g, '').replace('+91', '');
             db.collection("orders").where("email", "==", cleanPhone).onSnapshot(snap => {
                 let cloudOrders = snap.docs.map(d => d.data()); cloudOrders.sort((a,b) => b.timestamp - a.timestamp);
                 let deletedCodes = JSON.parse(localStorage.getItem('deletedOrderCodes') || "[]");
@@ -607,7 +607,7 @@
             showCustomModal('info', 'My Orders', 'Kripya pehle login karein.');
             return;
         }
-        let cleanPhone = userPhone.replace(/\s+/g, '');
+        let cleanPhone = userPhone.replace(/\s+/g, '').replace('+91', '');
         db.collection("orders").where("email", "==", cleanPhone).get().then(snap => {
             let orders = snap.docs.map(doc => doc.data());
             orders.sort((a,b) => b.timestamp - a.timestamp);
@@ -691,7 +691,7 @@
 
     async function fetchCloudOrdersAndShow(isNotificationClick = false) {
         let userPhone = localStorage.getItem('userPhone'); if(!userPhone) return;
-        let cleanPhone = userPhone.replace(/\s+/g, '');
+        let cleanPhone = userPhone.replace(/\s+/g, '').replace('+91', '');
         try {
             let snap = await db.collection("orders").where("email", "==", cleanPhone).get();
             let cloudOrders = snap.docs.map(doc => doc.data()); cloudOrders.sort((a,b) => b.timestamp - a.timestamp);
@@ -1055,7 +1055,16 @@
                     "order_id": orderData.razorpayOrderId, 
                     "handler": async function (response){ 
                         localStorage.removeItem('pendingRzpOrder');
-                        await submitOrderViaCloudFunction("UPI - Paid (ID: " + response.razorpay_payment_id + ")", name, phone, area, fullAddr, orderData.razorpayOrderId);
+                        
+                        let itemsSummary = ""; 
+                        for(let k in cart) { if(cart[k].qty > 0) itemsSummary += `${cart[k].name} [${cart[k].rName}] (x${cart[k].qty}), `; }
+
+                        let newOrderObj = { date: new Date().toLocaleString(), items: itemsSummary, total: orderData.total, method: "UPI - Paid (ID: " + response.razorpay_payment_id + ")", code: orderData.code, status: "Pending", timestamp: Date.now() };
+                        let historyArray = JSON.parse(localStorage.getItem('myOrdersHistory') || "[]");
+                        historyArray.unshift(newOrderObj); if(historyArray.length > 5) historyArray.pop(); localStorage.setItem('myOrdersHistory', JSON.stringify(historyArray));
+                        
+                        let codeSpan = document.getElementById('deliveryCode'); if(codeSpan) codeSpan.innerText = orderData.code;
+                        showScreen('successScreen'); updateRedDot(); cart = {}; updateCartTotals();
                     }, 
                     "prefill": { 
                         "name": name, 
@@ -1079,11 +1088,11 @@
                 btn.innerText = "Confirm & Place Order"; btn.disabled = false; btn.style.backgroundColor = "var(--primary)";
             }
         } else { 
-            await submitOrderViaCloudFunction("COD", name, phone, area, fullAddr, null); 
+            await submitOrderViaCloudFunction("COD", name, phone, area, fullAddr); 
         }
     }
 
-    async function submitOrderViaCloudFunction(finalPaymentMethod, name, phone, area, fullAddr, rzpOrderId) {
+    async function submitOrderViaCloudFunction(finalPaymentMethod, name, phone, area, fullAddr) {
         let btn = document.getElementById('finalPlaceOrderBtn');
         if(btn) { btn.innerText = "Processing..."; btn.disabled = true; btn.style.backgroundColor = "var(--disabled)"; }
 
