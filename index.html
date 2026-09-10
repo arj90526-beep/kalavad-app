@@ -348,24 +348,27 @@
     window.onload = function() {
         window.recaptchaVerifier = new firebase.auth.RecaptchaVerifier('recaptcha-container', { 'size': 'normal' });
 
-        if(localStorage.getItem('isLoggedIn') === 'true') {
-            let uName = localStorage.getItem('userName'); let uPhone = localStorage.getItem('userPhone');
-            if(uName && uPhone) {
+        firebase.auth().onAuthStateChanged((user) => {
+            if (user) {
+                localStorage.setItem('isLoggedIn', 'true');
+                localStorage.setItem('userPhone', user.phoneNumber);
+
                 let pName = document.getElementById('sidebarProfileName'); 
                 let pPhone = document.getElementById('sidebarProfilePhone');
-                if(pName) pName.innerText = uName; 
-                if(pPhone) pPhone.innerText = uPhone;
-                showScreen('homeScreen');
+                if(pName) pName.innerText = localStorage.getItem('userName') || 'User'; 
+                if(pPhone) pPhone.innerText = user.phoneNumber;
                 
+                showScreen('homeScreen');
                 checkPendingPayment();
                 
-            } else { localStorage.clear(); showScreen('loginScreen'); }
-            let cachedData = localStorage.getItem('onlineKalavadCache');
-            if(cachedData) { try { globalData = JSON.parse(cachedData); renderAllDataUI(globalData); } catch(e) {} }
-            fetchFirebaseData(); 
-        } else { 
-            showScreen('loginScreen'); 
-        }
+                let cachedData = localStorage.getItem('onlineKalavadCache');
+                if(cachedData) { try { globalData = JSON.parse(cachedData); renderAllDataUI(globalData); } catch(e) {} }
+                fetchFirebaseData(); 
+            } else { 
+                localStorage.clear(); 
+                showScreen('loginScreen'); 
+            }
+        });
     };
 
     function sendPhoneOTP() {
@@ -1095,44 +1098,43 @@
         let phone = "+91 " + document.getElementById('addrPhone').value.trim(); 
         let area = document.getElementById('addrArea').value; 
         let fullAddr = document.getElementById('addrFull').value.trim(); 
-        let userPhoneId = localStorage.getItem('userPhone');
-        let cleanPhoneId = userPhoneId ? userPhoneId.replace(/\s+/g, '') : "";
-        
-        let itemsSummary = ""; 
-        for(let k in cart) { if(cart[k].qty > 0) itemsSummary += `${cart[k].name} [${cart[k].rName}] (x${cart[k].qty}), `; }
-        
         let fullAddressString = name + " | Ph: " + phone + " | Area: " + area + " (City: Kalavad) | Addr: " + fullAddr;
 
         let btn = document.getElementById('finalPlaceOrderBtn');
         if(btn) { btn.innerText = "Processing..."; btn.disabled = true; btn.style.backgroundColor = "var(--disabled)"; }
 
         try {
-            // NAYA CODE: Backend Cloud Function ko call karke order save karein
-            let response = await fetch('https://us-central1-onlinekalavad.cloudfunctions.net/saveFinalOrder', {
+            const user = firebase.auth().currentUser;
+            if (!user) throw new Error("Please login first to place an order.");
+            const idToken = await user.getIdToken(true);
+
+            let response = await fetch('https://savefinalorder-ct45kue4ka-uc.a.run.app', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: { 
+                    'Content-Type': 'application/json',
+                    'Authorization': 'Bearer ' + idToken
+                },
                 body: JSON.stringify({
                     paymentMethod: finalPaymentMethod,
-                    userPhone: cleanPhoneId,
-                    orderDetails: {
-                        customerName: fullAddressString,
-                        itemsSummary: itemsSummary,
-                        total: grandTotalVal
-                    }
+                    cart: cart,
+                    customerName: fullAddressString
                 })
             });
 
             let responseData = await response.json();
             if(responseData.error) throw new Error(responseData.error);
 
-            let orderCode = responseData.code; // Backend se code mil gaya
+            let orderCode = responseData.code; 
+            
+            let itemsSummary = ""; 
+            for(let k in cart) { if(cart[k].qty > 0) itemsSummary += `${cart[k].name} [${cart[k].rName}] (x${cart[k].qty}), `; }
 
             let newOrderObj = { date: new Date().toLocaleString(), items: itemsSummary, total: grandTotalVal, method: finalPaymentMethod, code: orderCode, status: "Pending", timestamp: Date.now() };
             let historyArray = JSON.parse(localStorage.getItem('myOrdersHistory') || "[]");
             historyArray.unshift(newOrderObj); if(historyArray.length > 5) historyArray.pop(); localStorage.setItem('myOrdersHistory', JSON.stringify(historyArray));
             
             let codeSpan = document.getElementById('deliveryCode'); if(codeSpan) codeSpan.innerText = orderCode;
-            showScreen('successScreen'); updateRedDot(); cart = {}; updateCartTotals();
+            showScreen('successScreen'); cart = {}; updateCartTotals();
             if(btn) { btn.innerText = "Confirm & Place Order"; btn.disabled = false; btn.style.backgroundColor = "var(--primary)"; }
             
         } catch(error) {
