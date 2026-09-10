@@ -566,7 +566,7 @@
                         <div class="trending-actions-grid">
                             <i class="fa-solid fa-circle-minus" onclick="modifyCart('${safeName}', ${t.price}, -1, '${rName}'); updateTrendingQty('${uniqueKey}')"></i>
                             <span id="trend_qty_${uniqueKey}" style="font-weight: bold; font-size: 14px;">${currentQty}</span>
-                            <i class="fa-solid fa-circle-plus" onclick="modifyCart('${safeName}', ${t.price}, 1, '${rName}'); updateTrendingQty('${uniqueKey}')"></i>
+                            <i class="fa-solid fa-circle-plus" onclick="modifyCart('${safeName}', ${t.price}, 1, '${safeRName}'); updateTrendingQty('${uniqueKey}')"></i>
                         </div>
                     </div>
                 `;
@@ -901,7 +901,7 @@
             let codWrapper = document.getElementById('codWrapper'); let upiWrapper = document.getElementById('upiWrapper'); let radioCOD = document.getElementById('radioCOD'); let radioUPI = document.getElementById('radioUPI'); let placeBtn = document.getElementById('finalPlaceOrderBtn'); let errorMsg = document.getElementById('noPaymentMsg');
             let isCodOn = (data.settings.codStatus !== "OFF"); let isUpiOn = (data.settings.upiStatus !== "OFF");
             if(codWrapper && radioCOD && radioUPI) { if(!isCodOn) { codWrapper.style.display = "none"; radioCOD.checked = false; radioUPI.checked = true; } else { codWrapper.style.display = "flex"; } }
-            if(upiWrapper && radioUPI && radioCOD) { if(!isUpiOn) { comicWrapper.style.display = "none"; radioUPI.checked = false; if(isCodOn) radioCOD.checked = true; } else { upiWrapper.style.display = "flex"; } }
+            if(upiWrapper && radioUPI && radioCOD) { if(!isUpiOn) { upiWrapper.style.display = "none"; radioUPI.checked = false; if(isCodOn) radioCOD.checked = true; } else { upiWrapper.style.display = "flex"; } }
             if(placeBtn && errorMsg) { if(!isCodOn && !isUpiOn) { errorMsg.style.display = "block"; placeBtn.disabled = true; placeBtn.style.backgroundColor = "var(--disabled)"; } else { errorMsg.style.display = "none"; placeBtn.disabled = false; placeBtn.style.backgroundColor = "var(--primary)"; } }
         }
         let bannersWrapper = document.getElementById('bannersWrapper'); let bannerDots = document.getElementById('bannerDots');
@@ -1034,17 +1034,6 @@
                 
                 if (orderData.error) throw new Error(orderData.error);
 
-                localStorage.setItem('pendingRzpOrder', JSON.stringify({
-                    cart: cart,
-                    grandTotalVal: orderData.total,
-                    addrName: name,
-                    addrPhone: phone,
-                    addrArea: area,
-                    addrFull: fullAddr,
-                    orderId: orderData.razorpayOrderId,
-                    timestamp: Date.now()
-                }));
-
                 var options = { 
                     "key": RAZORPAY_KEY, 
                     "amount": orderData.total * 100,
@@ -1053,7 +1042,6 @@
                     "description": "Order Payment", 
                     "order_id": orderData.razorpayOrderId, 
                     "handler": async function (response){ 
-                        localStorage.removeItem('pendingRzpOrder');
                         await submitOrderViaCloudFunction("UPI - Paid (ID: " + response.razorpay_payment_id + ")", name, phone, area, fullAddr);
                     }, 
                     "prefill": { 
@@ -1066,7 +1054,6 @@
                 
                 var rzp1 = new Razorpay(options); 
                 rzp1.on('payment.failed', function (response){ 
-                    localStorage.removeItem('pendingRzpOrder');
                     showCustomModal('alert', 'Payment Failed', 'Payment fail ho gaya hai. Dobara try karein.'); 
                 }); 
                 rzp1.open();
@@ -1103,13 +1090,6 @@
             let resData = await response.json();
             if(resData.error) throw new Error(resData.error);
 
-            let itemsSummary = ""; 
-            for(let k in cart) { if(cart[k].qty > 0) itemsSummary += `${cart[k].name} [${cart[k].rName || 'Shop'}] (x${cart[k].qty}), `; }
-
-            let newOrderObj = { date: new Date().toLocaleString(), items: itemsSummary, total: resData.total, method: finalPaymentMethod, code: resData.code, status: "Pending", timestamp: Date.now() };
-            let historyArray = JSON.parse(localStorage.getItem('myOrdersHistory') || "[]");
-            historyArray.unshift(newOrderObj); if(historyArray.length > 5) historyArray.pop(); localStorage.setItem('myOrdersHistory', JSON.stringify(historyArray));
-            
             let codeSpan = document.getElementById('deliveryCode'); if(codeSpan) codeSpan.innerText = resData.code;
             showScreen('successScreen'); updateRedDot(); cart = {}; updateCartTotals();
             if(btn) { btn.innerText = "Confirm & Place Order"; btn.disabled = false; btn.style.backgroundColor = "var(--primary)"; }
