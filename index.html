@@ -576,7 +576,7 @@
                         <div class="trending-actions-grid">
                             <i class="fa-solid fa-circle-minus" onclick="modifyCart('${safeName}', ${t.price}, -1, '${rName}'); updateTrendingQty('${uniqueKey}')"></i>
                             <span id="trend_qty_${uniqueKey}" style="font-weight: bold; font-size: 14px;">${currentQty}</span>
-                            <i class="fa-solid fa-circle-plus" onclick="modifyCart('${safeName}', ${t.price}, 1, '${rName}'); updateTrendingQty('${uniqueKey}')"></i>
+                            <i class="fa-solid fa-circle-plus" onclick="modifyCart('${safeName}', ${t.price}, 1, '${safeName}', '${rName}'); updateTrendingQty('${uniqueKey}')"></i>
                         </div>
                     </div>
                 `;
@@ -696,9 +696,16 @@
         showCustomModal('info', title, text);
     }
 
+    // YAHAN LOGOUT FUNCTION UPDATE KIYA GAYA HAI:
     function logoutUser() {
-        localStorage.clear();
-        window.location.reload();
+        firebase.auth().signOut().then(() => {
+            localStorage.clear();
+            window.location.reload();
+        }).catch((error) => {
+            console.error("Logout Error:", error);
+            localStorage.clear();
+            window.location.reload();
+        });
     }
 
     function showScreen(screenId) { document.querySelectorAll('.screen').forEach(s => s.classList.add('hidden')); let target = document.getElementById(screenId); if(target) target.classList.remove('hidden'); }
