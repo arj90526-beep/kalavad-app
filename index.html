@@ -1028,7 +1028,7 @@
                 let response = await fetch('https://createorder-ct45kue4ka-uc.a.run.app', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ amount: grandTotalVal })
+                    body: JSON.stringify({ cart: cart })
                 });
                 
                 let orderData = await response.json();
