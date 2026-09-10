@@ -1102,13 +1102,31 @@
         for(let k in cart) { if(cart[k].qty > 0) itemsSummary += `${cart[k].name} [${cart[k].rName}] (x${cart[k].qty}), `; }
         
         let fullAddressString = name + " | Ph: " + phone + " | Area: " + area + " (City: Kalavad) | Addr: " + fullAddr;
-        let orderCode = Math.floor(1000 + Math.random() * 9000).toString(); 
 
         let btn = document.getElementById('finalPlaceOrderBtn');
         if(btn) { btn.innerText = "Processing..."; btn.disabled = true; btn.style.backgroundColor = "var(--disabled)"; }
 
         try {
-            await db.collection("orders").add({ code: orderCode, customerName: fullAddressString, email: cleanPhoneId, items: itemsSummary, total: grandTotalVal, paymentMethod: finalPaymentMethod, status: "Pending", timestamp: Date.now() });
+            // NAYA CODE: Backend Cloud Function ko call karke order save karein
+            let response = await fetch('https://us-central1-onlinekalavad.cloudfunctions.net/saveFinalOrder', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    paymentMethod: finalPaymentMethod,
+                    userPhone: cleanPhoneId,
+                    orderDetails: {
+                        customerName: fullAddressString,
+                        itemsSummary: itemsSummary,
+                        total: grandTotalVal
+                    }
+                })
+            });
+
+            let responseData = await response.json();
+            if(responseData.error) throw new Error(responseData.error);
+
+            let orderCode = responseData.code; // Backend se code mil gaya
+
             let newOrderObj = { date: new Date().toLocaleString(), items: itemsSummary, total: grandTotalVal, method: finalPaymentMethod, code: orderCode, status: "Pending", timestamp: Date.now() };
             let historyArray = JSON.parse(localStorage.getItem('myOrdersHistory') || "[]");
             historyArray.unshift(newOrderObj); if(historyArray.length > 5) historyArray.pop(); localStorage.setItem('myOrdersHistory', JSON.stringify(historyArray));
@@ -1118,8 +1136,8 @@
             if(btn) { btn.innerText = "Confirm & Place Order"; btn.disabled = false; btn.style.backgroundColor = "var(--primary)"; }
             
         } catch(error) {
-            let codeSpan = document.getElementById('deliveryCode'); if(codeSpan) codeSpan.innerText = orderCode;
-            showScreen('successScreen'); updateRedDot(); cart = {}; updateCartTotals();
+            console.error(error);
+            showCustomModal('alert', 'Order Failed', error.message || 'Kuch galat ho gaya, dobara try karein.');
             if(btn) { btn.innerText = "Confirm & Place Order"; btn.disabled = false; btn.style.backgroundColor = "var(--primary)"; }
         }
     }
