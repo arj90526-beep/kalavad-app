@@ -477,22 +477,23 @@
                 document.body.appendChild(overlay);
 
                 try {
-                    let response = await fetch('https://verifypayment-ct45kue4ka-uc.a.run.app', {
+                    let response = await fetch('https://us-central1-onlinekalavad.cloudfunctions.net/createOrderAndSave', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ orderId: pData.orderId })
+                        body: JSON.stringify({ 
+                            cart: pData.cart, 
+                            customerName: pData.addrName, 
+                            customerPhone: pData.addrPhone, 
+                            area: pData.addrArea, 
+                            fullAddr: pData.addrFull, 
+                            paymentMethod: "UPI - Paid (Recovered)" 
+                        })
                     });
                     let resData = await response.json();
                     
-                    if(resData.status === 'paid') {
-                        cart = pData.cart;
-                        grandTotalVal = pData.grandTotalVal;
-                        let nameVal = pData.addrName;
-                        let phoneVal = pData.addrPhone;
-                        let areaVal = pData.addrArea;
-                        let fullVal = pData.addrFull;
-                        
-                        await submitOrderViaCloudFunction("UPI - Paid (Recovered)", nameVal, phoneVal, areaVal, fullVal);
+                    if(resData.success) {
+                        let codeSpan = document.getElementById('deliveryCode'); if(codeSpan) codeSpan.innerText = resData.code;
+                        showScreen('successScreen'); updateRedDot(); cart = {}; updateCartTotals();
                     } else {
                         showCustomModal('alert', 'Payment Incomplete', 'Aapka pichla payment bank se successful nahi hua. Kripya cart mein jaakar dobara try karein.');
                     }
@@ -566,7 +567,7 @@
                         <div class="trending-actions-grid">
                             <i class="fa-solid fa-circle-minus" onclick="modifyCart('${safeName}', ${t.price}, -1, '${rName}'); updateTrendingQty('${uniqueKey}')"></i>
                             <span id="trend_qty_${uniqueKey}" style="font-weight: bold; font-size: 14px;">${currentQty}</span>
-                            <i class="fa-solid fa-circle-plus" onclick="modifyCart('${safeName}', ${t.price}, 1, '${rName}'); updateTrendingQty('${uniqueKey}')"></i>
+                            <i class="fa-solid fa-circle-plus" onclick="modifyCart('${safeName}', ${t.price}, 1, '${safeRName}'); updateTrendingQty('${uniqueKey}')"></i>
                         </div>
                     </div>
                 `;
