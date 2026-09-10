@@ -194,7 +194,6 @@
                 </div>
             </div>
             
-            <!-- Visible Recaptcha added for better mobile support if needed by Firebase -->
             <div id="recaptcha-container" style="margin: 10px 0;"></div>
             
             <button class="btn" id="sendOtpBtn" onclick="sendPhoneOTP()">Get OTP via SMS</button>
@@ -395,7 +394,6 @@
         })
         .catch((error) => {
             console.error(error);
-            // 🔥 YAHAN REAL FIREBASE ERROR DIKHEGA 🔥
             showCustomModal('alert', 'Firebase Auth Error', error.message);
             resetSendButton();
             if(window.recaptchaVerifier) window.recaptchaVerifier.render().then(widgetId => grecaptcha.reset(widgetId));
@@ -637,7 +635,12 @@
                 let statusColor = statusText === "Delivered" ? "var(--success)" : (statusText === "Accepted" ? "var(--info-blue)" : (statusText.includes("Reject") ? "#ef4444" : "#e67e22"));
                 
                 let riderInfoHtml = "";
-                if (order.status === "Accepted" && (order.dbName || order.dbPhone)) {
+                if (statusText === "Delivered") {
+                    riderInfoHtml = `
+                        <div style="background:#d4edda; color:#155724; padding:6px; border-radius:6px; margin-top:6px; font-size:12px; text-align:left;">
+                            <i class="fa-solid fa-check-circle"></i> Order successfully delivered!
+                        </div>`;
+                } else if (order.status === "Accepted" && (order.dbName || order.dbPhone)) {
                     riderInfoHtml = `
                         <div style="background:#d4edda; color:#155724; padding:8px; border-radius:8px; margin-top:8px; font-size:13px; border:1px solid #c3e6cb; text-align:left;">
                             <b><i class="fa-solid fa-motorcycle"></i> Delivery Boy:</b> ${order.dbName || 'Assigned'}<br>
@@ -780,7 +783,8 @@
                 if (statusText === "Rider_Rejected") statusText = "Pending";
                 let statusColor = statusText === "Delivered" ? "var(--success)" : (statusText === "Accepted" ? "var(--info-blue)" : (statusText === "Rejected" ? "#ef4444" : "#e67e22"));
                 let riderInfoHtml = "";
-                if (statusText === "Accepted" && (order.dbName || order.dbPhone)) riderInfoHtml = `<div style="background:#d4edda; color:#155724; padding:8px; border-radius:5px; margin-top:8px; font-size:13px; border:1px solid #c3e6cb;"><b><i class="fa-solid fa-motorcycle"></i> Rider:</b> ${order.dbName || 'Assigned'}<br><b><i class="fa-solid fa-phone"></i> Contact:</b> <span style="color:var(--primary); font-weight:bold;">${order.dbPhone || 'N/A'}</span></div>`;
+                if (statusText === "Delivered") riderInfoHtml = `<div style="color:var(--success); margin-top:5px; font-size:12px;"><b><i class="fa-solid fa-check-circle"></i> Delivered Successfully</b></div>`;
+                else if (statusText === "Accepted" && (order.dbName || order.dbPhone)) riderInfoHtml = `<div style="background:#d4edda; color:#155724; padding:8px; border-radius:5px; margin-top:8px; font-size:13px; border:1px solid #c3e6cb;"><b><i class="fa-solid fa-motorcycle"></i> Rider:</b> ${order.dbName || 'Assigned'}<br><b><i class="fa-solid fa-phone"></i> Contact:</b> <span style="color:var(--primary); font-weight:bold;">${order.dbPhone || 'N/A'}</span></div>`;
                 if (statusText === "Rejected") riderInfoHtml = `<div style="color:#ef4444; margin-top:5px; font-size:12px;"><b>Reason:</b> ${order.rejectReason || ''}</div>`;
                 msg += `<div style="position:relative; border-bottom:1px solid #ddd; padding-bottom:10px; margin-bottom:10px; text-align:left;"><i class="fa-solid fa-trash" style="position:absolute; top:0; right:0; color:#d9534f; cursor:pointer; font-size:16px;" onclick="confirmDeleteOrder('${order.code}')"></i><div style="font-size:11px; color:#888;">${order.date}</div><b>Items:</b> ${order.items}<br><b>Total:</b> ₹${order.total} | ${order.method}<br><b>Status:</b> <span style="color:${statusColor}; font-weight:bold;">${statusText}</span><br><b>Delivery Code:</b> <span style="color:var(--primary); font-weight:bold;">${order.code}</span>${riderInfoHtml}</div>`;
             });
