@@ -1108,7 +1108,7 @@
 
         try {
             // NAYA CODE: Backend Cloud Function ko call karke order save karein
-            let response = await fetch('https://us-central1-onlinekalavad.cloudfunctions.net/saveFinalOrder', {
+            let response = await fetch('https://savefinalorder-ct45kue4ka-uc.a.run.app', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
@@ -1132,7 +1132,10 @@
             historyArray.unshift(newOrderObj); if(historyArray.length > 5) historyArray.pop(); localStorage.setItem('myOrdersHistory', JSON.stringify(historyArray));
             
             let codeSpan = document.getElementById('deliveryCode'); if(codeSpan) codeSpan.innerText = orderCode;
-            showScreen('successScreen'); updateRedDot(); cart = {}; updateCartTotals();
+            
+            // FIX: Removed updateRedDot(); 
+            showScreen('successScreen'); cart = {}; updateCartTotals();
+            
             if(btn) { btn.innerText = "Confirm & Place Order"; btn.disabled = false; btn.style.backgroundColor = "var(--primary)"; }
             
         } catch(error) {
