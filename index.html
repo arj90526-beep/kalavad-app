@@ -477,23 +477,22 @@
                 document.body.appendChild(overlay);
 
                 try {
-                    let response = await fetch('https://us-central1-onlinekalavad.cloudfunctions.net/createOrderAndSave', {
+                    let response = await fetch('https://verifypayment-ct45kue4ka-uc.a.run.app', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ 
-                            cart: pData.cart, 
-                            customerName: pData.addrName, 
-                            customerPhone: pData.addrPhone, 
-                            area: pData.addrArea, 
-                            fullAddr: pData.addrFull, 
-                            paymentMethod: "UPI - Paid (Recovered)" 
-                        })
+                        body: JSON.stringify({ orderId: pData.orderId })
                     });
                     let resData = await response.json();
                     
-                    if(resData.success) {
-                        let codeSpan = document.getElementById('deliveryCode'); if(codeSpan) codeSpan.innerText = resData.code;
-                        showScreen('successScreen'); updateRedDot(); cart = {}; updateCartTotals();
+                    if(resData.status === 'paid') {
+                        cart = pData.cart;
+                        grandTotalVal = pData.grandTotalVal;
+                        let nameVal = pData.addrName;
+                        let phoneVal = pData.addrPhone;
+                        let areaVal = pData.addrArea;
+                        let fullVal = pData.addrFull;
+                        
+                        await submitOrderViaCloudFunction("UPI - Paid (Recovered)", nameVal, phoneVal, areaVal, fullVal);
                     } else {
                         showCustomModal('alert', 'Payment Incomplete', 'Aapka pichla payment bank se successful nahi hua. Kripya cart mein jaakar dobara try karein.');
                     }
@@ -1090,6 +1089,14 @@
 
             let resData = await response.json();
             if(resData.error) throw new Error(resData.error);
+
+            // Save to local storage history so customer sees it instantly
+            let itemsSummary = ""; 
+            for(let k in cart) { if(cart[k].qty > 0) itemsSummary += `${cart[k].name} [${cart[k].rName || 'Shop'}] (x${cart[k].qty}), `; }
+
+            let newOrderObj = { date: new Date().toLocaleString(), items: itemsSummary, total: resData.total, method: finalPaymentMethod, code: resData.code, status: "Pending", timestamp: Date.now() };
+            let historyArray = JSON.parse(localStorage.getItem('myOrdersHistory') || "[]");
+            historyArray.unshift(newOrderObj); if(historyArray.length > 5) historyArray.pop(); localStorage.setItem('myOrdersHistory', JSON.stringify(historyArray));
 
             let codeSpan = document.getElementById('deliveryCode'); if(codeSpan) codeSpan.innerText = resData.code;
             showScreen('successScreen'); updateRedDot(); cart = {}; updateCartTotals();
