@@ -523,7 +523,7 @@
                         <div class="trending-actions-grid">
                             <i class="fa-solid fa-circle-minus" onclick="modifyCart('${safeName}', ${t.price}, -1, '${rName}'); updateTrendingQty('${uniqueKey}')"></i>
                             <span id="trend_qty_${uniqueKey}" style="font-weight: bold; font-size: 14px;">${currentQty}</span>
-                            <i class="fa-solid fa-circle-plus" onclick="modifyCart('${safeName}', ${t.price}, 1, '${safeRName}'); updateTrendingQty('${uniqueKey}')"></i>
+                            <i class="fa-solid fa-circle-plus" onclick="modifyCart('${safeName}', ${t.price}, 1, '${rName}'); updateTrendingQty('${uniqueKey}')"></i>
                         </div>
                     </div>
                 `;
@@ -533,12 +533,18 @@
 
         let uPhone = localStorage.getItem('userPhone');
         if(uPhone) {
-            let cleanPhone = uPhone.replace(/\s+/g, '').replace('+91', '');
+            let cleanPhone = uPhone.replace(/\D/g, '').slice(-10);
             db.collection("orders").where("email", "==", cleanPhone).onSnapshot(snap => {
-                let cloudOrders = snap.docs.map(d => d.data()); cloudOrders.sort((a,b) => b.timestamp - a.timestamp);
+                let cloudOrders = snap.docs.map(d => {
+                    let data = d.data();
+                    data.id = d.id;
+                    return data;
+                });
+                cloudOrders.sort((a,b) => b.timestamp - a.timestamp);
                 let deletedCodes = JSON.parse(localStorage.getItem('deletedOrderCodes') || "[]");
                 let active = cloudOrders.filter(o => !deletedCodes.includes(String(o.code)) && o.status !== "Delivered");
-                let dot = document.getElementById('notiRedDot'); if(dot) dot.style.display = (active.length > 0) ? 'block' : 'none';
+                let dot = document.getElementById('notiRedDot'); 
+                if(dot) dot.style.display = (active.length > 0) ? 'block' : 'none';
                 localStorage.setItem('myOrdersHistory', JSON.stringify(cloudOrders.filter(o => !deletedCodes.includes(String(o.code)))));
             });
         }
@@ -564,7 +570,7 @@
             showCustomModal('info', 'My Orders', 'Kripya pehle login karein.');
             return;
         }
-        let cleanPhone = userPhone.replace(/\s+/g, '').replace('+91', '');
+        let cleanPhone = userPhone.replace(/\D/g, '').slice(-10);
         db.collection("orders").where("email", "==", cleanPhone).get().then(snap => {
             let orders = snap.docs.map(doc => doc.data());
             orders.sort((a,b) => b.timestamp - a.timestamp);
@@ -648,7 +654,7 @@
 
     async function fetchCloudOrdersAndShow(isNotificationClick = false) {
         let userPhone = localStorage.getItem('userPhone'); if(!userPhone) return;
-        let cleanPhone = userPhone.replace(/\s+/g, '').replace('+91', '');
+        let cleanPhone = userPhone.replace(/\D/g, '').slice(-10);
         try {
             let snap = await db.collection("orders").where("email", "==", cleanPhone).get();
             let cloudOrders = snap.docs.map(doc => doc.data()); cloudOrders.sort((a,b) => b.timestamp - a.timestamp);
@@ -1001,7 +1007,7 @@
                     "description": "Order Payment", 
                     "order_id": orderData.razorpayOrderId, 
                     "handler": async function (response){ 
-                        await submitOrderViaCloudFunction("UPI - Paid (ID: " + response.razorpay_payment_id + ")", name, phone, area, fullAddr);
+                        await submitOrderViaCloudFunction("UPI - Paid (ID: " + response.razorpay_payment_id + ")", name, phone, area, fullAddr, orderData.code);
                     }, 
                     "prefill": { 
                         "name": name, 
@@ -1024,11 +1030,12 @@
                 btn.innerText = "Confirm & Place Order"; btn.disabled = false; btn.style.backgroundColor = "var(--primary)";
             }
         } else { 
-            await submitOrderViaCloudFunction("COD", name, phone, area, fullAddr); 
+            let tempCode = Math.floor(1000 + Math.random() * 9000).toString();
+            await submitOrderViaCloudFunction("COD", name, phone, area, fullAddr, tempCode); 
         }
     }
 
-    async function submitOrderViaCloudFunction(finalPaymentMethod, name, phone, area, fullAddr) {
+    async function submitOrderViaCloudFunction(finalPaymentMethod, name, phone, area, fullAddr, preGeneratedCode) {
         let btn = document.getElementById('finalPlaceOrderBtn');
         try {
             let response = await fetch('https://us-central1-onlinekalavad.cloudfunctions.net/createOrderAndSave', {
@@ -1040,7 +1047,8 @@
                     customerPhone: phone, 
                     area: area, 
                     fullAddr: fullAddr, 
-                    paymentMethod: finalPaymentMethod 
+                    paymentMethod: finalPaymentMethod,
+                    code: preGeneratedCode
                 })
             });
 
@@ -1050,11 +1058,12 @@
             let itemsSummary = ""; 
             for(let k in cart) { if(cart[k].qty > 0) itemsSummary += `${cart[k].name} [${cart[k].rName || 'Shop'}] (x${cart[k].qty}), `; }
 
-            let newOrderObj = { date: new Date().toLocaleString(), items: itemsSummary, total: resData.total, method: finalPaymentMethod, code: resData.code, status: "Pending", timestamp: Date.now() };
+            let finalCode = resData.code || preGeneratedCode;
+            let newOrderObj = { date: new Date().toLocaleString(), items: itemsSummary, total: resData.total, method: finalPaymentMethod, code: finalCode, status: "Pending", timestamp: Date.now() };
             let historyArray = JSON.parse(localStorage.getItem('myOrdersHistory') || "[]");
             historyArray.unshift(newOrderObj); if(historyArray.length > 5) historyArray.pop(); localStorage.setItem('myOrdersHistory', JSON.stringify(historyArray));
 
-            let codeSpan = document.getElementById('deliveryCode'); if(codeSpan) codeSpan.innerText = resData.code;
+            let codeSpan = document.getElementById('deliveryCode'); if(codeSpan) codeSpan.innerText = finalCode;
             showScreen('successScreen'); updateRedDot(); cart = {}; updateCartTotals();
             if(btn) { btn.innerText = "Confirm & Place Order"; btn.disabled = false; btn.style.backgroundColor = "var(--primary)"; }
             
