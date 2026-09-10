@@ -405,7 +405,7 @@
     function verifyPhoneOTP() {
         let otpInput = document.getElementById('otpInput').value.trim();
         let name = document.getElementById('userName').value.trim();
-        let phoneToSave = "+91 " + document.getElementById('userPhone').value.trim();
+        let phoneToSave = "+91" + document.getElementById('userPhone').value.trim();
 
         if(!otpInput || otpInput.length !== 6) { 
             showCustomModal('alert', 'Action Required', 'Kripya poora 6-digit OTP daalein.'); 
@@ -585,7 +585,8 @@
 
         let uPhone = localStorage.getItem('userPhone');
         if(uPhone) {
-            db.collection("orders").where("email", "==", uPhone).onSnapshot(snap => {
+            let cleanPhone = uPhone.replace(/\s+/g, '');
+            db.collection("orders").where("email", "==", cleanPhone).onSnapshot(snap => {
                 let cloudOrders = snap.docs.map(d => d.data()); cloudOrders.sort((a,b) => b.timestamp - a.timestamp);
                 let deletedCodes = JSON.parse(localStorage.getItem('deletedOrderCodes') || "[]");
                 let active = cloudOrders.filter(o => !deletedCodes.includes(String(o.code)) && o.status !== "Delivered");
@@ -614,7 +615,8 @@
             showCustomModal('info', 'My Orders', 'Kripya pehle login karein.');
             return;
         }
-        db.collection("orders").where("email", "==", userPhone).get().then(snap => {
+        let cleanPhone = userPhone.replace(/\s+/g, '');
+        db.collection("orders").where("email", "==", cleanPhone).get().then(snap => {
             let orders = snap.docs.map(doc => doc.data());
             orders.sort((a,b) => b.timestamp - a.timestamp);
             let deletedCodes = JSON.parse(localStorage.getItem('deletedOrderCodes') || "[]");
@@ -697,8 +699,9 @@
 
     async function fetchCloudOrdersAndShow(isNotificationClick = false) {
         let userPhone = localStorage.getItem('userPhone'); if(!userPhone) return;
+        let cleanPhone = userPhone.replace(/\s+/g, '');
         try {
-            let snap = await db.collection("orders").where("email", "==", userPhone).get();
+            let snap = await db.collection("orders").where("email", "==", cleanPhone).get();
             let cloudOrders = snap.docs.map(doc => doc.data()); cloudOrders.sort((a,b) => b.timestamp - a.timestamp);
             cloudOrders.forEach(o => { o.date = new Date(o.timestamp).toLocaleString(); });
             let deletedCodes = JSON.parse(localStorage.getItem('deletedOrderCodes') || "[]");
@@ -1059,7 +1062,7 @@
                     }, 
                     "prefill": { 
                         "name": document.getElementById('addrName').value.trim(), 
-                        "email": localStorage.getItem('userPhone'), 
+                        "email": localStorage.getItem('userPhone').replace(/\s+/g, ''), 
                         "contact": document.getElementById('addrPhone').value.trim() 
                     }, 
                     "theme": { "color": "#B3391C" } 
@@ -1089,6 +1092,7 @@
         let area = document.getElementById('addrArea').value; 
         let fullAddr = document.getElementById('addrFull').value.trim(); 
         let userPhoneId = localStorage.getItem('userPhone');
+        let cleanPhoneId = userPhoneId ? userPhoneId.replace(/\s+/g, '') : "";
         
         let itemsSummary = ""; 
         for(let k in cart) { if(cart[k].qty > 0) itemsSummary += `${cart[k].name} [${cart[k].rName}] (x${cart[k].qty}), `; }
@@ -1100,7 +1104,7 @@
         if(btn) { btn.innerText = "Processing..."; btn.disabled = true; btn.style.backgroundColor = "var(--disabled)"; }
 
         try {
-            await db.collection("orders").add({ code: orderCode, customerName: fullAddressString, email: userPhoneId, items: itemsSummary, total: grandTotalVal, paymentMethod: finalPaymentMethod, status: "Pending", timestamp: Date.now() });
+            await db.collection("orders").add({ code: orderCode, customerName: fullAddressString, email: cleanPhoneId, items: itemsSummary, total: grandTotalVal, paymentMethod: finalPaymentMethod, status: "Pending", timestamp: Date.now() });
             let newOrderObj = { date: new Date().toLocaleString(), items: itemsSummary, total: grandTotalVal, method: finalPaymentMethod, code: orderCode, status: "Pending", timestamp: Date.now() };
             let historyArray = JSON.parse(localStorage.getItem('myOrdersHistory') || "[]");
             historyArray.unshift(newOrderObj); if(historyArray.length > 5) historyArray.pop(); localStorage.setItem('myOrdersHistory', JSON.stringify(historyArray));
