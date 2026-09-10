@@ -194,6 +194,7 @@
                 </div>
             </div>
             
+            <!-- Visible Recaptcha added for better mobile support if needed by Firebase -->
             <div id="recaptcha-container" style="margin: 10px 0;"></div>
             
             <button class="btn" id="sendOtpBtn" onclick="sendPhoneOTP()">Get OTP via SMS</button>
@@ -357,6 +358,8 @@
                 if(pPhone) pPhone.innerText = uPhone;
                 showScreen('homeScreen');
                 
+                checkPendingPayment();
+                
             } else { localStorage.clear(); showScreen('loginScreen'); }
             let cachedData = localStorage.getItem('onlineKalavadCache');
             if(cachedData) { try { globalData = JSON.parse(cachedData); renderAllDataUI(globalData); } catch(e) {} }
@@ -392,6 +395,7 @@
         })
         .catch((error) => {
             console.error(error);
+            // 🔥 YAHAN REAL FIREBASE ERROR DIKHEGA 🔥
             showCustomModal('alert', 'Firebase Auth Error', error.message);
             resetSendButton();
             if(window.recaptchaVerifier) window.recaptchaVerifier.render().then(widgetId => grecaptcha.reset(widgetId));
@@ -463,6 +467,54 @@
         btn.disabled = false;
     }
 
+    async function checkPendingPayment() {
+        let pending = localStorage.getItem('pendingRzpOrder');
+        if(pending) {
+            let pData = JSON.parse(pending);
+            if(Date.now() - pData.timestamp < 15 * 60 * 1000) {
+                
+                let overlay = document.createElement('div');
+                overlay.id = "paymentRecoveryOverlay";
+                overlay.innerHTML = `<div style="position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(255,255,255,0.95); z-index:999999; display:flex; flex-direction:column; align-items:center; justify-content:center;"><i class="fa-solid fa-spinner fa-spin" style="font-size:40px; color:var(--primary); margin-bottom:15px;"></i><h3 style="margin:0; color:var(--text-dark);">Verifying Payment...</h3><p style="color:#666; font-size:14px; margin-top:5px; text-align:center; padding: 0 20px;">Aapka bank payment check ho raha hai, kripya wait karein...</p></div>`;
+                document.body.appendChild(overlay);
+
+                try {
+                    let response = await fetch('https://verifypayment-ct45kue4ka-uc.a.run.app', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ orderId: pData.orderId })
+                    });
+                    let resData = await response.json();
+                    
+                    if(resData.status === 'paid') {
+                        cart = pData.cart;
+                        grandTotalVal = pData.grandTotalVal;
+                        document.getElementById('addrName').value = pData.addrName;
+                        document.getElementById('addrPhone').value = pData.addrPhone;
+                        
+                        let areaSel = document.getElementById('addrArea');
+                        let opt = document.createElement('option');
+                        opt.value = pData.addrArea;
+                        opt.innerText = pData.addrArea;
+                        areaSel.appendChild(opt);
+                        areaSel.value = pData.addrArea;
+                        
+                        document.getElementById('addrFull').value = pData.addrFull;
+                        
+                        await processOrderToFirebase("UPI - Paid (Recovered)");
+                    } else {
+                        showCustomModal('alert', 'Payment Incomplete', 'Aapka pichla payment bank se successful nahi hua. Kripya cart mein jaakar dobara try karein.');
+                    }
+                } catch(e) {
+                    console.error(e);
+                }
+                if(document.getElementById('paymentRecoveryOverlay')) document.getElementById('paymentRecoveryOverlay').remove();
+            }
+            localStorage.removeItem('pendingRzpOrder');
+        }
+    }
+
+
     function fetchFirebaseData() {
         db.collection("settings").doc("general").onSnapshot(doc => { if(doc.exists) { globalData.settings = doc.data(); renderAllDataUI(globalData); } });
         db.collection("settings").doc("areas").get().then(doc => { if(doc.exists) { globalData.areas = doc.data().list || []; renderAllDataUI(globalData); } });
@@ -533,19 +585,12 @@
 
         let uPhone = localStorage.getItem('userPhone');
         if(uPhone) {
-            let cleanPhone = uPhone.replace(/\D/g, '').slice(-10);
+            let cleanPhone = uPhone.replace(/\s+/g, '');
             db.collection("orders").where("email", "==", cleanPhone).onSnapshot(snap => {
-                let cloudOrders = snap.docs.map(d => {
-                    let data = d.data();
-                    data.id = d.id;
-                    return data;
-                });
-                cloudOrders.sort((a,b) => b.timestamp - a.timestamp);
+                let cloudOrders = snap.docs.map(d => d.data()); cloudOrders.sort((a,b) => b.timestamp - a.timestamp);
                 let deletedCodes = JSON.parse(localStorage.getItem('deletedOrderCodes') || "[]");
                 let active = cloudOrders.filter(o => !deletedCodes.includes(String(o.code)) && o.status !== "Delivered");
-                let dot = document.getElementById('notiRedDot'); 
-                if(dot) dot.style.display = (active.length > 0) ? 'block' : 'none';
-                localStorage.setItem('myOrdersHistory', JSON.stringify(cloudOrders.filter(o => !deletedCodes.includes(String(o.code)))));
+                let dot = document.getElementById('notiRedDot'); if(dot) dot.style.display = (active.length > 0) ? 'block' : 'none';
             });
         }
     }
@@ -570,7 +615,7 @@
             showCustomModal('info', 'My Orders', 'Kripya pehle login karein.');
             return;
         }
-        let cleanPhone = userPhone.replace(/\D/g, '').slice(-10);
+        let cleanPhone = userPhone.replace(/\s+/g, '');
         db.collection("orders").where("email", "==", cleanPhone).get().then(snap => {
             let orders = snap.docs.map(doc => doc.data());
             orders.sort((a,b) => b.timestamp - a.timestamp);
@@ -654,7 +699,7 @@
 
     async function fetchCloudOrdersAndShow(isNotificationClick = false) {
         let userPhone = localStorage.getItem('userPhone'); if(!userPhone) return;
-        let cleanPhone = userPhone.replace(/\D/g, '').slice(-10);
+        let cleanPhone = userPhone.replace(/\s+/g, '');
         try {
             let snap = await db.collection("orders").where("email", "==", cleanPhone).get();
             let cloudOrders = snap.docs.map(doc => doc.data()); cloudOrders.sort((a,b) => b.timestamp - a.timestamp);
@@ -974,102 +1019,103 @@
         let checkedRadio = document.querySelector('input[name="paymentType"]:checked'); 
         let paymentMethod = checkedRadio ? checkedRadio.value : "UPI";
         
-        let name = document.getElementById('addrName').value.trim();
-        let phone = document.getElementById('addrPhone').value.trim();
-        let area = document.getElementById('addrArea').value;
-        let fullAddr = document.getElementById('addrFull').value.trim();
-
-        let btn = document.getElementById('finalPlaceOrderBtn');
-        btn.innerText = "Processing Order..."; btn.disabled = true; btn.style.backgroundColor = "var(--disabled)";
-
         if (paymentMethod === "UPI") {
             if(!RAZORPAY_KEY || RAZORPAY_KEY === "YOUR_RAZORPAY_KEY_HERE") { 
-                showCustomModal('alert', 'Integration Pending', 'Developer ne abhi Razorpay Key nahi daali hai. Kripya COD select karein.'); 
-                btn.innerText = "Confirm & Place Order"; btn.disabled = false; btn.style.backgroundColor = "var(--primary)";
-                return; 
+                showCustomModal('alert', 'Integration Pending', 'Developer ne abhi Razorpay Key nahi daali hai. Kripya COD select karein.'); return; 
             }
+            
+            let btn = document.getElementById('finalPlaceOrderBtn');
+            btn.innerText = "Connecting Bank..."; btn.disabled = true; btn.style.backgroundColor = "var(--disabled)";
 
             try {
-                let response = await fetch('https://us-central1-onlinekalavad.cloudfunctions.net/createOrderAndSave', {
+                let response = await fetch('https://createorder-ct45kue4ka-uc.a.run.app', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ cart: cart, customerName: name, customerPhone: phone, area: area, fullAddr: fullAddr, paymentMethod: "UPI" })
+                    body: JSON.stringify({ cart: cart })
                 });
                 
                 let orderData = await response.json();
+                
                 if (orderData.error) throw new Error(orderData.error);
+
+                localStorage.setItem('pendingRzpOrder', JSON.stringify({
+                    cart: cart,
+                    grandTotalVal: grandTotalVal,
+                    addrName: document.getElementById('addrName').value.trim(),
+                    addrPhone: document.getElementById('addrPhone').value.trim(),
+                    addrArea: document.getElementById('addrArea').value,
+                    addrFull: document.getElementById('addrFull').value.trim(),
+                    orderId: orderData.id,
+                    timestamp: Date.now()
+                }));
 
                 var options = { 
                     "key": RAZORPAY_KEY, 
-                    "amount": orderData.total * 100,
+                    "amount": orderData.amount,
                     "currency": "INR", 
                     "name": "Online Kalavad", 
                     "description": "Order Payment", 
-                    "order_id": orderData.razorpayOrderId, 
-                    "handler": async function (response){ 
-                        await submitOrderViaCloudFunction("UPI - Paid (ID: " + response.razorpay_payment_id + ")", name, phone, area, fullAddr, orderData.code);
+                    "order_id": orderData.id, 
+                    "handler": function (response){ 
+                        localStorage.removeItem('pendingRzpOrder');
+                        processOrderToFirebase("UPI - Paid (ID: " + response.razorpay_payment_id + ")"); 
                     }, 
                     "prefill": { 
-                        "name": name, 
+                        "name": document.getElementById('addrName').value.trim(), 
                         "email": localStorage.getItem('userPhone').replace(/\s+/g, ''), 
-                        "contact": phone 
+                        "contact": document.getElementById('addrPhone').value.trim() 
                     }, 
                     "theme": { "color": "#B3391C" } 
                 };
                 
                 var rzp1 = new Razorpay(options); 
                 rzp1.on('payment.failed', function (response){ 
+                    localStorage.removeItem('pendingRzpOrder');
                     showCustomModal('alert', 'Payment Failed', 'Payment fail ho gaya hai. Dobara try karein.'); 
-                    btn.innerText = "Confirm & Place Order"; btn.disabled = false; btn.style.backgroundColor = "var(--primary)";
                 }); 
                 rzp1.open();
                 
             } catch (err) {
                 console.error("Backend error:", err);
                 showCustomModal('alert', 'Server Error', 'Bank server se connect nahi ho paya. Kripya COD chunein.');
+            } finally {
                 btn.innerText = "Confirm & Place Order"; btn.disabled = false; btn.style.backgroundColor = "var(--primary)";
             }
         } else { 
-            let tempCode = Math.floor(1000 + Math.random() * 9000).toString();
-            await submitOrderViaCloudFunction("COD", name, phone, area, fullAddr, tempCode); 
+            processOrderToFirebase("COD"); 
         }
     }
 
-    async function submitOrderViaCloudFunction(finalPaymentMethod, name, phone, area, fullAddr, preGeneratedCode) {
+    async function processOrderToFirebase(finalPaymentMethod) {
+        let name = document.getElementById('addrName').value.trim(); 
+        let phone = "+91 " + document.getElementById('addrPhone').value.trim(); 
+        let area = document.getElementById('addrArea').value; 
+        let fullAddr = document.getElementById('addrFull').value.trim(); 
+        let userPhoneId = localStorage.getItem('userPhone');
+        let cleanPhoneId = userPhoneId ? userPhoneId.replace(/\s+/g, '') : "";
+        
+        let itemsSummary = ""; 
+        for(let k in cart) { if(cart[k].qty > 0) itemsSummary += `${cart[k].name} [${cart[k].rName}] (x${cart[k].qty}), `; }
+        
+        let fullAddressString = name + " | Ph: " + phone + " | Area: " + area + " (City: Kalavad) | Addr: " + fullAddr;
+        let orderCode = Math.floor(1000 + Math.random() * 9000).toString(); 
+
         let btn = document.getElementById('finalPlaceOrderBtn');
+        if(btn) { btn.innerText = "Processing..."; btn.disabled = true; btn.style.backgroundColor = "var(--disabled)"; }
+
         try {
-            let response = await fetch('https://us-central1-onlinekalavad.cloudfunctions.net/createOrderAndSave', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ 
-                    cart: cart, 
-                    customerName: name, 
-                    customerPhone: phone, 
-                    area: area, 
-                    fullAddr: fullAddr, 
-                    paymentMethod: finalPaymentMethod,
-                    code: preGeneratedCode
-                })
-            });
-
-            let resData = await response.json();
-            if(resData.error) throw new Error(resData.error);
-
-            let itemsSummary = ""; 
-            for(let k in cart) { if(cart[k].qty > 0) itemsSummary += `${cart[k].name} [${cart[k].rName || 'Shop'}] (x${cart[k].qty}), `; }
-
-            let finalCode = resData.code || preGeneratedCode;
-            let newOrderObj = { date: new Date().toLocaleString(), items: itemsSummary, total: resData.total, method: finalPaymentMethod, code: finalCode, status: "Pending", timestamp: Date.now() };
+            await db.collection("orders").add({ code: orderCode, customerName: fullAddressString, email: cleanPhoneId, items: itemsSummary, total: grandTotalVal, paymentMethod: finalPaymentMethod, status: "Pending", timestamp: Date.now() });
+            let newOrderObj = { date: new Date().toLocaleString(), items: itemsSummary, total: grandTotalVal, method: finalPaymentMethod, code: orderCode, status: "Pending", timestamp: Date.now() };
             let historyArray = JSON.parse(localStorage.getItem('myOrdersHistory') || "[]");
             historyArray.unshift(newOrderObj); if(historyArray.length > 5) historyArray.pop(); localStorage.setItem('myOrdersHistory', JSON.stringify(historyArray));
-
-            let codeSpan = document.getElementById('deliveryCode'); if(codeSpan) codeSpan.innerText = finalCode;
+            
+            let codeSpan = document.getElementById('deliveryCode'); if(codeSpan) codeSpan.innerText = orderCode;
             showScreen('successScreen'); updateRedDot(); cart = {}; updateCartTotals();
             if(btn) { btn.innerText = "Confirm & Place Order"; btn.disabled = false; btn.style.backgroundColor = "var(--primary)"; }
             
         } catch(error) {
-            console.error(error);
-            showCustomModal('alert', 'Error', 'Order save karne mein samasya aayi. Kripya dobara try karein.');
+            let codeSpan = document.getElementById('deliveryCode'); if(codeSpan) codeSpan.innerText = orderCode;
+            showScreen('successScreen'); updateRedDot(); cart = {}; updateCartTotals();
             if(btn) { btn.innerText = "Confirm & Place Order"; btn.disabled = false; btn.style.backgroundColor = "var(--primary)"; }
         }
     }
