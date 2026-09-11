@@ -52,7 +52,7 @@
     .content-area { padding: 0 15px; }
     .banners-wrapper { display: flex; overflow-x: auto; scroll-snap-type: x mandatory; gap: 10px; padding-bottom: 5px; margin-bottom: 10px; scrollbar-width: none; }
     .banners-wrapper::-webkit-scrollbar { display: none; }
-    .banner-slide { flex: 0 0 100%; height: 150px; border-radius: 15px; scroll-snap-align: center; background-size: cover; background-position: center; position: relative; overflow: hidden; cursor: pointer; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+    .banner-slide { flex: 0 0 100%; height: 150px; min-height: 150px; max-height: 150px; border-radius: 15px; scroll-snap-align: center; background-size: cover; background-position: center; position: relative; overflow: hidden; cursor: pointer; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
     .banner-dots { display: flex; justify-content: center; gap: 6px; margin-bottom: 20px; }
     .banner-dots .dot { width: 8px; height: 8px; border-radius: 50%; background: #ccc; transition: 0.3s ease; }
     .banner-dots .dot.active { background: var(--primary); width: 16px; border-radius: 4px; }
@@ -100,11 +100,18 @@
     .item-actions-grid { display: flex; align-items: center; justify-content: space-between; border-top: 1px solid #f1f2f6; padding-top: 6px; }
     .item-actions-grid i { font-size: 22px; color: var(--primary); cursor: pointer; }
 
-    .bottom-panel { position: fixed; bottom: 0; left: 50%; transform: translateX(-50%); width: 100%; max-width: 400px; background: white; padding: 12px 18px; box-sizing: border-box; box-shadow: 0 -4px 15px rgba(0,0,0,0.08); border-top-left-radius: 18px; border-top-right-radius: 18px; display: none; align-items: center; justify-content: space-between; z-index: 50; transition: 0.3s ease; }
-    .bottom-panel-left { display: flex; flex-direction: column; }
-    .bottom-panel-left span:first-child { font-size: 12px; color: #666; font-weight: 500; }
-    .bottom-panel-left span:last-child { font-size: 18px; font-weight: bold; color: var(--text-dark); }
-    .bottom-panel .btn { width: auto; padding: 10px 24px; margin: 0; font-size: 15px; border-radius: 10px; }
+    /* Updated Bottom Panel Design matching reference image */
+    .bottom-panel { position: fixed; bottom: 0; left: 50%; transform: translateX(-50%); width: 100%; max-width: 400px; background: white; padding: 12px 18px; box-sizing: border-box; box-shadow: 0 -4px 15px rgba(0,0,0,0.08); border-top-left-radius: 24px; border-top-right-radius: 24px; display: none; align-items: center; justify-content: space-between; z-index: 50; transition: 0.3s ease; }
+    .bottom-panel-left { display: flex; align-items: center; gap: 12px; cursor: pointer; }
+    .cart-icon-wrapper { position: relative; display: flex; align-items: center; }
+    .cart-icon-wrapper i { font-size: 24px; color: #333; }
+    .cart-badge { position: absolute; top: -6px; right: -8px; background: #e74c3c; color: white; font-size: 11px; font-weight: bold; width: 18px; height: 18px; border-radius: 50%; display: flex; align-items: center; justify-content: center; border: 2px solid white; }
+    .cart-divider { width: 1px; height: 28px; background: #ddd; }
+    .cart-info-text { display: flex; flex-direction: column; }
+    .cart-info-text span:first-child { font-size: 12px; color: #666; font-weight: 600; line-height: 1.1; }
+    .cart-info-text span:last-child { font-size: 18px; font-weight: bold; color: #1a1a1a; line-height: 1.2; }
+    
+    .bottom-panel .btn { width: auto; padding: 12px 22px; margin: 0; font-size: 15px; border-radius: 25px; background-color: var(--primary); display: flex; align-items: center; gap: 8px; font-weight: bold; letter-spacing: 0.3px; }
 
     .payment-option { border: 1px solid #ccc; padding: 15px; margin-bottom: 15px; border-radius: 15px; display: flex; align-items: center; cursor: pointer; background: white;}
     .payment-option input { margin-right: 15px; width: 20px; height: 20px; accent-color: var(--primary); }
@@ -257,9 +264,16 @@
         </div>
         
         <div class="bottom-panel" id="bottomPanel">
-            <div class="bottom-panel-left">
-                <span id="itemTotal">0 Items</span>
-                <span id="grandTotal">₹0</span>
+            <div class="bottom-panel-left" onclick="openCartItemsPopup()">
+                <div class="cart-icon-wrapper">
+                    <i class="fa-solid fa-cart-shopping"></i>
+                    <div class="cart-badge" id="cartBadgeCount">0</div>
+                </div>
+                <div class="cart-divider"></div>
+                <div class="cart-info-text">
+                    <span id="itemTotal">0 Items</span>
+                    <span id="grandTotal">₹0</span>
+                </div>
             </div>
             <button class="btn" onclick="goToInvoice()">Place Order</button>
         </div>
@@ -348,7 +362,6 @@
     window.onload = function() {
         window.recaptchaVerifier = new firebase.auth.RecaptchaVerifier('recaptcha-container', { 'size': 'normal' });
 
-        // FIX: Pehle check karenge ki localStorage me login stored hai ya nahi, taaki refresh par turant home screen dikhe
         if (localStorage.getItem('isLoggedIn') === 'true') {
             let pName = document.getElementById('sidebarProfileName'); 
             let pPhone = document.getElementById('sidebarProfilePhone');
@@ -380,7 +393,6 @@
                 if(cachedData) { try { globalData = JSON.parse(cachedData); renderAllDataUI(globalData); } catch(e) {} }
                 fetchFirebaseData(); 
             } else { 
-                // Agar localStorage me pehle se logged-in nahi hai, tabhi login screen dikhegi
                 if (localStorage.getItem('isLoggedIn') !== 'true') {
                     localStorage.clear(); 
                     showScreen('loginScreen'); 
@@ -594,7 +606,7 @@
                         <div class="trending-actions-grid">
                             <i class="fa-solid fa-circle-minus" onclick="modifyCart('${safeName}', ${t.price}, -1, '${rName}'); updateTrendingQty('${uniqueKey}')"></i>
                             <span id="trend_qty_${uniqueKey}" style="font-weight: bold; font-size: 14px;">${currentQty}</span>
-                            <i class="fa-solid fa-circle-plus" onclick="modifyCart('${safeName}', ${t.price}, 1, '${rName}'); updateTrendingQty('${uniqueKey}')"></i>
+                            <i class="fa-solid fa-circle-plus" onclick="modifyCart('${safeName}', ${t.price}, 1, '${safeName}', '${rName}'); updateTrendingQty('${uniqueKey}')"></i>
                         </div>
                     </div>
                 `;
@@ -764,6 +776,46 @@
 
     function closeModal() { document.getElementById('customModalOverlay').classList.remove('show'); setTimeout(() => { document.getElementById('modalIcon').style.color = "var(--primary)"; }, 300); }
     function closeItemsPopupAndReset() { closeModal(); showAllItems(); }
+
+    function openCartItemsPopup() {
+        let cartItemsHtml = `<div style="display:flex; flex-direction:column; gap:10px; max-height:300px; overflow-y:auto;">`;
+        let hasItems = false;
+        let totalQtyCount = 0;
+        for(let k in cart) {
+            if(cart[k].qty > 0) {
+                hasItems = true;
+                totalQtyCount += cart[k].qty;
+                let itemName = cart[k].name;
+                let itemPrice = cart[k].price;
+                let itemQty = cart[k].qty;
+                let safeName = itemName.replace(/'/g, "\'");
+                cartItemsHtml += `
+                    <div style="display:flex; align-items:center; justify-content:space-between; background:white; padding:10px; border-radius:12px; border:1px solid #eee; gap:10px;">
+                        <div style="flex-grow:1; text-align:left;">
+                            <b style="font-size:14px; color:var(--text-dark);">${itemName}</b><br>
+                            <span style="color:var(--success); font-weight:bold; font-size:13px;">₹${itemPrice * itemQty}</span>
+                        </div>
+                        <div style="display:flex; align-items:center; gap:8px;">
+                            <i class="fa-solid fa-circle-minus" style="font-size:20px; color:var(--primary); cursor:pointer;" onclick="modifyCart('${safeName}', ${itemPrice}, -1); openCartItemsPopup();"></i>
+                            <span style="font-weight:bold; font-size:14px;">${itemQty}</span>
+                            <i class="fa-solid fa-circle-plus" style="font-size:20px; color:var(--primary); cursor:pointer;" onclick="modifyCart('${safeName}', ${itemPrice}, 1); openCartItemsPopup();"></i>
+                            <i class="fa-solid fa-xmark" style="font-size:18px; color:#d9534f; cursor:pointer; margin-left:8px;" onclick="modifyCart('${safeName}', ${itemPrice}, -${itemQty}); openCartItemsPopup();" title="Remove"></i>
+                        </div>
+                    </div>`;
+            }
+        }
+        cartItemsHtml += `</div>`;
+        let badgeElem = document.getElementById('cartBadgeCount');
+        if(badgeElem) badgeElem.innerText = totalQtyCount;
+
+        if(!hasItems) {
+            showCustomModal('info', 'Cart is Empty', 'Aapke cart me koi item nahi hai.');
+        } else {
+            showCustomModal('items_list', '', cartItemsHtml);
+            let modalTitle = document.getElementById('modalTitle');
+            if(modalTitle) modalTitle.innerText = "Selected Items in Cart";
+        }
+    }
 
     function openItemDetailModal(itemName, itemDesc, itemPrice, itemImg, rName) {
         let uniqueKey = itemName.replace(/\s+/g, '_'); let currentQty = cart[uniqueKey] ? cart[uniqueKey].qty : 0;
@@ -1026,6 +1078,8 @@
             totalQtyCount += cart[k].qty; 
         } 
         let elIT = document.getElementById('itemTotal'); if(elIT) elIT.innerText = totalQtyCount + (totalQtyCount === 1 ? " Item" : " Items"); 
+        let badgeElem = document.getElementById('cartBadgeCount'); if(badgeElem) badgeElem.innerText = totalQtyCount;
+        
         grandTotalVal = itemTotal > 0 ? (itemTotal + delCharge + packCharge) : 0; 
         let elGT = document.getElementById('grandTotal'); if(elGT) elGT.innerText = "₹" + itemTotal; 
         let elITot = document.getElementById('invTotal'); if(elITot) elITot.innerText = "₹" + grandTotalVal; 
