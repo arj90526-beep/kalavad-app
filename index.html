@@ -348,6 +348,21 @@
     window.onload = function() {
         window.recaptchaVerifier = new firebase.auth.RecaptchaVerifier('recaptcha-container', { 'size': 'normal' });
 
+        // FIX: Pehle check karenge ki localStorage me login stored hai ya nahi, taaki refresh par turant home screen dikhe
+        if (localStorage.getItem('isLoggedIn') === 'true') {
+            let pName = document.getElementById('sidebarProfileName'); 
+            let pPhone = document.getElementById('sidebarProfilePhone');
+            if(pName) pName.innerText = localStorage.getItem('userName') || 'User'; 
+            if(pPhone) pPhone.innerText = localStorage.getItem('userPhone') || '';
+            
+            showScreen('homeScreen');
+            checkPendingPayment();
+            
+            let cachedData = localStorage.getItem('onlineKalavadCache');
+            if(cachedData) { try { globalData = JSON.parse(cachedData); renderAllDataUI(globalData); } catch(e) {} }
+            fetchFirebaseData();
+        }
+
         firebase.auth().onAuthStateChanged((user) => {
             if (user) {
                 localStorage.setItem('isLoggedIn', 'true');
@@ -365,8 +380,11 @@
                 if(cachedData) { try { globalData = JSON.parse(cachedData); renderAllDataUI(globalData); } catch(e) {} }
                 fetchFirebaseData(); 
             } else { 
-                localStorage.clear(); 
-                showScreen('loginScreen'); 
+                // Agar localStorage me pehle se logged-in nahi hai, tabhi login screen dikhegi
+                if (localStorage.getItem('isLoggedIn') !== 'true') {
+                    localStorage.clear(); 
+                    showScreen('loginScreen'); 
+                }
             }
         });
     };
@@ -576,7 +594,7 @@
                         <div class="trending-actions-grid">
                             <i class="fa-solid fa-circle-minus" onclick="modifyCart('${safeName}', ${t.price}, -1, '${rName}'); updateTrendingQty('${uniqueKey}')"></i>
                             <span id="trend_qty_${uniqueKey}" style="font-weight: bold; font-size: 14px;">${currentQty}</span>
-                            <i class="fa-solid fa-circle-plus" onclick="modifyCart('${safeName}', ${t.price}, 1, '${safeName}', '${rName}'); updateTrendingQty('${uniqueKey}')"></i>
+                            <i class="fa-solid fa-circle-plus" onclick="modifyCart('${safeName}', ${t.price}, 1, '${rName}'); updateTrendingQty('${uniqueKey}')"></i>
                         </div>
                     </div>
                 `;
@@ -696,7 +714,6 @@
         showCustomModal('info', title, text);
     }
 
-    // YAHAN LOGOUT FUNCTION UPDATE KIYA GAYA HAI:
     function logoutUser() {
         firebase.auth().signOut().then(() => {
             localStorage.clear();
