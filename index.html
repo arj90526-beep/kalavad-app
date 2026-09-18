@@ -1251,17 +1251,111 @@
         }
     }
 </script>
+<style>
+    /* फुल स्क्रीन डार्क बैकग्राउंड */
+    .app-popup {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100vw;
+        height: 100vh;
+        background-color: rgba(0, 0, 0, 0.8);
+        display: none; /* शुरू में छुपा रहेगा */
+        align-items: center;
+        justify-content: center;
+        z-index: 99999;
+        font-family: sans-serif;
+    }
+    /* बीच में दिखने वाला सफेद बॉक्स */
+    .popup-content {
+        background-color: white;
+        width: 85%;
+        max-width: 400px;
+        padding: 30px 20px;
+        border-radius: 12px;
+        text-align: center;
+        position: relative;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+    }
+    /* क्रॉस (X) बटन */
+    .close-btn {
+        position: absolute;
+        top: 10px;
+        right: 15px;
+        background: none;
+        border: none;
+        font-size: 28px;
+        color: #555;
+        cursor: pointer;
+        padding: 0;
+        line-height: 1;
+    }
+    .popup-content h2 {
+        margin-top: 0;
+        font-size: 22px;
+        color: #333;
+    }
+    .popup-content p {
+        color: #666;
+        font-size: 14px;
+        margin-bottom: 25px;
+    }
+    /* बड़ा डाउनलोड बटन */
+    .download-btn {
+        background-color: #007bff;
+        color: white;
+        border: none;
+        padding: 12px 20px;
+        font-size: 16px;
+        font-weight: bold;
+        border-radius: 8px;
+        width: 100%;
+        cursor: pointer;
+    }
+</style>
+
+<div class="app-popup" id="appPopup">
+    <div class="popup-content">
+        <button class="close-btn" id="closeBtn">&times;</button>
+        <h2>App Download करें</h2>
+        <p>बेहतर स्पीड और फुल स्क्रीन अनुभव के लिए हमारी एप्लीकेशन इंस्टॉल करें।</p>
+        <button class="download-btn" id="downloadBtn">Download App</button>
+    </div>
+</div>
+
 <script>
-    // Service Worker को रजिस्टर करने का कोड
+    const popup = document.getElementById('appPopup');
+    const closeBtn = document.getElementById('closeBtn');
+    const downloadBtn = document.getElementById('downloadBtn');
+    let deferredPrompt;
+
+    // X बटन दबाने पर पॉपअप बंद होगा
+    closeBtn.addEventListener('click', () => {
+        popup.style.display = 'none';
+    });
+
+    // ब्राउज़र जब ऐप इंस्टॉल करने के लिए तैयार होगा, तब यह फुल स्क्रीन पॉपअप दिखेगा
+    window.addEventListener('beforeinstallprompt', (e) => {
+        e.preventDefault();
+        deferredPrompt = e;
+        popup.style.display = 'flex'; // पॉपअप को स्क्रीन पर दिखाएं
+    });
+
+    downloadBtn.addEventListener('click', async () => {
+        if (deferredPrompt) {
+            deferredPrompt.prompt();
+            const { outcome } = await deferredPrompt.userChoice;
+            deferredPrompt = null;
+            popup.style.display = 'none';
+        } else {
+            alert("ब्राउज़र अभी तैयार नहीं है, कृपया पेज को रिफ्रेश करें।");
+        }
+    });
+
+    // Service Worker Registration
     if ('serviceWorker' in navigator) {
         window.addEventListener('load', () => {
-            navigator.serviceWorker.register('sw.js')
-            .then(registration => {
-                console.log('Service Worker रजिस्टर हो गया!', registration.scope);
-            })
-            .catch(error => {
-                console.log('Registration फेल हो गया:', error);
-            });
+            navigator.serviceWorker.register('sw.js');
         });
     }
 </script>
