@@ -184,6 +184,9 @@
             <li onclick="logoutUser()" style="margin-top: auto; border-top: 1px solid #ddd; color: var(--primary);">
                 <i class="fa-solid fa-right-from-bracket"></i> Logout
             </li>
+            <li onclick="installAppManually()" style="background-color: #007bff; color: white; margin: 10px 15px 20px 15px; border-radius: 12px; text-align: center; font-weight: bold; border: none; box-shadow: 0 4px 6px rgba(0,0,0,0.1); padding: 15px 20px;">
+            <i class="fa-solid fa-mobile-screen-button" style="color: white; margin-right: 8px;"></i> Download App
+        </li>
         </ul>
     </div>
     
@@ -1352,11 +1355,25 @@
         }
     });
 
-    // Service Worker Registration
+// Service Worker Registration
     if ('serviceWorker' in navigator) {
         window.addEventListener('load', () => {
             navigator.serviceWorker.register('sw.js');
         });
+    }
+
+    // Sidebar wale button se app install karne ka function
+    async function installAppManually() {
+        if (deferredPrompt) {
+            deferredPrompt.prompt();
+            const { outcome } = await deferredPrompt.userChoice;
+            deferredPrompt = null;
+            const fsPopup = document.getElementById('appPopup');
+            if (fsPopup) fsPopup.style.display = 'none';
+            if (typeof toggleMenu === 'function') toggleMenu();
+        } else {
+            alert("ऐप डाउनलोड करने के लिए तैयार है, कृपया पेज को हल्का सा ऊपर-नीचे स्क्रॉल करें और फिर से क्लिक करें।");
+        }
     }
 </script>
 </body>
