@@ -6,6 +6,7 @@
 <title>Online Kalavad</title>
 <link rel="icon" type="image/x-icon" href="favicon.ico?v=2">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<link rel="manifest" href="manifest.json">
 <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore-compat.js"></script>
@@ -1248,6 +1249,20 @@
             showCustomModal('alert', 'Order Failed', error.message || 'Kuch galat ho gaya, dobara try karein.');
             if(btn) { btn.innerText = "Confirm & Place Order"; btn.disabled = false; btn.style.backgroundColor = "var(--primary)"; }
         }
+    }
+</script>
+<script>
+    // Service Worker को रजिस्टर करने का कोड
+    if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+            navigator.serviceWorker.register('sw.js')
+            .then(registration => {
+                console.log('Service Worker रजिस्टर हो गया!', registration.scope);
+            })
+            .catch(error => {
+                console.log('Registration फेल हो गया:', error);
+            });
+        });
     }
 </script>
 </body>
