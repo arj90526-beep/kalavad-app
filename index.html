@@ -114,7 +114,7 @@
     
     .bottom-panel .btn { width: auto; padding: 12px 22px; margin: 0; font-size: 15px; border-radius: 25px; background-color: var(--primary); display: flex; align-items: center; gap: 8px; font-weight: bold; letter-spacing: 0.3px; }
 
-    .payment-option { border: 1px solid #ccc; padding: 15px; margin-bottom: 15px; border-radius: 15px; display: flex; align-items: center; cursor: pointer; background: white; transition: opacity 0.3s ease;}
+    .payment-option { border: 1px solid #ccc; padding: 15px; margin-bottom: 15px; border-radius: 15px; display: flex; align-items: center; cursor: pointer; background: white;}
     .payment-option input { margin-right: 15px; width: 20px; height: 20px; accent-color: var(--primary); }
     .payment-option span { font-weight: 500; font-size: 16px; }
 
@@ -798,9 +798,9 @@
                             <span style="color:var(--success); font-weight:bold; font-size:13px;">₹${itemPrice * itemQty}</span>
                         </div>
                         <div style="display:flex; align-items:center; gap:8px;">
-                            <i class="fa-solid fa-circle-minus" style="font-size:20px; color:var(--primary); cursor:pointer;" onclick="modifyCart('${safeName}',${itemPrice}, -1); openCartItemsPopup();"></i>
+                            <i class="fa-solid fa-circle-minus" style="font-size:20px; color:var(--primary); cursor:pointer;" onclick="modifyCart('${safeName}', ${itemPrice}, -1); openCartItemsPopup();"></i>
                             <span style="font-weight:bold; font-size:14px;">${itemQty}</span>
-                            <i class="fa-solid fa-circle-plus" style="font-size:20px; color:var(--primary); cursor:pointer;" onclick="modifyCart('${safeName}',${itemPrice}, 1); openCartItemsPopup();"></i>
+                            <i class="fa-solid fa-circle-plus" style="font-size:20px; color:var(--primary); cursor:pointer;" onclick="modifyCart('${safeName}', ${itemPrice}, 1); openCartItemsPopup();"></i>
                             <i class="fa-solid fa-xmark" style="font-size:18px; color:#d9534f; cursor:pointer; margin-left:8px;" onclick="modifyCart('${safeName}', ${itemPrice}, -${itemQty}); openCartItemsPopup();" title="Remove"></i>
                         </div>
                     </div>`;
@@ -822,7 +822,7 @@
     function openItemDetailModal(itemName, itemDesc, itemPrice, itemImg, rName) {
         let uniqueKey = itemName.replace(/\s+/g, '_'); let currentQty = cart[uniqueKey] ? cart[uniqueKey].qty : 0;
         let safeName = itemName.replace(/'/g, "\'"); let safeRName = rName.replace(/'/g, "\'"); let safeDesc = (itemDesc || '').replace(/'/g, "\'");
-        let html = `<div class="item-popup-body"><div class="item-popup-card-style"><div class="item-popup-img"><img src="${itemImg}"></div><div class="item-popup-info"><h4>${itemName}</h4><p>${itemDesc || ''}</p><div class="popup-price">₹${itemPrice}</div><div class="popup-rest">${rName}</div></div></div><div class="item-popup-actions"><i class="fa-solid fa-circle-minus" onclick="modifyCart('${safeName}',${itemPrice}, -1, '${safeRName}'); updatePopupQtyDisplay('${uniqueKey}'); updateTrendingQty('${uniqueKey}')"></i><span id="popup_modal_qty_${uniqueKey}" style="font-weight: bold; font-size: 18px;">${currentQty}</span><i class="fa-solid fa-circle-plus" onclick="modifyCart('${safeName}', ${itemPrice}, 1, '${safeRName}'); updatePopupQtyDisplay('${uniqueKey}'); updateTrendingQty('${uniqueKey}')"></i></div></div>`;
+        let html = `<div class="item-popup-body"><div class="item-popup-card-style"><div class="item-popup-img"><img src="${itemImg}"></div><div class="item-popup-info"><h4>${itemName}</h4><p>${itemDesc || ''}</p><div class="popup-price">₹${itemPrice}</div><div class="popup-rest">${rName}</div></div></div><div class="item-popup-actions"><i class="fa-solid fa-circle-minus" onclick="modifyCart('${safeName}', ${itemPrice}, -1, '${safeRName}'); updatePopupQtyDisplay('${uniqueKey}'); updateTrendingQty('${uniqueKey}')"></i><span id="popup_modal_qty_${uniqueKey}" style="font-weight: bold; font-size: 18px;">${currentQty}</span><i class="fa-solid fa-circle-plus" onclick="modifyCart('${safeName}', ${itemPrice}, 1, '${safeRName}'); updatePopupQtyDisplay('${uniqueKey}'); updateTrendingQty('${uniqueKey}')"></i></div></div>`;
         showCustomModal('item_detail', 'Item Details', html);
     }
     function updatePopupQtyDisplay(uniqueKey) { let pQtyElem = document.getElementById('popup_modal_qty_' + uniqueKey); if(pQtyElem) pQtyElem.innerText = cart[uniqueKey] ? cart[uniqueKey].qty : 0; }
@@ -844,7 +844,7 @@
             ordersArray.forEach((order) => {
                 let statusHtml = "";
                 if(order.status === "Pending") statusHtml = `<span style="color:#e67e22; font-weight:bold;"><i class="fa-solid fa-clock"></i> Pending (Searching Rider...)</span>`;
-                else if(order.status === "Accepted") statusHtml = `<div style="background:#d4edda; color:#155724; padding:8px; border-radius:5px; margin-top:5px; border:1px solid #c3e6cb;"><b style="font-size:14px;"><i class="fa-solid fa-motorcycle"></i> Order Accepted!</b><br><span style="color:#555;">Rider: ${order.dbName \vert{}\vert{} 'Assigned'}</span><br><span style="color:var(--primary); font-weight:bold;"><i class="fa-solid fa-phone"></i> ${order.dbPhone || ''}</span></div>`;
+                else if(order.status === "Accepted") statusHtml = `<div style="background:#d4edda; color:#155724; padding:8px; border-radius:5px; margin-top:5px; border:1px solid #c3e6cb;"><b style="font-size:14px;"><i class="fa-solid fa-motorcycle"></i> Order Accepted!</b><br><span style="color:#555;">Rider: ${order.dbName || 'Assigned'}</span><br><span style="color:var(--primary); font-weight:bold;"><i class="fa-solid fa-phone"></i> ${order.dbPhone || ''}</span></div>`;
                 else if(order.status === "Rider_Rejected") statusHtml = `<span style="color:#e67e22; font-weight:bold;"><i class="fa-solid fa-clock"></i> Re-assigning Rider...</span>`;
                 else if(order.status === "Rejected") statusHtml = `<div style="background:#f8d7da; color:#721c24; padding:8px; border-radius:5px; margin-top:5px;"><b style="font-size:14px;"><i class="fa-solid fa-xmark"></i> Order Rejected</b><br><span style="color:#555;">Reason: ${order.rejectReason || 'Shop busy'}</span></div>`;
                 else if(order.status === "Delivered") statusHtml = `<span style="color:var(--success); font-weight:bold;"><i class="fa-solid fa-check-circle"></i> Delivered Successfully</span>`;
