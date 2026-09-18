@@ -1376,5 +1376,53 @@
         }
     }
 </script>
+<!-- EXIT APP CONFIRMATION POPUP (BACK BUTTON HANDLER) -->
+<style>
+    .exit-overlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background-color: rgba(0,0,0,0.7); display: none; align-items: center; justify-content: center; z-index: 1000000; }
+    .exit-modal { background: white; width: 80%; max-width: 320px; padding: 25px 20px; border-radius: 16px; text-align: center; box-shadow: 0 10px 30px rgba(0,0,0,0.2); }
+    .exit-modal h3 { margin: 0 0 10px 0; color: #333; font-size: 20px; }
+    .exit-modal p { color: #666; font-size: 15px; margin-bottom: 25px; line-height: 1.4; }
+    .exit-btn-group { display: flex; gap: 15px; justify-content: center; }
+    .btn-exit { flex: 1; padding: 12px; border-radius: 25px; font-weight: bold; cursor: pointer; border: none; font-size: 15px; }
+    .btn-exit-cancel { background: #e2e8f0; color: #334155; }
+    .btn-exit-confirm { background: #ef4444; color: white; }
+</style>
+
+<div class="exit-overlay" id="exitAppOverlay">
+    <div class="exit-modal">
+        <h3>Exit Application</h3>
+        <p>Are you sure you want to exit the application?</p>
+        <div class="exit-btn-group">
+            <button class="btn-exit btn-exit-cancel" onclick="cancelExit()">No</button>
+            <button class="btn-exit btn-exit-confirm" onclick="confirmExit()">Yes, Exit</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    // App khulte hi ek dummy history state add kar dete hain taaki back button detect ho sake
+    window.history.pushState({ page: 1 }, "", "");
+
+    // Jab user mobile ka back button dabayega, tab ye function chalega
+    window.onpopstate = function(event) {
+        // Back dabane par popup dikhayein
+        document.getElementById('exitAppOverlay').style.display = 'flex';
+        // Lekin app band hone se rokne ke liye turant wapas state push kar dein
+        window.history.pushState({ page: 1 }, "", "");
+    };
+
+    // "No" dabane par popup chhup jayega, aur app chalti rahegi
+    function cancelExit() {
+        document.getElementById('exitAppOverlay').style.display = 'none';
+    }
+
+    // "Yes" dabane par, app ya tab close ho jayegi
+    function confirmExit() {
+        // Chrome browser mein sidha PWA app close karne ke liye history ka last step use karte hain
+        window.history.go(-2); // Ye app ko exit command bhejta hai
+        // Agar PWA hai aur device allow kare, toh close bhi kar dega
+        setTimeout(() => { window.close(); }, 100); 
+    }
+</script>
 </body>
 </html>
