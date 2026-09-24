@@ -743,7 +743,16 @@
         });
     }
 
-    function showScreen(screenId) { document.querySelectorAll('.screen').forEach(s => s.classList.add('hidden')); let target = document.getElementById(screenId); if(target) target.classList.remove('hidden'); }
+function showScreen(screenId, addToHistory = true) { 
+    document.querySelectorAll('.screen').forEach(s => s.classList.add('hidden')); 
+    let target = document.getElementById(screenId); 
+    if(target) target.classList.remove('hidden'); 
+
+    // Mobile ki history me screen ko save karein
+    if(addToHistory) {
+        window.history.pushState({ screen: screenId }, "", "#" + screenId);
+    }
+}
 
     async function fetchCloudOrdersAndShow(isNotificationClick = false) {
         let userPhone = localStorage.getItem('userPhone'); if(!userPhone) return;
@@ -1403,13 +1412,38 @@
     // App khulte hi ek dummy history state add kar dete hain taaki back button detect ho sake
     window.history.pushState({ page: 1 }, "", "");
 
-    // Jab user mobile ka back button dabayega, tab ye function chalega
-    window.onpopstate = function(event) {
-        // Back dabane par popup dikhayein
-        document.getElementById('exitAppOverlay').style.display = 'flex';
-        // Lekin app band hone se rokne ke liye turant wapas state push kar dein
-        window.history.pushState({ page: 1 }, "", "");
-    };
+window.addEventListener('popstate', function(event) {
+    // 1. Agar Exit Popup khula hai, to use pehle band karein
+    let exitPopup = document.getElementById('exitAppOverlay');
+    if(exitPopup && exitPopup.style.display === 'flex') {
+        exitPopup.style.display = 'none';
+        return;
+    }
+
+    // 2. Agar koi dusra Modal Overlay khula hai
+    let modal = document.getElementById('customModalOverlay');
+    if(modal && modal.classList.contains('show')) {
+        closeModal();
+        window.history.forward();
+        return;
+    }
+
+    // 3. Agar Sidebar menu khula hai
+    let sidebar = document.getElementById('sidebar');
+    if(sidebar && sidebar.classList.contains('open')) {
+        toggleMenu();
+        window.history.forward();
+        return;
+    }
+
+    // 4. Pichle screen par jane ke liye
+    if(event.state && event.state.screen) {
+        showScreen(event.state.screen, false);
+    } else {
+        // Agar koi history nahi hai to Exit App overlay dikhayein
+        if(exitPopup) exitPopup.style.display = 'flex';
+    }
+});
 
     // "No" dabane par popup chhup jayega, aur app chalti rahegi
     function cancelExit() {
