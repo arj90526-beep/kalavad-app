@@ -126,7 +126,9 @@
     .custom-modal-overlay.show { opacity: 1; pointer-events: auto; }
     .custom-modal { background: white; width: 90%; max-width: 360px; border-radius: 20px; padding: 25px; box-shadow: 0 10px 30px rgba(0,0,0,0.2); transform: translateY(20px); transition: transform 0.3s ease; text-align: center; position: relative; }
     .custom-modal-overlay.show .custom-modal { transform: translateY(0); }
-    .modal-close-btn { position: absolute; top: 15px; right: 15px; background: #eee; border: none; width: 30px; height: 30px; border-radius: 50%; font-size: 14px; font-weight: bold; cursor: pointer; color: #555; display: flex; align-items: center; justify-content: center; }
+    .modal-close-btn {
+display: none !important;
+ position: absolute; top: 15px; right: 15px; background: #eee; border: none; width: 30px; height: 30px; border-radius: 50%; font-size: 14px; font-weight: bold; cursor: pointer; color: #555; display: flex; align-items: center; justify-content: center; }
     .modal-icon { font-size: 40px; color: var(--primary); margin-bottom: 15px; }
     .modal-title { font-size: 18px; font-weight: bold; color: var(--text-dark); margin: 0 0 10px 0; }
     .modal-body { font-size: 14px; color: #555; line-height: 1.5; margin-bottom: 20px; text-align: left; background: #f9f9f9; padding: 15px; border-radius: 10px; border: 1px solid #eee; word-break: break-word; max-height: 380px; overflow-y: auto;}
@@ -161,7 +163,7 @@
     
     <div class="custom-modal-overlay" id="customModalOverlay">
         <div class="custom-modal">
-            <button class="modal-close-btn" onclick="closeModal()">✕</button>
+            
             <i class="fa-solid fa-bell modal-icon" id="modalIcon" style="display:none;"></i>
             <h3 class="modal-title" id="modalTitle">Notification</h3>
             <div class="modal-body" id="modalBody" style="background:transparent; padding:0; border:none; max-height:420px;">Message goes here...</div>
@@ -762,7 +764,7 @@ function showScreen(screenId, addToHistory = true) {
                             <i class="fa-solid fa-circle-minus" style="font-size:20px; color:var(--primary); cursor:pointer;" onclick="modifyCart('${safeName}', ${itemPrice}, -1); openCartItemsPopup();"></i>
                             <span style="font-weight:bold; font-size:14px;">${itemQty}</span>
                             <i class="fa-solid fa-circle-plus" style="font-size:20px; color:var(--primary); cursor:pointer;" onclick="modifyCart('${safeName}', ${itemPrice}, 1); openCartItemsPopup();"></i>
-                            <i class="fa-solid fa-xmark" style="font-size:18px; color:#d9534f; cursor:pointer; margin-left:8px;" onclick="modifyCart('${safeName}', ${itemPrice}, -${itemQty}); openCartItemsPopup();" title="Remove"></i>
+
                         </div>
                     </div>`;
             }
