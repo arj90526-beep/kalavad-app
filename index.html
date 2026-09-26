@@ -102,7 +102,6 @@
     .item-actions-grid { display: flex; align-items: center; justify-content: space-between; border-top: 1px solid #f1f2f6; padding-top: 6px; }
     .item-actions-grid i { font-size: 22px; color: var(--primary); cursor: pointer; }
 
-    /* Updated Bottom Panel Design matching reference image */
     .bottom-panel { position: fixed; bottom: 0; left: 50%; transform: translateX(-50%); width: 100%; max-width: 400px; background: white; padding: 12px 18px; box-sizing: border-box; box-shadow: 0 -4px 15px rgba(0,0,0,0.08); border-top-left-radius: 24px; border-top-right-radius: 24px; display: none; align-items: center; justify-content: space-between; z-index: 50; transition: 0.3s ease; }
     .bottom-panel-left { display: flex; align-items: center; gap: 12px; cursor: pointer; }
     .cart-icon-wrapper { position: relative; display: flex; align-items: center; }
@@ -257,12 +256,12 @@
             
             <div class="section-title" id="catSectionTitle"><span>Explore Categories</span></div>
             <div class="category-grid-4" id="mainCategoriesGrid">
-                <p style="grid-column: span 4; text-align: center; color: #888; font-size: 12px;">Loading...</p>
+                <p style="grid-column: span 4; text-align: center; color: #888; font-size: 12px;"><i class="fa-solid fa-spinner fa-spin"></i> Loading Categories...</p>
             </div>
 
             <div class="section-title" id="trendingSectionTitle"><span>Today Trending</span></div>
             <div class="trending-container" id="trendingContainer">
-                <p style="font-size:12px; color:#888;">Loading trending items...</p>
+                <p style="font-size:12px; color:#888;"><i class="fa-solid fa-spinner fa-spin"></i> Loading trending items...</p>
             </div>
 
             <div class="section-title" id="restSectionTitle"><span>Restaurants & Shops</span><span onclick="openRestaurantsPopup()" style="color: var(--primary); font-size: 12px; cursor: pointer; font-weight: bold;">See All</span></div>
@@ -363,7 +362,7 @@
     firebase.initializeApp(firebaseConfig);
     const db = firebase.firestore();
 
-    let globalData = { settings: {}, areas: [], banners: [], restaurants: [], items: [], trending: [], categories: [] };
+    let globalData = { settings: {}, areas: [], banners: [], restaurants: [], items: [], trending: null, categories: null };
     let cart = {}; let delCharge = 0; let packCharge = 0; let grandTotalVal = 0;
     let currentRestoFilter = null; let currentCategoryFilter = null;
     let currentSubMenuFilter = null;
@@ -1007,9 +1006,75 @@ function showScreen(screenId, addToHistory = true) {
 
     function renderRestaurants() { let restsContainer = document.getElementById('restaurantsContainer'); if(!restsContainer) return; let restsHTML = ""; if(globalData.restaurants && globalData.restaurants.length > 0) { let activeRests = globalData.restaurants.filter(r => r.isActive !== false); activeRests.forEach(rest => { let imgUrl = rest.image || 'https://via.placeholder.com/60'; restsHTML += `<div class="rest-card" onclick="filterByRestaurant('${rest.id}', '${rest.name.replace(/'/g, "\'")}')"><div class="rest-logo"><img src="${imgUrl}"></div><div class="rest-name">${rest.name}</div></div>`; }); } restsContainer.innerHTML = restsHTML; }
     
-    function renderCategories() { let grid = document.getElementById('mainCategoriesGrid'); if(!grid) return; if(!globalData.categories || globalData.categories.length === 0) { grid.innerHTML = `<p style="grid-column: span 4; text-align: center; color: #888; font-size: 12px;">Admin panel se categories add karein.</p>`; return; } let html = ""; globalData.categories.forEach(cat => { let safeName = cat.name.replace(/'/g, "\'"); html += `<div class="cat-box" onclick="filterByMainCategory('${safeName}')"><img src="${cat.image}" alt="${cat.name}"><span>${cat.name}</span></div>`; }); grid.innerHTML = html; }
+    function renderCategories() {
+        let grid = document.getElementById('mainCategoriesGrid');
+        let catTitle = document.getElementById('catSectionTitle');
+        if(!grid) return;
 
-    function renderTrending() { let container = document.getElementById('trendingContainer'); let sectionTitle = document.getElementById('trendingSectionTitle'); if(!container) return; if(!globalData.trending || globalData.trending.length === 0 || currentRestoFilter || currentCategoryFilter) { if(sectionTitle) sectionTitle.style.display = "none"; container.style.display = "none"; return; } if(sectionTitle && !document.getElementById('searchInput').value) sectionTitle.style.display = "flex"; if(!document.getElementById('searchInput').value) container.style.display = "flex"; let html = ""; globalData.trending.forEach(t => { let safeName = t.name.replace(/'/g, "\'"); let safeImg = t.image || 'https://via.placeholder.com/100'; let uniqueKey = safeName.replace(/\s+/g, '_'); let currentQty = cart[uniqueKey] ? cart[uniqueKey].qty : 0; let rName = t.restoName || "Online Kalavad"; html += `<div class="trending-card"><div onclick="openItemDetailModal('${safeName}', '', ${t.price}, '${safeImg}', '${rName}')"><img src="${safeImg}" class="trending-img" alt="${t.name}"><div class="trending-name">${t.name}</div><div style="font-size:10px; color:var(--primary); font-weight:500; margin-bottom:2px; text-transform:lowercase;">${rName}</div><div class="trending-price">₹${t.price}</div></div><div class="trending-actions-grid"><i class="fa-solid fa-circle-minus" onclick="modifyCart('${safeName}', ${t.price}, -1, '${rName}'); updateTrendingQty('${uniqueKey}')"></i><span id="trend_qty_${uniqueKey}" style="font-weight: bold; font-size: 14px;">${currentQty}</span><i class="fa-solid fa-circle-plus" onclick="modifyCart('${safeName}', ${t.price}, 1, '${safeName}', '${rName}'); updateTrendingQty('${uniqueKey}')"></i></div></div>`; }); container.innerHTML = html; }
+        if (currentRestoFilter || currentCategoryFilter) {
+            if(grid) grid.style.display = "none";
+            if(catTitle) catTitle.style.display = "none";
+            return;
+        }
+
+        if(!globalData.categories) {
+            grid.innerHTML = `<p style="grid-column: span 4; text-align: center; color: #888; font-size: 12px;"><i class="fa-solid fa-spinner fa-spin"></i> Loading Categories...</p>`;
+            return;
+        }
+
+        if(globalData.categories.length === 0) {
+            grid.innerHTML = `<p style="grid-column: span 4; text-align: center; color: #888; font-size: 12px;">Admin panel se categories add karein.</p>`;
+            return;
+        }
+
+        let html = "";
+        globalData.categories.forEach(cat => {
+            let safeName = (cat.name || '').replace(/'/g, "\\'");
+            html += `<div class="cat-box" onclick="filterByMainCategory('${safeName}')"><img src="${cat.image || ''}" alt="${cat.name}"><span>${cat.name}</span></div>`;
+        });
+        grid.innerHTML = html;
+    }
+
+    function renderTrending() {
+        let container = document.getElementById('trendingContainer');
+        let sectionTitle = document.getElementById('trendingSectionTitle');
+        if(!container) return;
+
+        if (currentRestoFilter || currentCategoryFilter) {
+            if(sectionTitle) sectionTitle.style.display = "none";
+            container.style.display = "none";
+            return;
+        }
+
+        if (!globalData.trending) {
+            if(sectionTitle && !document.getElementById('searchInput').value) sectionTitle.style.display = "flex";
+            if(!document.getElementById('searchInput').value) {
+                container.style.display = "flex";
+                container.innerHTML = `<p style="font-size:12px; color:#888;"><i class="fa-solid fa-spinner fa-spin"></i> Loading trending items...</p>`;
+            }
+            return;
+        }
+
+        if(globalData.trending.length === 0) {
+            if(sectionTitle) sectionTitle.style.display = "none";
+            container.style.display = "none";
+            return;
+        }
+
+        if(sectionTitle && !document.getElementById('searchInput').value) sectionTitle.style.display = "flex";
+        if(!document.getElementById('searchInput').value) container.style.display = "flex";
+
+        let html = "";
+        globalData.trending.forEach(t => {
+            let safeName = (t.name || '').replace(/'/g, "\\'");
+            let safeImg = t.image || 'https://via.placeholder.com/100';
+            let uniqueKey = safeName.replace(/\s+/g, '_');
+            let currentQty = cart[uniqueKey] ? cart[uniqueKey].qty : 0;
+            let rName = t.restoName || "Online Kalavad";
+            html += `<div class="trending-card"><div onclick="openItemDetailModal('${safeName}', '', ${t.price}, '${safeImg}', '${rName}')"><img src="${safeImg}" class="trending-img" alt="${t.name}"><div class="trending-name">${t.name}</div><div style="font-size:10px; color:var(--primary); font-weight:500; margin-bottom:2px; text-transform:lowercase;">${rName}</div><div class="trending-price">₹${t.price}</div></div><div class="trending-actions-grid"><i class="fa-solid fa-circle-minus" onclick="modifyCart('${safeName}', ${t.price}, -1, '${rName}'); updateTrendingQty('${uniqueKey}')"></i><span id="trend_qty_${uniqueKey}" style="font-weight: bold; font-size: 14px;">${currentQty}</span><i class="fa-solid fa-circle-plus" onclick="modifyCart('${safeName}', ${t.price}, 1, '${rName}'); updateTrendingQty('${uniqueKey}')"></i></div></div>`;
+        });
+        container.innerHTML = html;
+    }
 
     function filterByRestaurant(restoId, restoName) { 
         currentRestoFilter = restoId; currentCategoryFilter = null; currentSubMenuFilter = null;
@@ -1053,6 +1118,8 @@ function showScreen(screenId, addToHistory = true) {
         let titleElem = document.getElementById('itemSectionTitle'); 
         if(titleElem) { let parentTitle = titleElem.closest('.section-title'); if(parentTitle) parentTitle.innerHTML = `<span id="itemSectionTitle">All Items</span> <span id="itemSectionSeeAll" onclick="openItemsPopup()" style="color: var(--primary); font-size: 12px; cursor: pointer; font-weight: bold;">See All</span>`; } 
         renderItemsOrCategories(null); 
+        renderCategories();
+        renderTrending();
     }
     
     function renderItemsOrCategories(restoId) {
@@ -1214,27 +1281,12 @@ function showScreen(screenId, addToHistory = true) {
             let codeSpan = document.getElementById('deliveryCode'); if(codeSpan) codeSpan.innerText = orderCode;
             showScreen('successScreen'); cart = {}; updateCartTotals();
             if(btn) { btn.innerText = "Confirm & Place Order"; btn.disabled = false; btn.style.backgroundColor = "var(--primary)"; }
-            
-        } catch(error) {
-            console.error(error);
-            showCustomModal('alert', 'Order Failed', error.message || 'Kuch galat ho gaya, dobara try karein.');
+        } catch (e) {
+            console.error("Order save error:", e);
+            showCustomModal('alert', 'Order Failed', 'Order place karne me error aayi: ' + e.message);
             if(btn) { btn.innerText = "Confirm & Place Order"; btn.disabled = false; btn.style.backgroundColor = "var(--primary)"; }
         }
     }
 </script>
-<style>
-    /* फुल स्क्रीन डार्क बैकग्राउंड */
-    .app-popup {
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100vw;
-        height: 100vh;
-        background-color: rgba(0, 0, 0, 0.8);
-        display: none; /* शुरू में छुपा रहेगा */
-        align-items: center;
-        justify-content: center;
-        z-index: 99999;
-        font-family: sans-serif;
-    }
-    /* बीच में दिखने वाला सफेद
+</body>
+</html>
