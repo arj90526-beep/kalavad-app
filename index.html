@@ -154,6 +154,11 @@
 </head>
 <body>
 <div class="app-container">
+<div id="loadingScreen" class="screen" style="display: flex; flex-direction: column; justify-content: center; align-items: center; background-color: var(--bg-color); height: 100vh;">
+        <div class="logo-title">ONLINE<br>KALAVAD</div>
+        <i class="fa-solid fa-circle-notch fa-spin" style="font-size: 40px; color: var(--primary); margin-top: 25px;"></i>
+        <p style="color: #666; font-size: 14px; font-weight: 500; margin-top: 15px; letter-spacing: 1px;">Getting things ready...</p>
+    </div>
     
     <div class="custom-modal-overlay" id="customModalOverlay">
         <div class="custom-modal">
@@ -190,7 +195,7 @@
         </ul>
     </div>
     
-    <div id="loginScreen" class="screen">
+    <div id="loginScreen" class="screen hidden">
         <div class="login-wrapper" id="loginFormSection">
             <div class="logo-title">ONLINE<br>KALAVAD</div>
             <div class="logo-sub">Fast & Fresh, Right at your door</div>
@@ -380,7 +385,9 @@
             let cachedData = localStorage.getItem('onlineKalavadCache');
             if(cachedData) { try { globalData = JSON.parse(cachedData); renderAllDataUI(globalData); } catch(e) {} }
             fetchFirebaseData();
-        }
+        }else {
+        showScreen('loginScreen');
+    }
 
         firebase.auth().onAuthStateChanged((user) => {
             if (user) {
