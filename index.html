@@ -363,7 +363,7 @@
     firebase.initializeApp(firebaseConfig);
     const db = firebase.firestore();
 
-    let globalData = { settings: {}, areas: [], banners: [], restaurants: [], items: [], trending: [], categories: [] };
+    let globalData = { settings: {}, areas: [], banners: [], restaurants: [], items: [], trending: [] };
     let cart = {}; let delCharge = 0; let packCharge = 0; let grandTotalVal = 0;
     let currentRestoFilter = null; let currentCategoryFilter = null;
     let currentSubMenuFilter = null;
@@ -567,8 +567,24 @@
         db.collection("items").onSnapshot(snap => { globalData.items = snap.docs.map(d => d.data()); renderAllDataUI(globalData); });
         
         db.collection("categories").onSnapshot(snap => {
-            globalData.categories = snap.docs.map(d => d.data());
-            renderCategoriesUI();
+            let grid = document.getElementById('mainCategoriesGrid');
+            if(!grid) return;
+            if(snap.empty) {
+                grid.innerHTML = `<p style="grid-column: span 4; text-align: center; color: #888; font-size: 12px;">Admin panel se categories add karein.</p>`;
+                return;
+            }
+            let html = "";
+            snap.forEach(docSnap => {
+                let cat = docSnap.data();
+                let safeName = cat.name.replace(/'/g, "\'");
+                html += `
+                    <div class="cat-box" onclick="filterByMainCategory('${safeName}')">
+                        <img src="${cat.image}" alt="${cat.name}">
+                        <span>${cat.name}</span>
+                    </div>
+                `;
+            });
+            grid.innerHTML = html;
         });
 
         db.collection("trending").onSnapshot(snap => {
@@ -621,26 +637,6 @@
                 let dot = document.getElementById('notiRedDot'); if(dot) dot.style.display = (active.length > 0) ? 'block' : 'none';
             });
         }
-    }
-
-    function renderCategoriesUI() {
-        let grid = document.getElementById('mainCategoriesGrid');
-        if(!grid) return;
-        if(!globalData.categories || globalData.categories.length === 0) {
-            grid.innerHTML = `<p style="grid-column: span 4; text-align: center; color: #888; font-size: 12px;">Admin panel se categories add karein.</p>`;
-            return;
-        }
-        let html = "";
-        globalData.categories.forEach(cat => {
-            let safeName = cat.name.replace(/'/g, "\'");
-            html += `
-                <div class="cat-box" onclick="filterByMainCategory('${safeName}')">
-                    <img src="${cat.image}" alt="${cat.name}">
-                    <span>${cat.name}</span>
-                </div>
-            `;
-        });
-        grid.innerHTML = html;
     }
 
     function updateTrendingQty(uniqueKey) {
@@ -1350,4 +1346,124 @@ function showScreen(screenId, addToHistory = true) {
     const popup = document.getElementById('appPopup');
     const closeBtn = document.getElementById('closeBtn');
     const downloadBtn = document.getElementById('downloadBtn');
-    let deferredPrompt
+    let deferredPrompt;
+
+    // X बटन दबाने पर पॉपअप बंद होगा
+    closeBtn.addEventListener('click', () => {
+        popup.style.display = 'none';
+    });
+
+    // ब्राउज़र जब ऐप इंस्टॉल करने के लिए तैयार होगा, तब यह फुल स्क्रीन पॉपअप दिखेगा
+    window.addEventListener('beforeinstallprompt', (e) => {
+        e.preventDefault();
+        deferredPrompt = e;
+        popup.style.display = 'flex'; // पॉपअप को स्क्रीन पर दिखाएं
+    });
+
+    downloadBtn.addEventListener('click', async () => {
+        if (deferredPrompt) {
+            deferredPrompt.prompt();
+            const { outcome } = await deferredPrompt.userChoice;
+            deferredPrompt = null;
+            popup.style.display = 'none';
+        } else {
+            alert("ब्राउज़र अभी तैयार नहीं है, कृपया पेज को रिफ्रेश करें।");
+        }
+    });
+
+// Service Worker Registration
+    if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+            navigator.serviceWorker.register('sw.js');
+        });
+    }
+
+    // Sidebar wale button se app install karne ka function
+    async function installAppManually() {
+        if (deferredPrompt) {
+            deferredPrompt.prompt();
+            const { outcome } = await deferredPrompt.userChoice;
+            deferredPrompt = null;
+            const fsPopup = document.getElementById('appPopup');
+            if (fsPopup) fsPopup.style.display = 'none';
+            if (typeof toggleMenu === 'function') toggleMenu();
+        } else {
+            alert("शायद आपने पहले ही एप्लिकेशन डाउनलोड कर ली है। या फिर पेज को एक बार रिफ्रेश करके दोबारा ट्राई करें।");
+        }
+    }
+</script>
+<!-- EXIT APP CONFIRMATION POPUP (BACK BUTTON HANDLER) -->
+<style>
+    .exit-overlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background-color: rgba(0,0,0,0.7); display: none; align-items: center; justify-content: center; z-index: 1000000; }
+    .exit-modal { background: white; width: 80%; max-width: 320px; padding: 25px 20px; border-radius: 16px; text-align: center; box-shadow: 0 10px 30px rgba(0,0,0,0.2); }
+    .exit-modal h3 { margin: 0 0 10px 0; color: #333; font-size: 20px; }
+    .exit-modal p { color: #666; font-size: 15px; margin-bottom: 25px; line-height: 1.4; }
+    .exit-btn-group { display: flex; gap: 15px; justify-content: center; }
+    .btn-exit { flex: 1; padding: 12px; border-radius: 25px; font-weight: bold; cursor: pointer; border: none; font-size: 15px; }
+    .btn-exit-cancel { background: #e2e8f0; color: #334155; }
+    .btn-exit-confirm { background: #ef4444; color: white; }
+</style>
+
+<div class="exit-overlay" id="exitAppOverlay">
+    <div class="exit-modal">
+        <h3>Exit Application</h3>
+        <p>Are you sure you want to exit the application?</p>
+        <div class="exit-btn-group">
+            <button class="btn-exit btn-exit-cancel" onclick="cancelExit()">No</button>
+            <button class="btn-exit btn-exit-confirm" onclick="confirmExit()">Back again to Exit</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    // App khulte hi ek dummy history state add kar dete hain taaki back button detect ho sake
+    window.history.pushState({ page: 1 }, "", "");
+
+window.addEventListener('popstate', function(event) {
+    // 1. Agar Exit Popup khula hai, to use pehle band karein
+    let exitPopup = document.getElementById('exitAppOverlay');
+    if(exitPopup && exitPopup.style.display === 'flex') {
+        exitPopup.style.display = 'none';
+        return;
+    }
+
+    // 2. Agar koi dusra Modal Overlay khula hai
+    let modal = document.getElementById('customModalOverlay');
+    if(modal && modal.classList.contains('show')) {
+        closeModal();
+        window.history.forward();
+        return;
+    }
+
+    // 3. Agar Sidebar menu khula hai
+    let sidebar = document.getElementById('sidebar');
+    if(sidebar && sidebar.classList.contains('open')) {
+        toggleMenu();
+        window.history.forward();
+        return;
+    }
+
+    // 4. Pichle screen par jane ke liye
+    if(event.state && event.state.screen) {
+        showScreen(event.state.screen, false);
+    } else {
+        // Agar koi history nahi hai to Exit App overlay dikhayein
+        if(exitPopup) exitPopup.style.display = 'flex';
+    }
+});
+
+    // "No" dabane par popup chhup jayega, aur app chalti rahegi
+    function cancelExit() {
+        document.getElementById('exitAppOverlay').style.display = 'none';
+    }
+
+    // "Yes" dabane par, app ya tab close ho jayegi
+    function confirmExit() {
+        // Chrome browser mein sidha PWA app close karne ke liye history ka last step use karte hain
+        window.history.go(-2); // Ye app ko exit command bhejta hai
+        // Agar PWA hai aur device allow kare, toh close bhi kar dega
+        setTimeout(() => { window.close(); }, 100); 
+    }
+</script>
+</body>
+</html>
