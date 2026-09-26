@@ -363,7 +363,7 @@
     firebase.initializeApp(firebaseConfig);
     const db = firebase.firestore();
 
-    let globalData = { settings: {}, areas: [], banners: [], restaurants: [], items: [], trending: [] };
+    let globalData = { settings: {}, areas: [], banners: [], restaurants: [], items: [], trending: [], categories: [] };
     let cart = {}; let delCharge = 0; let packCharge = 0; let grandTotalVal = 0;
     let currentRestoFilter = null; let currentCategoryFilter = null;
     let currentSubMenuFilter = null;
@@ -566,66 +566,8 @@
         db.collection("restaurants").onSnapshot(snap => { globalData.restaurants = snap.docs.map(d => { let r = d.data(); r.id = d.id; return r; }); renderAllDataUI(globalData); });
         db.collection("items").onSnapshot(snap => { globalData.items = snap.docs.map(d => d.data()); renderAllDataUI(globalData); });
         
-        db.collection("categories").onSnapshot(snap => {
-            let grid = document.getElementById('mainCategoriesGrid');
-            if(!grid) return;
-            if(snap.empty) {
-                grid.innerHTML = `<p style="grid-column: span 4; text-align: center; color: #888; font-size: 12px;">Admin panel se categories add karein.</p>`;
-                return;
-            }
-            let html = "";
-            snap.forEach(docSnap => {
-                let cat = docSnap.data();
-                let safeName = cat.name.replace(/'/g, "\'");
-                html += `
-                    <div class="cat-box" onclick="filterByMainCategory('${safeName}')">
-                        <img src="${cat.image}" alt="${cat.name}">
-                        <span>${cat.name}</span>
-                    </div>
-                `;
-            });
-            grid.innerHTML = html;
-        });
-
-        db.collection("trending").onSnapshot(snap => {
-            let container = document.getElementById('trendingContainer');
-            let sectionTitle = document.getElementById('trendingSectionTitle');
-            if(!container) return;
-            if(snap.empty || currentRestoFilter || currentCategoryFilter) {
-                if(sectionTitle) sectionTitle.style.display = "none";
-                container.style.display = "none";
-                return;
-            }
-            if(sectionTitle && !document.getElementById('searchInput').value) sectionTitle.style.display = "flex";
-            if(!document.getElementById('searchInput').value) container.style.display = "flex";
-            
-            let html = "";
-            snap.forEach(docSnap => {
-                let t = docSnap.data();
-                let safeName = t.name.replace(/'/g, "\'");
-                let safeImg = t.image || 'https://via.placeholder.com/100';
-                let uniqueKey = safeName.replace(/\s+/g, '_');
-                let currentQty = cart[uniqueKey] ? cart[uniqueKey].qty : 0;
-                let rName = t.restoName || "Online Kalavad";
-
-                html += `
-                    <div class="trending-card">
-                        <div onclick="openItemDetailModal('${safeName}', '', ${t.price}, '${safeImg}', '${rName}')">
-                            <img src="${safeImg}" class="trending-img" alt="${t.name}">
-                            <div class="trending-name">${t.name}</div>
-                            <div style="font-size:10px; color:var(--primary); font-weight:500; margin-bottom:2px; text-transform:lowercase;">${rName}</div>
-                            <div class="trending-price">₹${t.price}</div>
-                        </div>
-                        <div class="trending-actions-grid">
-                            <i class="fa-solid fa-circle-minus" onclick="modifyCart('${safeName}', ${t.price}, -1, '${rName}'); updateTrendingQty('${uniqueKey}')"></i>
-                            <span id="trend_qty_${uniqueKey}" style="font-weight: bold; font-size: 14px;">${currentQty}</span>
-                            <i class="fa-solid fa-circle-plus" onclick="modifyCart('${safeName}', ${t.price}, 1, '${safeName}', '${rName}'); updateTrendingQty('${uniqueKey}')"></i>
-                        </div>
-                    </div>
-                `;
-        });
-        container.innerHTML = html;
-        });
+        db.collection("categories").onSnapshot(snap => { globalData.categories = snap.docs.map(d => d.data()); renderAllDataUI(globalData); });
+        db.collection("trending").onSnapshot(snap => { globalData.trending = snap.docs.map(d => d.data()); renderAllDataUI(globalData); });
 
         let uPhone = localStorage.getItem('userPhone');
         if(uPhone) {
@@ -1051,14 +993,24 @@ function showScreen(screenId, addToHistory = true) {
             bannersWrapper.innerHTML = bHtml; if(bannerDots) bannerDots.innerHTML = dotsHtml;
             if(!bannersWrapper.dataset.listenerAttached) { bannersWrapper.addEventListener('scroll', function() { let slideIndex = Math.round(bannersWrapper.scrollLeft / bannersWrapper.offsetWidth); let allDots = bannerDots.querySelectorAll('.dot'); allDots.forEach((d, idx) => { if(idx === slideIndex) d.classList.add('active'); else d.classList.remove('active'); }); }); bannersWrapper.dataset.listenerAttached = 'true'; }
         } else if (bannersWrapper) { bannersWrapper.innerHTML = `<div class="banner-slide" style="background-color: #d0e0e3; display: flex; align-items: center; justify-content: center; color: #555;">Welcome to Kalavad</div>`; if(bannerDots) bannerDots.innerHTML = ""; }
+        
         let areaSelect = document.getElementById('addrArea');
         if(areaSelect) { let oldAreaVal = areaSelect.value; areaSelect.innerHTML = '<option value="">Select your area...</option>'; if(data.areas && data.areas.length > 0) { data.areas.forEach(a => { let opt = document.createElement('option'); opt.value = a; opt.innerText = a; areaSelect.appendChild(opt); }); } areaSelect.value = oldAreaVal; }
-        renderRestaurants(); let titleElem = document.getElementById('itemSectionTitle'); let currentTitle = titleElem ? titleElem.innerText : "All Items";
+        
+        renderRestaurants();
+        renderCategories(); 
+        renderTrending(); 
+        
+        let titleElem = document.getElementById('itemSectionTitle'); let currentTitle = titleElem ? titleElem.innerText : "All Items";
         if(currentTitle.includes("All Items")) { renderItemsOrCategories(null); } else { let resto = globalData.restaurants.find(r => currentTitle.includes(r.name)); if(resto) renderItemsOrCategories(resto.id); else renderItemsOrCategories(null); }
     }
 
     function renderRestaurants() { let restsContainer = document.getElementById('restaurantsContainer'); if(!restsContainer) return; let restsHTML = ""; if(globalData.restaurants && globalData.restaurants.length > 0) { let activeRests = globalData.restaurants.filter(r => r.isActive !== false); activeRests.forEach(rest => { let imgUrl = rest.image || 'https://via.placeholder.com/60'; restsHTML += `<div class="rest-card" onclick="filterByRestaurant('${rest.id}', '${rest.name.replace(/'/g, "\'")}')"><div class="rest-logo"><img src="${imgUrl}"></div><div class="rest-name">${rest.name}</div></div>`; }); } restsContainer.innerHTML = restsHTML; }
     
+    function renderCategories() { let grid = document.getElementById('mainCategoriesGrid'); if(!grid) return; if(!globalData.categories || globalData.categories.length === 0) { grid.innerHTML = `<p style="grid-column: span 4; text-align: center; color: #888; font-size: 12px;">Admin panel se categories add karein.</p>`; return; } let html = ""; globalData.categories.forEach(cat => { let safeName = cat.name.replace(/'/g, "\'"); html += `<div class="cat-box" onclick="filterByMainCategory('${safeName}')"><img src="${cat.image}" alt="${cat.name}"><span>${cat.name}</span></div>`; }); grid.innerHTML = html; }
+
+    function renderTrending() { let container = document.getElementById('trendingContainer'); let sectionTitle = document.getElementById('trendingSectionTitle'); if(!container) return; if(!globalData.trending || globalData.trending.length === 0 || currentRestoFilter || currentCategoryFilter) { if(sectionTitle) sectionTitle.style.display = "none"; container.style.display = "none"; return; } if(sectionTitle && !document.getElementById('searchInput').value) sectionTitle.style.display = "flex"; if(!document.getElementById('searchInput').value) container.style.display = "flex"; let html = ""; globalData.trending.forEach(t => { let safeName = t.name.replace(/'/g, "\'"); let safeImg = t.image || 'https://via.placeholder.com/100'; let uniqueKey = safeName.replace(/\s+/g, '_'); let currentQty = cart[uniqueKey] ? cart[uniqueKey].qty : 0; let rName = t.restoName || "Online Kalavad"; html += `<div class="trending-card"><div onclick="openItemDetailModal('${safeName}', '', ${t.price}, '${safeImg}', '${rName}')"><img src="${safeImg}" class="trending-img" alt="${t.name}"><div class="trending-name">${t.name}</div><div style="font-size:10px; color:var(--primary); font-weight:500; margin-bottom:2px; text-transform:lowercase;">${rName}</div><div class="trending-price">₹${t.price}</div></div><div class="trending-actions-grid"><i class="fa-solid fa-circle-minus" onclick="modifyCart('${safeName}', ${t.price}, -1, '${rName}'); updateTrendingQty('${uniqueKey}')"></i><span id="trend_qty_${uniqueKey}" style="font-weight: bold; font-size: 14px;">${currentQty}</span><i class="fa-solid fa-circle-plus" onclick="modifyCart('${safeName}', ${t.price}, 1, '${safeName}', '${rName}'); updateTrendingQty('${uniqueKey}')"></i></div></div>`; }); container.innerHTML = html; }
+
     function filterByRestaurant(restoId, restoName) { 
         currentRestoFilter = restoId; currentCategoryFilter = null; currentSubMenuFilter = null;
         let searchInput = document.getElementById('searchInput'); if(searchInput) searchInput.value = ""; 
@@ -1285,185 +1237,4 @@ function showScreen(screenId, addToHistory = true) {
         z-index: 99999;
         font-family: sans-serif;
     }
-    /* बीच में दिखने वाला सफेद बॉक्स */
-    .popup-content {
-        background-color: white;
-        width: 85%;
-        max-width: 400px;
-        padding: 30px 20px;
-        border-radius: 12px;
-        text-align: center;
-        position: relative;
-        box-shadow: 0 5px 15px rgba(0,0,0,0.3);
-    }
-    /* क्रॉस (X) बटन */
-    .close-btn {
-        position: absolute;
-        top: 10px;
-        right: 15px;
-        background: none;
-        border: none;
-        font-size: 28px;
-        color: #555;
-        cursor: pointer;
-        padding: 0;
-        line-height: 1;
-    }
-    .popup-content h2 {
-        margin-top: 0;
-        font-size: 22px;
-        color: #333;
-    }
-    .popup-content p {
-        color: #666;
-        font-size: 14px;
-        margin-bottom: 25px;
-    }
-    /* बड़ा डाउनलोड बटन */
-    .download-btn {
-        background-color: #007bff;
-        color: white;
-        border: none;
-        padding: 12px 20px;
-        font-size: 16px;
-        font-weight: bold;
-        border-radius: 8px;
-        width: 100%;
-        cursor: pointer;
-    }
-</style>
-
-<div class="app-popup" id="appPopup">
-    <div class="popup-content">
-        <button class="close-btn" id="closeBtn">&times;</button>
-        <h2>ONLINE KALAVAD</h2>
-        <p>बेहतर स्पीड और फुल स्क्रीन अनुभव के लिए हमारी एप्लीकेशन इंस्टॉल करें।</p>
-        <button class="download-btn" id="downloadBtn">Download App</button>
-    </div>
-</div>
-
-<script>
-    const popup = document.getElementById('appPopup');
-    const closeBtn = document.getElementById('closeBtn');
-    const downloadBtn = document.getElementById('downloadBtn');
-    let deferredPrompt;
-
-    // X बटन दबाने पर पॉपअप बंद होगा
-    closeBtn.addEventListener('click', () => {
-        popup.style.display = 'none';
-    });
-
-    // ब्राउज़र जब ऐप इंस्टॉल करने के लिए तैयार होगा, तब यह फुल स्क्रीन पॉपअप दिखेगा
-    window.addEventListener('beforeinstallprompt', (e) => {
-        e.preventDefault();
-        deferredPrompt = e;
-        popup.style.display = 'flex'; // पॉपअप को स्क्रीन पर दिखाएं
-    });
-
-    downloadBtn.addEventListener('click', async () => {
-        if (deferredPrompt) {
-            deferredPrompt.prompt();
-            const { outcome } = await deferredPrompt.userChoice;
-            deferredPrompt = null;
-            popup.style.display = 'none';
-        } else {
-            alert("ब्राउज़र अभी तैयार नहीं है, कृपया पेज को रिफ्रेश करें।");
-        }
-    });
-
-// Service Worker Registration
-    if ('serviceWorker' in navigator) {
-        window.addEventListener('load', () => {
-            navigator.serviceWorker.register('sw.js');
-        });
-    }
-
-    // Sidebar wale button se app install karne ka function
-    async function installAppManually() {
-        if (deferredPrompt) {
-            deferredPrompt.prompt();
-            const { outcome } = await deferredPrompt.userChoice;
-            deferredPrompt = null;
-            const fsPopup = document.getElementById('appPopup');
-            if (fsPopup) fsPopup.style.display = 'none';
-            if (typeof toggleMenu === 'function') toggleMenu();
-        } else {
-            alert("शायद आपने पहले ही एप्लिकेशन डाउनलोड कर ली है। या फिर पेज को एक बार रिफ्रेश करके दोबारा ट्राई करें।");
-        }
-    }
-</script>
-<!-- EXIT APP CONFIRMATION POPUP (BACK BUTTON HANDLER) -->
-<style>
-    .exit-overlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background-color: rgba(0,0,0,0.7); display: none; align-items: center; justify-content: center; z-index: 1000000; }
-    .exit-modal { background: white; width: 80%; max-width: 320px; padding: 25px 20px; border-radius: 16px; text-align: center; box-shadow: 0 10px 30px rgba(0,0,0,0.2); }
-    .exit-modal h3 { margin: 0 0 10px 0; color: #333; font-size: 20px; }
-    .exit-modal p { color: #666; font-size: 15px; margin-bottom: 25px; line-height: 1.4; }
-    .exit-btn-group { display: flex; gap: 15px; justify-content: center; }
-    .btn-exit { flex: 1; padding: 12px; border-radius: 25px; font-weight: bold; cursor: pointer; border: none; font-size: 15px; }
-    .btn-exit-cancel { background: #e2e8f0; color: #334155; }
-    .btn-exit-confirm { background: #ef4444; color: white; }
-</style>
-
-<div class="exit-overlay" id="exitAppOverlay">
-    <div class="exit-modal">
-        <h3>Exit Application</h3>
-        <p>Are you sure you want to exit the application?</p>
-        <div class="exit-btn-group">
-            <button class="btn-exit btn-exit-cancel" onclick="cancelExit()">No</button>
-            <button class="btn-exit btn-exit-confirm" onclick="confirmExit()">Back again to Exit</button>
-        </div>
-    </div>
-</div>
-
-<script>
-    // App khulte hi ek dummy history state add kar dete hain taaki back button detect ho sake
-    window.history.pushState({ page: 1 }, "", "");
-
-window.addEventListener('popstate', function(event) {
-    // 1. Agar Exit Popup khula hai, to use pehle band karein
-    let exitPopup = document.getElementById('exitAppOverlay');
-    if(exitPopup && exitPopup.style.display === 'flex') {
-        exitPopup.style.display = 'none';
-        return;
-    }
-
-    // 2. Agar koi dusra Modal Overlay khula hai
-    let modal = document.getElementById('customModalOverlay');
-    if(modal && modal.classList.contains('show')) {
-        closeModal();
-        window.history.forward();
-        return;
-    }
-
-    // 3. Agar Sidebar menu khula hai
-    let sidebar = document.getElementById('sidebar');
-    if(sidebar && sidebar.classList.contains('open')) {
-        toggleMenu();
-        window.history.forward();
-        return;
-    }
-
-    // 4. Pichle screen par jane ke liye
-    if(event.state && event.state.screen) {
-        showScreen(event.state.screen, false);
-    } else {
-        // Agar koi history nahi hai to Exit App overlay dikhayein
-        if(exitPopup) exitPopup.style.display = 'flex';
-    }
-});
-
-    // "No" dabane par popup chhup jayega, aur app chalti rahegi
-    function cancelExit() {
-        document.getElementById('exitAppOverlay').style.display = 'none';
-    }
-
-    // "Yes" dabane par, app ya tab close ho jayegi
-    function confirmExit() {
-        // Chrome browser mein sidha PWA app close karne ke liye history ka last step use karte hain
-        window.history.go(-2); // Ye app ko exit command bhejta hai
-        // Agar PWA hai aur device allow kare, toh close bhi kar dega
-        setTimeout(() => { window.close(); }, 100); 
-    }
-</script>
-</body>
-</html>
+    /* बीच में दिखने वाला सफेद
