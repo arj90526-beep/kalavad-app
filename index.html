@@ -126,9 +126,7 @@
     .custom-modal-overlay.show { opacity: 1; pointer-events: auto; }
     .custom-modal { background: white; width: 90%; max-width: 360px; border-radius: 20px; padding: 25px; box-shadow: 0 10px 30px rgba(0,0,0,0.2); transform: translateY(20px); transition: transform 0.3s ease; text-align: center; position: relative; }
     .custom-modal-overlay.show .custom-modal { transform: translateY(0); }
-    .modal-close-btn {
-display: none !important;
- position: absolute; top: 15px; right: 15px; background: #eee; border: none; width: 30px; height: 30px; border-radius: 50%; font-size: 14px; font-weight: bold; cursor: pointer; color: #555; display: flex; align-items: center; justify-content: center; }
+    .modal-close-btn { display: none !important; position: absolute; top: 15px; right: 15px; background: #eee; border: none; width: 30px; height: 30px; border-radius: 50%; font-size: 14px; font-weight: bold; cursor: pointer; color: #555; display: flex; align-items: center; justify-content: center; }
     .modal-icon { font-size: 40px; color: var(--primary); margin-bottom: 15px; }
     .modal-title { font-size: 18px; font-weight: bold; color: var(--text-dark); margin: 0 0 10px 0; }
     .modal-body { font-size: 14px; color: #555; line-height: 1.5; margin-bottom: 20px; text-align: left; background: #f9f9f9; padding: 15px; border-radius: 10px; border: 1px solid #eee; word-break: break-word; max-height: 380px; overflow-y: auto;}
@@ -163,7 +161,6 @@ display: none !important;
     
     <div class="custom-modal-overlay" id="customModalOverlay">
         <div class="custom-modal">
-            
             <i class="fa-solid fa-bell modal-icon" id="modalIcon" style="display:none;"></i>
             <h3 class="modal-title" id="modalTitle">Notification</h3>
             <div class="modal-body" id="modalBody" style="background:transparent; padding:0; border:none; max-height:420px;">Message goes here...</div>
@@ -190,7 +187,6 @@ display: none !important;
             <li onclick="logoutUser()" style="margin-top: auto; border-top: 1px solid #ddd; color: var(--primary);">
                 <i class="fa-solid fa-right-from-bracket"></i> Logout
             </li>
-<!-- 24x7 Helpline Number Professional Section -->
             <li style="background: #fdf2f2; border-left: 4px solid var(--primary); margin: 10px 15px; border-radius: 8px; padding: 12px 15px; cursor: default;">
                 <div style="font-size: 11px; text-transform: uppercase; color: #777; font-weight: bold; letter-spacing: 0.5px; margin-bottom: 2px;">
                     <i class="fa-solid fa-headset" style="color: var(--primary); margin-right: 5px;"></i> 24 x 7 Helpline
@@ -381,6 +377,30 @@ display: none !important;
 
     let timerInterval = null;
 
+    // --- BACK BUTTON & HISTORY MANAGEMENT ---
+    window.addEventListener('popstate', function(event) {
+        let sidebar = document.getElementById('sidebar');
+        let overlay = document.getElementById('sidebarOverlay');
+        if (sidebar && sidebar.classList.contains('open')) {
+            sidebar.classList.remove('open');
+            if(overlay) overlay.style.display = 'none';
+            return;
+        }
+
+        let modalOverlay = document.getElementById('customModalOverlay');
+        if (modalOverlay && modalOverlay.classList.contains('show')) {
+            modalOverlay.classList.remove('show');
+            setTimeout(() => { document.getElementById('modalIcon').style.color = "var(--primary)"; }, 300);
+            return;
+        }
+
+        if (event.state && event.state.screen) {
+            showScreen(event.state.screen, false);
+        } else {
+            showScreen('homeScreen', false);
+        }
+    });
+
     window.onload = function() {
         window.recaptchaVerifier = new firebase.auth.RecaptchaVerifier('recaptcha-container', { 'size': 'normal' });
 
@@ -390,15 +410,15 @@ display: none !important;
             if(pName) pName.innerText = localStorage.getItem('userName') || 'User'; 
             if(pPhone) pPhone.innerText = localStorage.getItem('userPhone') || '';
             
-            showScreen('homeScreen');
+            showScreen('homeScreen', true);
             checkPendingPayment();
             
             let cachedData = localStorage.getItem('onlineKalavadCache');
             if(cachedData) { try { globalData = JSON.parse(cachedData); renderAllDataUI(globalData); } catch(e) {} }
             fetchFirebaseData();
-        }else {
-        showScreen('loginScreen');
-    }
+        } else {
+            showScreen('loginScreen', true);
+        }
 
         firebase.auth().onAuthStateChanged((user) => {
             if (user) {
@@ -410,7 +430,7 @@ display: none !important;
                 if(pName) pName.innerText = localStorage.getItem('userName') || 'User'; 
                 if(pPhone) pPhone.innerText = user.phoneNumber;
                 
-                showScreen('homeScreen');
+                showScreen('homeScreen', true);
                 checkPendingPayment();
                 
                 let cachedData = localStorage.getItem('onlineKalavadCache');
@@ -419,7 +439,7 @@ display: none !important;
             } else { 
                 if (localStorage.getItem('isLoggedIn') !== 'true') {
                     localStorage.clear(); 
-                    showScreen('loginScreen'); 
+                    showScreen('loginScreen', true); 
                 }
             }
         });
@@ -527,7 +547,6 @@ display: none !important;
         if(pending) {
             let pData = JSON.parse(pending);
             if(Date.now() - pData.timestamp < 15 * 60 * 1000) {
-                
                 let overlay = document.createElement('div');
                 overlay.id = "paymentRecoveryOverlay";
                 overlay.innerHTML = `<div style="position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(255,255,255,0.95); z-index:999999; display:flex; flex-direction:column; align-items:center; justify-content:center;"><i class="fa-solid fa-spinner fa-spin" style="font-size:40px; color:var(--primary); margin-bottom:15px;"></i><h3 style="margin:0; color:var(--text-dark);">Verifying Payment...</h3><p style="color:#666; font-size:14px; margin-top:5px; text-align:center; padding: 0 20px;">Aapka bank payment check ho raha hai, kripya wait karein...</p></div>`;
@@ -569,7 +588,6 @@ display: none !important;
         }
     }
 
-
     function fetchFirebaseData() {
         db.collection("settings").doc("general").onSnapshot(doc => { if(doc.exists) { globalData.settings = doc.data(); renderAllDataUI(globalData); } });
         db.collection("settings").doc("areas").get().then(doc => { if(doc.exists) { globalData.areas = doc.data().list || []; renderAllDataUI(globalData); } });
@@ -601,8 +619,19 @@ display: none !important;
         let sidebar = document.getElementById('sidebar');
         let overlay = document.getElementById('sidebarOverlay');
         if(!sidebar || !overlay) return;
-        sidebar.classList.toggle('open');
-        overlay.style.display = sidebar.classList.contains('open') ? 'block' : 'none';
+        
+        let isOpen = sidebar.classList.contains('open');
+        if (!isOpen) {
+            sidebar.classList.add('open');
+            overlay.style.display = 'block';
+            history.pushState({ sidebar: true }, "", "");
+        } else {
+            sidebar.classList.remove('open');
+            overlay.style.display = 'none';
+            if (history.state && history.state.sidebar) {
+                history.back();
+            }
+        }
     }
 
     function fetchCloudOrdersAndShowSidebar() {
@@ -635,35 +664,14 @@ display: none !important;
                 
                 let riderInfoHtml = "";
                 if (statusText === "Delivered") {
-                    riderInfoHtml = `
-                        <div style="background:#d4edda; color:#155724; padding:6px; border-radius:6px; margin-top:6px; font-size:12px; text-align:left;">
-                            <i class="fa-solid fa-check-circle"></i> Order successfully delivered!
-                        </div>`;
+                    riderInfoHtml = `<div style="background:#d4edda; color:#155724; padding:6px; border-radius:6px; margin-top:6px; font-size:12px; text-align:left;"><i class="fa-solid fa-check-circle"></i> Order successfully delivered!</div>`;
                 } else if (order.status === "Accepted" && (order.dbName || order.dbPhone)) {
-                    riderInfoHtml = `
-                        <div style="background:#d4edda; color:#155724; padding:8px; border-radius:8px; margin-top:8px; font-size:13px; border:1px solid #c3e6cb; text-align:left;">
-                            <b><i class="fa-solid fa-motorcycle"></i> Delivery Boy:</b> ${order.dbName || 'Assigned'}<br>
-                            <b><i class="fa-solid fa-phone"></i> Contact:</b> <span style="color:var(--primary); font-weight:bold;">${order.dbPhone || 'N/A'}</span>
-                        </div>`;
+                    riderInfoHtml = `<div style="background:#d4edda; color:#155724; padding:8px; border-radius:8px; margin-top:8px; font-size:13px; border:1px solid #c3e6cb; text-align:left;"><b><i class="fa-solid fa-motorcycle"></i> Delivery Boy:</b> ${order.dbName || 'Assigned'}<br><b><i class="fa-solid fa-phone"></i> Contact:</b> <span style="color:var(--primary); font-weight:bold;">${order.dbPhone || 'N/A'}</span></div>`;
                 } else {
-                    riderInfoHtml = `
-                        <div style="background:#fff3cd; color:#856404; padding:6px; border-radius:6px; margin-top:6px; font-size:12px; text-align:left;">
-                            <i class="fa-solid fa-clock"></i> Delivery Partner searching...
-                        </div>`;
+                    riderInfoHtml = `<div style="background:#fff3cd; color:#856404; padding:6px; border-radius:6px; margin-top:6px; font-size:12px; text-align:left;"><i class="fa-solid fa-clock"></i> Delivery Partner searching...</div>`;
                 }
 
-                msg += `
-                    <div style="position:relative; background:#fff; border:1px solid #eee; border-radius:12px; padding:12px; margin-bottom:12px; box-shadow:0 2px 5px rgba(0,0,0,0.02);">
-                        <i class="fa-solid fa-trash" style="position:absolute; top:12px; right:12px; color:#d9534f; cursor:pointer; font-size:15px;" onclick="confirmDeleteOrder('${order.code}')" title="Delete Order"></i>
-                        <div style="font-size:11px; color:#888; margin-bottom:4px;">${new Date(order.timestamp).toLocaleString()}</div>
-                        <div style="text-align:left; font-size:14px; line-height:1.4;">
-                            <b>Items:</b> ${order.items}<br>
-                            <b>Total Amount:</b> <span style="color:var(--success); font-weight:bold;">₹${order.total}</span> (${order.paymentMethod || 'COD'})<br>
-                            <b>Status:</b> <span style="color:${statusColor}; font-weight:bold;">${statusText}</span><br>
-                            <b>Delivery Code:</b> <span style="color:var(--primary); font-weight:bold; font-size:16px; letter-spacing:1px;">${order.code}</span>
-                        </div>
-                        ${riderInfoHtml}
-                    </div>`;
+                msg += `<div style="position:relative; background:#fff; border:1px solid #eee; border-radius:12px; padding:12px; margin-bottom:12px; box-shadow:0 2px 5px rgba(0,0,0,0.02);"><i class="fa-solid fa-trash" style="position:absolute; top:12px; right:12px; color:#d9534f; cursor:pointer; font-size:15px;" onclick="confirmDeleteOrder('${order.code}')" title="Delete Order"></i><div style="font-size:11px; color:#888; margin-bottom:4px;">${new Date(order.timestamp).toLocaleString()}</div><div style="text-align:left; font-size:14px; line-height:1.4;"><b>Items:</b> ${order.items}<br><b>Total Amount:</b> <span style="color:var(--success); font-weight:bold;">₹${order.total}</span> (${order.paymentMethod || 'COD'})<br><b>Status:</b> <span style="color:${statusColor}; font-weight:bold;">${statusText}</span><br><b>Delivery Code:</b> <span style="color:var(--primary); font-weight:bold; font-size:16px; letter-spacing:1px;">${order.code}</span></div>${riderInfoHtml}</div>`;
             });
             showCustomModal('order', 'My Orders', msg);
         } else {
@@ -703,16 +711,15 @@ display: none !important;
         });
     }
 
-function showScreen(screenId, addToHistory = true) { 
-    document.querySelectorAll('.screen').forEach(s => s.classList.add('hidden')); 
-    let target = document.getElementById(screenId); 
-    if(target) target.classList.remove('hidden'); 
+    function showScreen(screenId, addToHistory = true) { 
+        document.querySelectorAll('.screen').forEach(s => s.classList.add('hidden')); 
+        let target = document.getElementById(screenId); 
+        if(target) target.classList.remove('hidden'); 
 
-    // Mobile ki history me screen ko save karein
-    if(addToHistory) {
-        window.history.pushState({ screen: screenId }, "", "#" + screenId);
+        if(addToHistory) {
+            history.pushState({ screen: screenId }, "", "#" + screenId);
+        }
     }
-}
 
     async function fetchCloudOrdersAndShow(isNotificationClick = false) {
         let userPhone = localStorage.getItem('userPhone'); if(!userPhone) return;
@@ -735,7 +742,7 @@ function showScreen(screenId, addToHistory = true) {
         let modalTitle = document.getElementById('modalTitle'); let modalBody = document.getElementById('modalBody'); let icon = document.getElementById('modalIcon'); let btns = document.getElementById('modalButtons');
         if(type === 'items_list') {
             modalTitle.style.display = "block"; modalTitle.innerText = "All Items"; icon.style.display = "none"; modalBody.innerHTML = bodyHTML;
-            btns.innerHTML = `<button class="modal-btn modal-btn-cancel" onclick="closeItemsPopupAndReset()" style="width:100%; border-radius:25px; background:#eee; color:#333; padding:12px; font-weight:bold;">Close</button>`;
+            btns.innerHTML = `<button class="modal-btn modal-btn-cancel" onclick="closeModal()" style="width:100%; border-radius:25px; background:#eee; color:#333; padding:12px; font-weight:bold;">Close</button>`;
         } else {
             modalTitle.style.display = "block"; modalTitle.innerText = title; modalBody.innerHTML = bodyHTML; modalBody.style.background = "#f9f9f9"; modalBody.style.padding = "15px"; modalBody.style.border = "1px solid #eee";
             if(type === 'notification') { icon.style.display = "block"; icon.className = "fa-solid fa-bell modal-icon"; btns.innerHTML = `<button class="modal-btn modal-btn-confirm" onclick="closeModal()">OK</button>`; } 
@@ -747,10 +754,19 @@ function showScreen(screenId, addToHistory = true) {
             else if (type === 'alert') { icon.style.display = "block"; icon.className = "fa-solid fa-triangle-exclamation modal-icon"; icon.style.color = "#d9534f"; btns.innerHTML = `<button class="modal-btn modal-btn-confirm" style="background:#d9534f;" onclick="closeModal()">OK</button>`; }
         }
         document.getElementById('customModalOverlay').classList.add('show');
+        history.pushState({ modal: true }, "", "");
     }
 
-    function closeModal() { document.getElementById('customModalOverlay').classList.remove('show'); setTimeout(() => { document.getElementById('modalIcon').style.color = "var(--primary)"; }, 300); }
-    function closeItemsPopupAndReset() { closeModal(); showAllItems(); }
+    function closeModal() { 
+        let modalOverlay = document.getElementById('customModalOverlay');
+        if (modalOverlay && modalOverlay.classList.contains('show')) {
+            modalOverlay.classList.remove('show');
+            setTimeout(() => { document.getElementById('modalIcon').style.color = "var(--primary)"; }, 300);
+            if (history.state && history.state.modal) {
+                history.back();
+            }
+        }
+    }
 
     function openCartItemsPopup() {
         let cartItemsHtml = `<div style="display:flex; flex-direction:column; gap:10px; max-height:300px; overflow-y:auto;">`;
@@ -764,19 +780,7 @@ function showScreen(screenId, addToHistory = true) {
                 let itemPrice = cart[k].price;
                 let itemQty = cart[k].qty;
                 let safeName = itemName.replace(/'/g, "\'");
-                cartItemsHtml += `
-                    <div style="display:flex; align-items:center; justify-content:space-between; background:white; padding:10px; border-radius:12px; border:1px solid #eee; gap:10px;">
-                        <div style="flex-grow:1; text-align:left;">
-                            <b style="font-size:14px; color:var(--text-dark);">${itemName}</b><br>
-                            <span style="color:var(--success); font-weight:bold; font-size:13px;">₹${itemPrice * itemQty}</span>
-                        </div>
-                        <div style="display:flex; align-items:center; gap:8px;">
-                            <i class="fa-solid fa-circle-minus" style="font-size:20px; color:var(--primary); cursor:pointer;" onclick="modifyCart('${safeName}', ${itemPrice}, -1); openCartItemsPopup();"></i>
-                            <span style="font-weight:bold; font-size:14px;">${itemQty}</span>
-                            <i class="fa-solid fa-circle-plus" style="font-size:20px; color:var(--primary); cursor:pointer;" onclick="modifyCart('${safeName}', ${itemPrice}, 1); openCartItemsPopup();"></i>
-
-                        </div>
-                    </div>`;
+                cartItemsHtml += `<div style="display:flex; align-items:center; justify-content:space-between; background:white; padding:10px; border-radius:12px; border:1px solid #eee; gap:10px;"><div style="flex-grow:1; text-align:left;"><b style="font-size:14px; color:var(--text-dark);">${itemName}</b><br><span style="color:var(--success); font-weight:bold; font-size:13px;">₹${itemPrice * itemQty}</span></div><div style="display:flex; align-items:center; gap:8px;"><i class="fa-solid fa-circle-minus" style="font-size:20px; color:var(--primary); cursor:pointer;" onclick="modifyCart('${safeName}',${itemPrice}, -1); openCartItemsPopup();"></i><span style="font-weight:bold; font-size:14px;">${itemQty}</span><i class="fa-solid fa-circle-plus" style="font-size:20px; color:var(--primary); cursor:pointer;" onclick="modifyCart('${safeName}',${itemPrice}, 1); openCartItemsPopup();"></i></div></div>`;
             }
         }
         cartItemsHtml += `</div>`;
@@ -804,8 +808,8 @@ function showScreen(screenId, addToHistory = true) {
         showCustomModal('delete_confirm', 'Delete Order?', 'Kripya dhyan dein: Agar order aapke paas pahunch gaya hai, tabhi ise history se delete karein.', function() {
             let deletedCodes = JSON.parse(localStorage.getItem('deletedOrderCodes') || "[]");
             if(!deletedCodes.includes(String(orderCode))) { deletedCodes.push(String(orderCode)); localStorage.setItem('deletedOrderCodes', JSON.stringify(deletedCodes)); }
-            let history = JSON.parse(localStorage.getItem('myOrdersHistory') || "[]"); history = history.filter(o => String(o.code) !== String(orderCode));
-            localStorage.setItem('myOrdersHistory', JSON.stringify(history)); 
+            let historyLocal = JSON.parse(localStorage.getItem('myOrdersHistory') || "[]"); historyLocal = historyLocal.filter(o => String(o.code) !== String(orderCode));
+            localStorage.setItem('myOrdersHistory', JSON.stringify(historyLocal)); 
             setTimeout(() => { showCustomModal('info', 'Deleted Successfully', 'Order history se hata diya gaya hai.'); }, 350);
         });
     }
@@ -1229,270 +1233,79 @@ function showScreen(screenId, addToHistory = true) {
                         "email": localStorage.getItem('userPhone').replace(/\s+/g, ''), 
                         "contact": document.getElementById('addrPhone').value.trim() 
                     }, 
-                    "theme": { "color": "#B3391C" } 
+                    "theme": { "color": "#B3391C" },
+                    "modal": {
+                        "ondismiss": function() {
+                            localStorage.removeItem('pendingRzpOrder');
+                            let btn = document.getElementById('finalPlaceOrderBtn');
+                            if(btn) { btn.innerText = "Confirm & Place Order"; btn.disabled = false; btn.style.backgroundColor = "var(--primary)"; }
+                        }
+                    }
                 };
                 
-                var rzp1 = new Razorpay(options); 
-                rzp1.on('payment.failed', function (response){ 
-                    localStorage.removeItem('pendingRzpOrder');
-                    showCustomModal('alert', 'Payment Failed', 'Payment fail ho gaya hai. Dobara try karein.'); 
-                }); 
+                var rzp1 = new Razorpay(options);
                 rzp1.open();
                 
-            } catch (err) {
-                console.error("Backend error:", err);
-                showCustomModal('alert', 'Server Error', 'Bank server se connect nahi ho paya. Kripya COD chunein.');
-            } finally {
-                btn.innerText = "Confirm & Place Order"; btn.disabled = false; btn.style.backgroundColor = "var(--primary)";
+            } catch(e) {
+                console.error(e);
+                showCustomModal('alert', 'Payment Error', e.message || 'Payment server connect nahi ho saka.');
+                let btn = document.getElementById('finalPlaceOrderBtn');
+                if(btn) { btn.innerText = "Confirm & Place Order"; btn.disabled = false; btn.style.backgroundColor = "var(--primary)"; }
             }
-        } else { 
-            processOrderToFirebase("COD"); 
+        } else {
+            await processOrderToFirebase("COD");
         }
     }
 
-    async function processOrderToFirebase(finalPaymentMethod) {
-        let name = document.getElementById('addrName').value.trim(); 
-        let phone = "+91 " + document.getElementById('addrPhone').value.trim(); 
-        let area = document.getElementById('addrArea').value; 
-        let fullAddr = document.getElementById('addrFull').value.trim(); 
-        let fullAddressString = name + " | Ph: " + phone + " | Area: " + area + " (City: Kalavad) | Addr: " + fullAddr;
+    async function processOrderToFirebase(paymentMethodStr) {
+        let name = document.getElementById('addrName').value.trim();
+        let phone = document.getElementById('addrPhone').value.trim();
+        let area = document.getElementById('addrArea').value;
+        let fullAddr = document.getElementById('addrFull').value.trim();
+        let userPhoneClean = localStorage.getItem('userPhone').replace(/\s+/g, '');
+
+        let itemsSummary = "";
+        for(let k in cart) {
+            if(cart[k].qty > 0) {
+                itemsSummary += `${cart[k].name} (x${cart[k].qty}), `;
+            }
+        }
+
+        let orderCode = Math.floor(1000 + Math.random() * 9000);
+        let orderObj = {
+            name: name,
+            phone: phone,
+            email: userPhoneClean,
+            area: area,
+            address: fullAddr,
+            items: itemsSummary,
+            total: grandTotalVal,
+            paymentMethod: paymentMethodStr,
+            code: String(orderCode),
+            timestamp: Date.now(),
+            status: "Pending"
+        };
 
         let btn = document.getElementById('finalPlaceOrderBtn');
-        if(btn) { btn.innerText = "Processing..."; btn.disabled = true; btn.style.backgroundColor = "var(--disabled)"; }
+        if(btn) { btn.innerText = "Placing Order..."; btn.disabled = true; btn.style.backgroundColor = "var(--disabled)"; }
 
         try {
-            const user = firebase.auth().currentUser;
-            if (!user) throw new Error("Please login first to place an order.");
-            const idToken = await user.getIdToken(true);
-
-            let response = await fetch('https://savefinalorder-ct45kue4ka-uc.a.run.app', {
-                method: 'POST',
-                headers: { 
-                    'Content-Type': 'application/json',
-                    'Authorization': 'Bearer ' + idToken
-                },
-                body: JSON.stringify({
-                    paymentMethod: finalPaymentMethod,
-                    cart: cart,
-                    customerName: fullAddressString
-                })
-            });
-
-            let responseData = await response.json();
-            if(responseData.error) throw new Error(responseData.error);
-
-            let orderCode = responseData.code; 
+            await db.collection("orders").add(orderObj);
             
-            let itemsSummary = ""; 
-            for(let k in cart) { if(cart[k].qty > 0) itemsSummary += `${cart[k].name} [${cart[k].rName}] (x${cart[k].qty}), `; }
+            let localOrders = JSON.parse(localStorage.getItem('myOrdersHistory') || "[]");
+            localOrders.unshift(orderObj);
+            localStorage.setItem('myOrdersHistory', JSON.stringify(localOrders));
 
-            let newOrderObj = { date: new Date().toLocaleString(), items: itemsSummary, total: grandTotalVal, method: finalPaymentMethod, code: orderCode, status: "Pending", timestamp: Date.now() };
-            let historyArray = JSON.parse(localStorage.getItem('myOrdersHistory') || "[]");
-            historyArray.unshift(newOrderObj); if(historyArray.length > 5) historyArray.pop(); localStorage.setItem('myOrdersHistory', JSON.stringify(historyArray));
-            
-            let codeSpan = document.getElementById('deliveryCode'); if(codeSpan) codeSpan.innerText = orderCode;
-            showScreen('successScreen'); cart = {}; updateCartTotals();
-            if(btn) { btn.innerText = "Confirm & Place Order"; btn.disabled = false; btn.style.backgroundColor = "var(--primary)"; }
-        } catch (e) {
-            console.error("Order save error:", e);
-            showCustomModal('alert', 'Order Failed', 'Order place karne me error aayi: ' + e.message);
+            cart = {};
+            updateCartTotals();
+
+            document.getElementById('deliveryCode').innerText = orderCode;
+            showScreen('successScreen', true);
+        } catch(e) {
+            console.error(e);
+            showCustomModal('alert', 'Order Failed', 'Order submit nahi ho saka. Kripya dobara try karein.');
             if(btn) { btn.innerText = "Confirm & Place Order"; btn.disabled = false; btn.style.backgroundColor = "var(--primary)"; }
         }
-    }
-</script>
-<style>
-    /* फुल स्क्रीन डार्क बैकग्राउंड */
-    .app-popup {
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100vw;
-        height: 100vh;
-        background-color: rgba(0, 0, 0, 0.8);
-        display: none; /* शुरू में छुपा रहेगा */
-        align-items: center;
-        justify-content: center;
-        z-index: 99999;
-        font-family: sans-serif;
-    }
-    /* बीच में दिखने वाला सफेद बॉक्स */
-    .popup-content {
-        background-color: white;
-        width: 85%;
-        max-width: 400px;
-        padding: 30px 20px;
-        border-radius: 12px;
-        text-align: center;
-        position: relative;
-        box-shadow: 0 5px 15px rgba(0,0,0,0.3);
-    }
-    /* क्रॉस (X) बटन */
-    .close-btn {
-        position: absolute;
-        top: 10px;
-        right: 15px;
-        background: none;
-        border: none;
-        font-size: 28px;
-        color: #555;
-        cursor: pointer;
-        padding: 0;
-        line-height: 1;
-    }
-    .popup-content h2 {
-        margin-top: 0;
-        font-size: 22px;
-        color: #333;
-    }
-    .popup-content p {
-        color: #666;
-        font-size: 14px;
-        margin-bottom: 25px;
-    }
-    /* बड़ा डाउनलोड बटन */
-    .download-btn {
-        background-color: #007bff;
-        color: white;
-        border: none;
-        padding: 12px 20px;
-        font-size: 16px;
-        font-weight: bold;
-        border-radius: 8px;
-        width: 100%;
-        cursor: pointer;
-    }
-</style>
-
-<div class="app-popup" id="appPopup">
-    <div class="popup-content">
-        <button class="close-btn" id="closeBtn">&times;</button>
-        <h2>ONLINE KALAVAD</h2>
-        <p>बेहतर स्पीड और फुल स्क्रीन अनुभव के लिए हमारी एप्लीकेशन इंस्टॉल करें।</p>
-        <button class="download-btn" id="downloadBtn">Download App</button>
-    </div>
-</div>
-
-<script>
-    const popup = document.getElementById('appPopup');
-    const closeBtn = document.getElementById('closeBtn');
-    const downloadBtn = document.getElementById('downloadBtn');
-    let deferredPrompt;
-
-    // X बटन दबाने पर पॉपअप बंद होगा
-    closeBtn.addEventListener('click', () => {
-        popup.style.display = 'none';
-    });
-
-    // ब्राउज़र जब ऐप इंस्टॉल करने के लिए तैयार होगा, तब यह फुल स्क्रीन पॉपअप दिखेगा
-    window.addEventListener('beforeinstallprompt', (e) => {
-        e.preventDefault();
-        deferredPrompt = e;
-        popup.style.display = 'flex'; // पॉपअप को स्क्रीन पर दिखाएं
-    });
-
-    downloadBtn.addEventListener('click', async () => {
-        if (deferredPrompt) {
-            deferredPrompt.prompt();
-            const { outcome } = await deferredPrompt.userChoice;
-            deferredPrompt = null;
-            popup.style.display = 'none';
-        } else {
-            alert("ब्राउज़र अभी तैयार नहीं है, कृपया पेज को रिफ्रेश करें।");
-        }
-    });
-
-// Service Worker Registration
-    if ('serviceWorker' in navigator) {
-        window.addEventListener('load', () => {
-            navigator.serviceWorker.register('sw.js');
-        });
-    }
-
-    // Sidebar wale button se app install karne ka function
-    async function installAppManually() {
-        if (deferredPrompt) {
-            deferredPrompt.prompt();
-            const { outcome } = await deferredPrompt.userChoice;
-            deferredPrompt = null;
-            const fsPopup = document.getElementById('appPopup');
-            if (fsPopup) fsPopup.style.display = 'none';
-            if (typeof toggleMenu === 'function') toggleMenu();
-        } else {
-            alert("शायद आपने पहले ही एप्लिकेशन डाउनलोड कर ली है। या फिर पेज को एक बार रिफ्रेश करके दोबारा ट्राई करें।");
-        }
-    }
-</script>
-<!-- EXIT APP CONFIRMATION POPUP (BACK BUTTON HANDLER) -->
-<style>
-    .exit-overlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background-color: rgba(0,0,0,0.7); display: none; align-items: center; justify-content: center; z-index: 1000000; }
-    .exit-modal { background: white; width: 80%; max-width: 320px; padding: 25px 20px; border-radius: 16px; text-align: center; box-shadow: 0 10px 30px rgba(0,0,0,0.2); }
-    .exit-modal h3 { margin: 0 0 10px 0; color: #333; font-size: 20px; }
-    .exit-modal p { color: #666; font-size: 15px; margin-bottom: 25px; line-height: 1.4; }
-    .exit-btn-group { display: flex; gap: 15px; justify-content: center; }
-    .btn-exit { flex: 1; padding: 12px; border-radius: 25px; font-weight: bold; cursor: pointer; border: none; font-size: 15px; }
-    .btn-exit-cancel { background: #e2e8f0; color: #334155; }
-    .btn-exit-confirm { background: #ef4444; color: white; }
-</style>
-
-<div class="exit-overlay" id="exitAppOverlay">
-    <div class="exit-modal">
-        <h3>Exit Application</h3>
-        <p>Are you sure you want to exit the application?</p>
-        <div class="exit-btn-group">
-            <button class="btn-exit btn-exit-cancel" onclick="cancelExit()">No</button>
-            <button class="btn-exit btn-exit-confirm" onclick="confirmExit()">Back again to Exit</button>
-        </div>
-    </div>
-</div>
-
-<script>
-    // App khulte hi ek dummy history state add kar dete hain taaki back button detect ho sake
-    window.history.pushState({ page: 1 }, "", "");
-
-window.addEventListener('popstate', function(event) {
-    // 1. Agar Exit Popup khula hai, to use pehle band karein
-    let exitPopup = document.getElementById('exitAppOverlay');
-    if(exitPopup && exitPopup.style.display === 'flex') {
-        exitPopup.style.display = 'none';
-        return;
-    }
-
-    // 2. Agar koi dusra Modal Overlay khula hai
-    let modal = document.getElementById('customModalOverlay');
-    if(modal && modal.classList.contains('show')) {
-        closeModal();
-        window.history.forward();
-        return;
-    }
-
-    // 3. Agar Sidebar menu khula hai
-    let sidebar = document.getElementById('sidebar');
-    if(sidebar && sidebar.classList.contains('open')) {
-        toggleMenu();
-        window.history.forward();
-        return;
-    }
-
-    // 4. Pichle screen par jane ke liye
-    if(event.state && event.state.screen) {
-        showScreen(event.state.screen, false);
-    } else {
-        // Agar koi history nahi hai to Exit App overlay dikhayein
-        if(exitPopup) exitPopup.style.display = 'flex';
-    }
-});
-
-    // "No" dabane par popup chhup jayega, aur app chalti rahegi
-    function cancelExit() {
-        document.getElementById('exitAppOverlay').style.display = 'none';
-    }
-
-    // "Yes" dabane par, app ya tab close ho jayegi
-    function confirmExit() {
-        // Chrome browser mein sidha PWA app close karne ke liye history ka last step use karte hain
-        window.history.go(-2); // Ye app ko exit command bhejta hai
-        // Agar PWA hai aur device allow kare, toh close bhi kar dega
-        setTimeout(() => { window.close(); }, 100); 
     }
 </script>
 </body>
