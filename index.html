@@ -1102,6 +1102,7 @@ function showScreen(screenId, addToHistory = true) {
 
     function filterByRestaurant(restoId, restoName) { 
         currentRestoFilter = restoId; currentCategoryFilter = null; currentSubMenuFilter = null;
+window.history.pushState({ view: 'restaurant', restoId: restoId }, "", "#restaurant-" + restoId);
         let searchInput = document.getElementById('searchInput'); if(searchInput) searchInput.value = ""; 
         let bannersWrap = document.getElementById('bannersWrapper'); let bannerDots = document.getElementById('bannerDots'); let restTitle = document.getElementById('restSectionTitle'); let restContainer = document.getElementById('restaurantsContainer'); let itemSeeAll = document.getElementById('itemSectionSeeAll'); let catGrid = document.getElementById('mainCategoriesGrid'); let catTitle = document.getElementById('catSectionTitle'); 
         let trendingContainer = document.getElementById('trendingContainer'); let trendingTitle = document.getElementById('trendingSectionTitle');
@@ -1116,6 +1117,7 @@ function showScreen(screenId, addToHistory = true) {
     
     window.filterByMainCategory = function(catName) {
         currentCategoryFilter = catName; currentRestoFilter = null; currentSubMenuFilter = null;
+window.history.pushState({ view: 'category', catName: catName }, "", "#category-" + catName);
         let searchInput = document.getElementById('searchInput'); if(searchInput) searchInput.value = ""; 
         let bannersWrap = document.getElementById('bannersWrapper'); let bannerDots = document.getElementById('bannerDots'); let restTitle = document.getElementById('restSectionTitle'); let restContainer = document.getElementById('restaurantsContainer'); let itemSeeAll = document.getElementById('itemSectionSeeAll'); let catGrid = document.getElementById('mainCategoriesGrid'); let catTitle = document.getElementById('catSectionTitle'); 
         let trendingContainer = document.getElementById('trendingContainer'); let trendingTitle = document.getElementById('trendingSectionTitle'); let chipsContainer = document.getElementById('subMenuChipsContainer');
