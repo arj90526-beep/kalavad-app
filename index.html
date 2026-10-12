@@ -707,16 +707,15 @@ display: none !important;
         });
     }
 
-function showScreen(screenId, addToHistory = true) { 
+let currentActiveScreen = 'loadingScreen';
+
+function showScreen(screenId) { 
     document.querySelectorAll('.screen').forEach(s => s.classList.add('hidden')); 
     let target = document.getElementById(screenId); 
     if(target) target.classList.remove('hidden'); 
-
-    // Mobile ki history me screen ko save karein
-    if(addToHistory) {
-        window.history.pushState({ screen: screenId }, "", "#" + screenId);
-    }
+    currentActiveScreen = screenId;
 }
+
 
     async function fetchCloudOrdersAndShow(isNotificationClick = false) {
         let userPhone = localStorage.getItem('userPhone'); if(!userPhone) return;
@@ -1440,6 +1439,7 @@ window.history.pushState({ view: 'category', catName: catName }, "", "#category-
         }
     }
 </script>
+
 <!-- EXIT APP CONFIRMATION POPUP (BACK BUTTON HANDLER) -->
 <style>
     .exit-overlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background-color: rgba(0,0,0,0.7); display: none; align-items: center; justify-content: center; z-index: 1000000; }
@@ -1455,63 +1455,129 @@ window.history.pushState({ view: 'category', catName: catName }, "", "#category-
 <div class="exit-overlay" id="exitAppOverlay">
     <div class="exit-modal">
         <h3>Exit Application</h3>
-        <p>Are you sure you want to exit the application?</p>
+        <p>Kya aap application band karna chahte hain?</p>
         <div class="exit-btn-group">
-            <button class="btn-exit btn-exit-cancel" onclick="cancelExit()">No</button>
-            <button class="btn-exit btn-exit-confirm" onclick="confirmExit()">Back again to Exit</button>
+            <button class="btn-exit btn-exit-cancel" onclick="cancelExit()">Nahi</button>
+            <button class="btn-exit btn-exit-confirm" onclick="confirmExit()">Exit Karein</button>
         </div>
     </div>
 </div>
 
 <script>
-    // App khulte hi ek dummy history state add kar dete hain taaki back button detect ho sake
-    window.history.pushState({ page: 1 }, "", "");
-
-window.addEventListener('popstate', function(event) {
-    // 1. Agar Exit Popup khula hai, to use pehle band karein
-    let exitPopup = document.getElementById('exitAppOverlay');
-    if(exitPopup && exitPopup.style.display === 'flex') {
-        exitPopup.style.display = 'none';
-        return;
+    // History Lock Helper Function
+    function pushHistoryLock() {
+        window.history.pushState({ appActive: true }, "");
     }
 
-    // 2. Agar koi dusra Modal Overlay khula hai
-    let modal = document.getElementById('customModalOverlay');
-    if(modal && modal.classList.contains('show')) {
-        closeModal();
-        window.history.forward();
-        return;
-    }
+    // App load hote hi pehla state push karein taaki back button detect ho sake
+    pushHistoryLock();
 
-    // 3. Agar Sidebar menu khula hai
-    let sidebar = document.getElementById('sidebar');
-    if(sidebar && sidebar.classList.contains('open')) {
-        toggleMenu();
-        window.history.forward();
-        return;
-    }
+    // Mobile ke in-built hardware back button ka main listener
+    window.addEventListener('popstate', function(event) {
+        // 1. Agar Exit Popup pehle se khula hai, aur user ne dobara back dabaya to App Exit karein
+        let exitPopup = document.getElementById('exitAppOverlay');
+        if (exitPopup && exitPopup.style.display === 'flex') {
+            confirmExit();
+            return;
+        }
 
-    // 4. Pichle screen par jane ke liye
-    if(event.state && event.state.screen) {
-        showScreen(event.state.screen, false);
-    } else {
-        // Agar koi history nahi hai to Exit App overlay dikhayein
-        if(exitPopup) exitPopup.style.display = 'flex';
-    }
-});
+        // 2. Agar PWA App Install Popup khula hai, to pehle use band karein
+        let installPopup = document.getElementById('appPopup');
+        if (installPopup && installPopup.style.display === 'flex') {
+            installPopup.style.display = 'none';
+            pushHistoryLock();
+            return;
+        }
 
-    // "No" dabane par popup chhup jayega, aur app chalti rahegi
+        // 3. Agar koi Custom Modal (Cart popup, Item Detail, Orders, Notifications, etc.) khula hai
+        let modal = document.getElementById('customModalOverlay');
+        if (modal && modal.classList.contains('show')) {
+            closeModal();
+            pushHistoryLock();
+            return;
+        }
+
+        // 4. Agar Sidebar Menu khula hai to use band karein
+        let sidebar = document.getElementById('sidebar');
+        if (sidebar && sidebar.classList.contains('open')) {
+            toggleMenu();
+            pushHistoryLock();
+            return;
+        }
+
+        // 5. Agar Login screen me OTP verification wala section khula hai to wapas Phone number par jayein
+        let otpSection = document.getElementById('otpVerifySection');
+        if (currentActiveScreen === 'loginScreen' && otpSection && !otpSection.classList.contains('hidden')) {
+            changeNumber();
+            pushHistoryLock();
+            return;
+        }
+
+        // 6. Agar Search bar me kuch search kiya hua hai to search hata kar Normal Home par aayein
+        let searchInput = document.getElementById('searchInput');
+        if (currentActiveScreen === 'homeScreen' && searchInput && searchInput.value.trim() !== "") {
+            clearSearchAndGoHome();
+            pushHistoryLock();
+            return;
+        }
+
+        // 7. Agar Restaurant ya Category filter open hai to Normal Home ("All Items") par wapas jayein
+        if (currentActiveScreen === 'homeScreen' && (currentRestoFilter !== null || currentCategoryFilter !== null)) {
+            showAllItems();
+            pushHistoryLock();
+            return;
+        }
+
+        // 8. Screen Navigation: Step-by-Step Back
+        // Payment Screen se Address Screen par wapas
+        if (currentActiveScreen === 'paymentScreen') {
+            showScreen('addressScreen');
+            pushHistoryLock();
+            return;
+        }
+
+        // Address Screen se Invoice (Order Summary) par wapas
+        if (currentActiveScreen === 'addressScreen') {
+            showScreen('invoiceScreen');
+            pushHistoryLock();
+            return;
+        }
+
+        // Invoice Screen se Home Screen par wapas
+        if (currentActiveScreen === 'invoiceScreen') {
+            showScreen('homeScreen');
+            pushHistoryLock();
+            return;
+        }
+
+        // Success Screen (Order Placed) se Home Screen par wapas
+        if (currentActiveScreen === 'successScreen') {
+            showScreen('homeScreen');
+            pushHistoryLock();
+            return;
+        }
+
+        // 9. Agar user Home Screen ya Login Screen par hai aur kuch bhi open nahi hai, to Exit Popup dikhayein
+        if (exitPopup) {
+            exitPopup.style.display = 'flex';
+            pushHistoryLock();
+        }
+    });
+
+    // "Nahi" dabane par exit popup band ho jayega
     function cancelExit() {
-        document.getElementById('exitAppOverlay').style.display = 'none';
+        let exitPopup = document.getElementById('exitAppOverlay');
+        if (exitPopup) exitPopup.style.display = 'none';
     }
 
-    // "Yes" dabane par, app ya tab close ho jayegi
+    // "Exit" dabane par browser tab / app close command
     function confirmExit() {
-        // Chrome browser mein sidha PWA app close karne ke liye history ka last step use karte hain
-        window.history.go(-2); // Ye app ko exit command bhejta hai
-        // Agar PWA hai aur device allow kare, toh close bhi kar dega
-        setTimeout(() => { window.close(); }, 100); 
+        window.history.go(-2);
+        setTimeout(() => { 
+            window.close(); 
+        }, 150);
     }
 </script>
 </body>
 </html>
+
