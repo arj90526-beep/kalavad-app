@@ -851,7 +851,7 @@ function showScreen(screenId) {
 
     function backToHomeClick(btn) { btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Loading...'; btn.style.backgroundColor = "var(--disabled)"; btn.disabled = true; setTimeout(() => { window.location.reload(); }, 800); }
 
-    function onAreaSelected(selectElem) { document.getElementById('addrCity').value = (selectElem.value !== "") ? "Kalavad" : ""; }
+    function onAreaSelected(selectElem) { document.getElementById('addrCity').value = (selectElem.value !== "") ? "Kalavad, 361160" : ""; }
     function checkCitySelection(inputElem) { let areaSelect = document.getElementById('addrArea'); if(!areaSelect || areaSelect.value === "") showCustomModal('alert', 'Notice', 'Kripya pehle area select karein.'); }
 
     function openRestaurantsPopup() {
