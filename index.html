@@ -22,6 +22,7 @@
 <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore-compat.js"></script>
 <script src="config.js"></script>
+<script>window.va=window.va||function(){(window.vaq=window.vaq||[]).push(arguments)}</script><script defer src="/_vercel/insights/script.js"></script>
 <style>
 :root{--bg:#f3f3f1;--card:#fff;--tx:#1a1a1a;--mu:#6b6b6b;--ac:#B3391C;--bd:#e3e3df}
 @media(prefers-color-scheme:dark){:root{--bg:#121212;--card:#1e1e1e;--tx:#eee;--mu:#9a9a9a;--ac:#ff6b4a;--bd:#333}}
@@ -71,9 +72,10 @@ function vid(u){var m=u.match(/(?:youtu\.be\/|v=|shorts\/|embed\/)([\w-]{11})/);
 if(/\.(mp4|webm)(\?|$)/i.test(u))return'<video src="'+esc(u)+'" controls playsinline></video>';return'<p><a href="'+esc(u)+'" target="_blank" rel="noopener">▶ વીડિયો જુઓ</a></p>'}
 function post(id){var a=A.find(function(x){return x.id==id}),app=document.getElementById("app");app.innerHTML='<p class="mu">લોડ થઈ રહ્યું છે...</p>';
 db.collection("newsBody").doc(id).get().then(function(d){if(!d.exists){app.innerHTML='<p class="mu">સમાચાર મળ્યા નથી.</p>';return}
-var t=a?a.title:"",dt=a?a.d:"";document.title=t+" – "+SITE.name;
+countView(id);var t=a?a.title:"",dt=a?a.d:"";document.title=t+" – "+SITE.name;
 app.innerHTML=ad("top")+'<article class="art"><h1>'+esc(t)+'</h1><div class="mu">'+esc(dt)+'</div>'+(d.data().blocks||[]).map(function(b){return b.t=="p"?'<p>'+esc(b.v)+'</p>':b.t=="img"?'<img src="'+b.v+'" alt="">':vid(b.v)}).join("")+
 '<div class="sh"><b>📤 શેર કરો:</b> <button class="b" style="background:#25d366" onclick="share(\'wa\')">WhatsApp</button> <button class="b" style="background:#c13584" onclick="share(\'ig\')">Instagram</button> <button class="b" style="background:#1877f2" onclick="share(\'fb\')">Facebook</button> <button class="b g" onclick="share(\'cp\')">🔗 લિંક કોપી</button></div><button class="b g" onclick="location.hash=\'home\'">← પાછા</button></article>'+ad("mid");window.scrollTo(0,0)})}
+function countView(id){try{var k="v_"+id;if(sessionStorage.getItem(k))return;sessionStorage.setItem(k,1)}catch(e){}db.collection("news").doc(id).update({views:firebase.firestore.FieldValue.increment(1)}).catch(function(){})}
 function cp(u){try{navigator.clipboard.writeText(u).then(function(){alert("લિંક કોપી થઈ ગઈ ✅")},function(){prompt("લિંક કોપી કરો:",u)})}catch(e){prompt("લિંક કોપી કરો:",u)}}
 function share(w){var u=location.href,t=document.title;
 if(w=="wa")window.open("https://wa.me/?text="+encodeURIComponent(t+"\n"+u),"_blank");
@@ -81,3 +83,4 @@ else if(w=="fb")window.open("https://www.facebook.com/sharer/sharer.php?u="+enco
 else if(w=="ig"){if(navigator.share)navigator.share({title:t,url:u}).catch(function(){});else cp(u)}else cp(u)}
 window.addEventListener("hashchange",render);render();
 </script></body></html>
+
