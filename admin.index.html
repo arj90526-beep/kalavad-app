@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="hi"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<title>Admin – Online Kalavad</title>
+<script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-auth-compat.js"></script>
+<script src="../config.js"></script>
+<style>
+:root{--bg:#f3f3f1;--card:#fff;--tx:#1a1a1a;--mu:#6b6b6b;--ac:#e8630a;--bd:#e3e3df}
+@media(prefers-color-scheme:dark){:root{--bg:#121212;--card:#1e1e1e;--tx:#eee;--mu:#9a9a9a;--ac:#ff8a3d;--bd:#333}}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--tx);font-family:system-ui,-apple-system,"Noto Sans Devanagari",sans-serif;line-height:1.5}
+.w{max-width:760px;margin:0 auto;padding:12px}
+.card{background:var(--card);border:1px solid var(--bd);border-radius:10px;padding:14px;margin-bottom:12px}
+.f{display:grid;gap:10px}.f input,.f textarea{width:100%;padding:9px;border:1px solid var(--bd);border-radius:8px;background:var(--bg);color:var(--tx);font:inherit}
+.b{cursor:pointer;border:0;border-radius:8px;padding:8px 13px;background:var(--ac);color:#fff;font-size:14px}.b.g{background:var(--mu)}.b.s{padding:5px 9px;font-size:12px}
+.row{display:flex;gap:8px;align-items:center;justify-content:space-between;padding:9px 0;border-bottom:1px solid var(--bd);flex-wrap:wrap}
+.tabs{display:flex;gap:8px;margin:12px 0;flex-wrap:wrap}.mu{color:var(--mu);font-size:12px}
+.blk{border:1px dashed var(--mu);border-radius:8px;padding:8px;display:grid;gap:6px}.blk img{max-width:100%;max-height:160px;object-fit:contain;border-radius:6px}
+.tp{width:140px;height:90px;border-radius:8px;background:var(--bg) center/cover}
+</style></head><body><div class="w" id="app"><p class="mu">Loading...</p></div>
+<script>
+firebase.initializeApp(CFG);var db=firebase.firestore(),au=firebase.auth();
+var A=[],ADS={top:{},mid:{}},SITE={name:"Online Kalavad",logo:""},tab="posts",fs=null,editId=null,user=null,ready=false;
+function esc(s){return String(s==null?"":s).replace(/[&<>"]/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]})}
+function err(e){alert("Error: "+(e.message||e)+"\n(Rules/Admin email check karein)")}
+au.onAuthStateChanged(function(u){user=u;if(u)loadAll();else{ready=false;render()}});
+function loadAll(){Promise.all([db.collection("news").orderBy("ts","desc").get(),db.collection("newsAds").get(),db.collection("newsSite").doc("main").get()]).then(function(r){
+A=r[0].docs.map(function(d){var o=d.data();o.id=d.id;return o});r[1].docs.forEach(function(d){ADS[d.id]=d.data()});if(r[2].exists)SITE=Object.assign(SITE,r[2].data());ready=true;render()}).catch(err)}
+function render(){var a=document.getElementById("app");if(!user){a.innerHTML='<div class="card" style="max-width:340px;margin:40px auto"><h2>🔐 Admin Login</h2><div class="f"><input id="em" type="email" placeholder="Email"><input id="pw" type="password" placeholder="Password" onkeydown="if(event.key==\'Enter\')login()"><button class="b" onclick="login()">Login</button></div></div>';return}
+if(!ready){a.innerHTML='<p class="mu">Loading...</p>';return}
+var t='<div class="tabs"><button class="b'+(tab=="posts"?'':' g')+'" onclick="tab=\'posts\';render()">📝 खबरें ('+A.length+')</button><button class="b'+(tab=="new"?'':' g')+'" onclick="newP()">➕ नई खबर</button><button class="b'+(tab=="ads"?'':' g')+'" onclick="tab=\'ads\';render()">📢 Ads</button><button class="b'+(tab=="set"?'':' g')+'" onclick="tab=\'set\';render()">⚙️ Logo</button><button class="b g" onclick="au.signOut()">Logout</button><a class="b g" style="text-decoration:none" href="../" target="_blank">🌐 Website</a></div>';
+a.innerHTML=t+(tab=="new"?form():tab=="ads"?adForm("top","Top Banner (ऊपर)")+adForm("mid","Middle Banner (खबरों के बीच)")+'<p class="mu">Image डालने पर ही विज्ञापन दिखेगा।</p>':tab=="set"?setForm():list())}
+function login(){au.signInWithEmailAndPassword(document.getElementById("em").value.trim(),document.getElementById("pw").value).catch(function(e){alert("Login fail: "+e.message)})}
+function list(){return'<div class="card">'+(A.map(function(a){return'<div class="row"><div><b>'+esc(a.title)+'</b><div class="mu">'+esc(a.d)+(a.tr?' · 🔥 Trending':'')+'</div></div><div><button class="b s g" onclick="tg(\''+a.id+'\')">'+(a.tr?'Trending हटाएँ':'Trending')+'</button> <button class="b s" onclick="ed(\''+a.id+'\')">Edit</button> <button class="b s g" onclick="del(\''+a.id+'\')">Delete</button></div></div>'}).join("")||'<p class="mu">कोई खबर नहीं</p>')+'</div>'}
+function newP(){editId=null;fs={title:"",tr:0,img:"",blocks:[{t:"p",v:""}]};tab="new";render()}
+function ed(id){db.collection("newsBody").doc(id).get().then(function(d){var a=A.find(function(x){return x.id==id});fs={title:a.title,tr:a.tr,img:a.img||"",blocks:(d.data()||{}).blocks||[]};editId=id;tab="new";render()}).catch(err)}
+function form(){var h='<div class="card"><h3>'+(editId?"खबर Edit करें":"नई खबर")+'</h3><div class="f"><input placeholder="शीर्षक" value="'+esc(fs.title)+'" oninput="fs.title=this.value"><div class="mu">Thumbnail (home screen के लिए)</div><div class="tp" style="background-image:url('+fs.img+')"></div><input type="file" accept="image/*" onchange="pick(this,function(d){fs.img=d;render()},400)"><label><input type="checkbox" style="width:auto"'+(fs.tr?' checked':'')+' onchange="fs.tr=this.checked?1:0"> 🔥 Trending में रखें</label><div class="mu">Content (क्रम से: paragraph / image / video)</div>';
+fs.blocks.forEach(function(b,i){h+='<div class="blk">'+(b.t=="p"?'<textarea rows="4" placeholder="Paragraph..." oninput="fs.blocks['+i+'].v=this.value">'+esc(b.v)+'</textarea>':b.t=="img"?'<img src="'+b.v+'">':'<input placeholder="YouTube / mp4 link" value="'+esc(b.v)+'" oninput="fs.blocks['+i+'].v=this.value">')+'<div><button class="b s g" onclick="mv('+i+',-1)">⬆</button> <button class="b s g" onclick="mv('+i+',1)">⬇</button> <button class="b s g" onclick="fs.blocks.splice('+i+',1);render()">🗑 हटाएँ</button></div></div>'});
+return h+'<div class="tabs" style="margin:0"><button class="b s" onclick="fs.blocks.push({t:\'p\',v:\'\'});render()">+ Paragraph</button><label class="b s">+ Image<input type="file" accept="image/*" hidden onchange="pick(this,function(d){fs.blocks.push({t:\'img\',v:d});render()},800)"></label><button class="b s" onclick="fs.blocks.push({t:\'vid\',v:\'\'});render()">+ Video</button></div><button class="b" onclick="saveP()">✅ Save / Publish</button></div></div>'}
+function mv(i,d){var j=i+d;if(j<0||j>=fs.blocks.length)return;var t=fs.blocks[i];fs.blocks[i]=fs.blocks[j];fs.blocks[j]=t;render()}
+function pick(el,cb,max,png){var f=el.files&&el.files[0];if(!f)return;var r=new FileReader();r.onerror=function(){alert("File read nahi hui")};r.onload=function(){var i=new Image();i.onerror=function(){alert("Image khul nahi paayi – JPG/PNG try karein")};i.onload=function(){var c=document.createElement("canvas"),s=Math.min(1,max/i.width);c.width=Math.max(1,Math.round(i.width*s));c.height=Math.max(1,Math.round(i.height*s));c.getContext("2d").drawImage(i,0,0,c.width,c.height);cb(c.toDataURL(png?"image/png":"image/jpeg",.72));el.value=""};i.src=r.result};r.readAsDataURL(f)}
+function saveP(){if(!fs.title.trim()){alert("शीर्षक लिखें");return}var blocks=fs.blocks.filter(function(b){return b.v.trim()});
+if(JSON.stringify(blocks).length>950000){alert("Images bahut zyada hain (limit ~900KB). Kuch images kam karein.");return}
+var id=editId||db.collection("news").doc().id,old=A.find(function(x){return x.id==id}),o={title:fs.title.trim(),tr:fs.tr?1:0,img:fs.img||"",d:old?old.d:new Date().toISOString().slice(0,10),ts:old?old.ts:Date.now()};
+var b=db.batch();b.set(db.collection("news").doc(id),o);b.set(db.collection("newsBody").doc(id),{blocks:blocks});
+b.commit().then(function(){o.id=id;var i=A.findIndex(function(x){return x.id==id});if(i>-1)A[i]=o;else A.unshift(o);tab="posts";render();alert("Publish ho gaya ✅")}).catch(err)}
+function del(id){if(!confirm("यह खबर delete करें?"))return;var b=db.batch();b.delete(db.collection("news").doc(id));b.delete(db.collection("newsBody").doc(id));b.commit().then(function(){A=A.filter(function(a){return a.id!=id});render()}).catch(err)}
+function tg(id){var a=A.find(function(x){return x.id==id});a.tr=a.tr?0:1;db.collection("news").doc(id).update({tr:a.tr}).then(render).catch(err)}
+function adForm(k,n){var a=ADS[k]||{};return'<div class="card"><h3>'+n+'</h3><div class="f">'+(a.img?'<img src="'+a.img+'" style="max-width:100%;border-radius:8px">':'<div class="mu">अभी कोई image नहीं – विज्ञापन छुपा है</div>')+'<input type="file" accept="image/*" onchange="pick(this,function(d){saveAd(\''+k+'\',{img:d})},900)"><input placeholder="Link (https://...)" value="'+esc(a.link||"")+'" onchange="saveAd(\''+k+'\',{link:this.value},1)">'+(a.img?'<button class="b s g" onclick="saveAd(\''+k+'\',{img:\'\'})">Image हटाएँ (ad बंद)</button>':'')+'</div></div>'}
+function saveAd(k,o,quiet){ADS[k]=Object.assign(ADS[k]||{},o);db.collection("newsAds").doc(k).set(ADS[k]).then(function(){if(!quiet)render()}).catch(err)}
+function setForm(){return'<div class="card"><h3>Logo और Site Name</h3><div class="f">'+(SITE.logo?'<img src="'+SITE.logo+'" style="height:60px;object-fit:contain;justify-self:start">':'<div class="mu">अभी logo नहीं है</div>')+'<input type="file" accept="image/*" onchange="pick(this,function(d){saveSite({logo:d})},300,true)"><input placeholder="Site name" value="'+esc(SITE.name)+'" onchange="saveSite({name:this.value},1)">'+(SITE.logo?'<button class="b s g" onclick="saveSite({logo:\'\'})">Logo हटाएँ</button>':'')+'</div></div>'}
+function saveSite(o,quiet){SITE=Object.assign(SITE,o);db.collection("newsSite").doc("main").set(SITE).then(function(){if(!quiet)render()}).catch(err)}
+render();
+</script></body></html>
