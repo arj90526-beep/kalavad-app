@@ -43,13 +43,13 @@ let U=null,rd=0,me={},L=[],MY=[],X=[],cat='',q='',ph=[],conf=null,okL=0,okM=0,wa
 const $=s=>document.getElementById(s),E=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const R=()=>location.hash.slice(1)||'land',go=x=>{location.hash=x},tg=o=>$('dr').classList.toggle('on',!!o),dg=x=>{tg(0);go(x)};
 const setCat=c=>{cat=c;tg(0);R()=='home'?render():go('home')};
-const out=()=>{tg(0);au.signOut().then(()=>{me={};okM=0;L=[];okL=0;go('land')})};
+const out=()=>{tg(0);if(myUn){myUn();myUn=null}au.signOut().then(()=>{me={};okM=0;L=[];okL=0;go('land')})};
 const dest=()=>{const d=ret||(want=='sell'?'sell':'home');ret='';return'#'+d};
 const pick=w=>{want=w;if(U)go(w=='sell'?'sell':'home');else{ret=w=='sell'?'sell':'home';go('login')}};
 db.collection('meta').doc('cats').get().then(d=>{if(d.exists&&d.data().list)CATS=d.data().list;if(rd)render()}).catch(()=>{});
 db.collection('meta').doc('loc').get().then(d=>{if(d.exists){CITY=d.data().city||CITY;AREAS=d.data().area||[]}if(rd)render()}).catch(()=>{});
 db.collection('meta').doc('ads').get().then(d=>{if(d.exists)ADS=(d.data().items||[]).filter(a=>a&&a.img);if(rd)render()}).catch(()=>{});
-au.onAuthStateChanged(async u=>{U=u;if(u){try{const d=await db.collection('users').doc(u.uid).get();if(d.exists)me=d.data()}catch(e){}}rd=1;render()});
+au.onAuthStateChanged(async u=>{U=u;if(u){try{const d=await db.collection('users').doc(u.uid).get();if(d.exists)me=d.data()}catch(e){}loadMy()}rd=1;render()});
 addEventListener('hashchange',render);
 db.collection('meta').doc('pages').get().then(d=>{if(d.exists&&d.data().list){PG=d.data().list;if(rd&&!document.activeElement.matches('input,textarea,select'))render()}}).catch(()=>{});
 const inp_=e=>{const t=e.target.nodeType==3?e.target.parentElement:e.target;return t&&t.closest&&t.closest('input,textarea')};
@@ -91,7 +91,8 @@ if(!d.cat||!d.area||!d.title||!d.desc||d.price===''||+d.price<0||!ph.length){ale
 const b=$('sbtn');b.disabled=true;b.textContent='અપલોડ થઈ રહ્યું છે...';try{const id=db.collection('listings').doc().id,up=async(f,m,n)=>{const r=st.ref(`market/${U.uid}/${id}_${n}.jpg`);await r.put(await cmp(f,m),{contentType:'image/jpeg'});return r.getDownloadURL()};
 const imgs=await Promise.all(ph.map((f,i)=>up(f,900,i))),thumb=await up(ph[0],360,'t');
 await db.collection('listings').doc(id).set({...d,price:+d.price,uid:U.uid,name:me.name||'',phone:U.phoneNumber,imgs,thumb,status:'pending',quick:false,reason:'',ts:Date.now()});okM=0;alert('સબમિટ થઈ ગયું ✅ એડમિનની મંજૂરીની રાહ જુઓ');go('me')}catch(e){alert('Upload fail: '+(e.code||'')+' '+e.message);b.disabled=false;b.textContent='સબમિટ કરો'}}
-async function loadMy(){okM=1;try{const s=await db.collection('listings').where('uid','==',U.uid).get();MY=s.docs.map(d=>({...d.data(),id:d.id})).sort((a,b)=>b.ts-a.ts)}catch(e){alert(e.message)}if(R()=='me')render()}
+let myUn=null;
+function loadMy(){okM=1;if(myUn)myUn();myUn=db.collection('listings').where('uid','==',U.uid).onSnapshot(s=>{MY=s.docs.map(d=>({...d.data(),id:d.id})).sort((a,b)=>b.ts-a.ts);if(R()=='me')render()},e=>alert(e.message))}
 const SL={pending:'⏳ પેન્ડિંગ – એડમિનની મંજૂરીની રાહ',approved:'✅ મંજૂર – લાઇવ',rejected:'❌ રિજેક્ટ',sold:'✔ વેચાઈ ગઈ',withdrawn:'✖ વેચવી નથી'};
 const mine=()=>`<div class="sec">👤 ${E(me.name)} <span class="mu">${E(U.phoneNumber)}</span></div>`+(okM?(MY.length?MY.map(x=>`<div class="card"><div style="display:flex;gap:10px;cursor:pointer" onclick="go('item-${x.id}')"><div class="th" style="width:70px;height:70px;flex:none;background-image:url('${E(x.thumb)}')"></div><div><b>${E(x.title)}</b><div>₹${E(x.price)}</div><span class="bd">${SL[x.status]||''}</span></div></div>${x.status=='rejected'?`<p class="mu">કારણ: ${E(x.reason)}</p>`:''}<div style="margin-top:8px;display:flex;gap:6px;flex-wrap:wrap">${x.status=='approved'?`<button class="b s" onclick="close_('${x.id}','sold')">✔ વેચાઈ ગઈ</button><button class="b s g" onclick="close_('${x.id}','withdrawn')">✖ વેચવી નથી</button>`:`<button class="b s g" onclick="del('${x.id}')">🗑 Delete</button>`}</div></div>`).join(''):'<p class="mu">હજી કોઈ વસ્તુ નથી.</p>'):'<p class="mu">લોડ થઈ રહ્યું છે...</p>');
 async function close_(id,s){if(!confirm('આ વસ્તુ લિસ્ટમાંથી હટાવવી છે?'))return;try{await db.collection('listings').doc(id).update({status:s});L=L.filter(x=>x.id!=id);okM=0;render()}catch(e){alert(e.message)}}
