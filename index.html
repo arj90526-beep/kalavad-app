@@ -30,7 +30,7 @@
 <header><div class="w"><div class="bar"><b onclick="go('land')">🛍️ Online Kalavad</b><nav id="nv"></nav></div></div></header>
 <main class="w" id="app"></main>
 <script>
-firebase.initializeApp(CFG);const db=firebase.firestore(),au=firebase.auth(),st=firebase.storage();
+firebase.initializeApp(CFG);const db=firebase.firestore(),au=firebase.auth(),st=firebase.storage();st.setMaxUploadRetryTime(20000);
 const CATS=["મોબાઇલ","ઇલેક્ટ્રોનિક્સ","બાઇક / વાહન","ફર્નિચર","ઘરવખરી","ખેતીના સાધનો","કપડાં","પુસ્તકો","અન્ય"],
 CONDS=["નવી જેવી","સારી","ઠીક-ઠાક","જૂની / ઘસાયેલી"],AGES=["1 મહિનાથી ઓછી","1-6 મહિના","6-12 મહિના","1-2 વર્ષ","2-5 વર્ષ","5 વર્ષથી વધુ"];
 let U=null,me={},L=[],MY=[],v='land',want='buy',cat='',q='',cur=null,ph=[],conf=null,okL=0,okM=0;
@@ -62,7 +62,7 @@ async function sub(){const g=i=>$(i).value.trim(),d={cat:g('sc'),title:g('stt'),
 if(!d.cat||!d.title||!d.desc||!d.cond||!d.age||d.price===''||+d.price<0||!ph.length){alert('બધી વિગત ભરો અને ઓછામાં ઓછો 1 ફોટો મૂકો');return}
 const b=$('sbtn');b.disabled=true;b.textContent='અપલોડ થઈ રહ્યું છે...';try{const id=db.collection('listings').doc().id,up=async(f,m,n)=>{const r=st.ref(`market/${U.uid}/${id}_${n}.jpg`);await r.put(await cmp(f,m),{contentType:'image/jpeg'});return r.getDownloadURL()};
 const imgs=await Promise.all(ph.map((f,i)=>up(f,900,i))),thumb=await up(ph[0],360,'t');
-await db.collection('listings').doc(id).set({...d,price:+d.price,uid:U.uid,name:me.name||'',phone:U.phoneNumber,imgs,thumb,status:'pending',quick:false,reason:'',ts:Date.now()});okM=0;alert('સબમિટ થઈ ગયું ✅ એડમિનની મંજૂરીની રાહ જુઓ');go('me')}catch(e){alert('Error: '+e.message);b.disabled=false;b.textContent='સબમિટ કરો'}}
+await db.collection('listings').doc(id).set({...d,price:+d.price,uid:U.uid,name:me.name||'',phone:U.phoneNumber,imgs,thumb,status:'pending',quick:false,reason:'',ts:Date.now()});okM=0;alert('સબમિટ થઈ ગયું ✅ એડમિનની મંજૂરીની રાહ જુઓ');go('me')}catch(e){alert('Upload fail: '+(e.code||'')+' '+e.message+'\n\nFirebase Storage chalu aur Rules publish hain ya nahi check karein.');b.disabled=false;b.textContent='સબમિટ કરો'}}
 async function loadMy(){okM=1;try{const s=await db.collection('listings').where('uid','==',U.uid).get();MY=s.docs.map(d=>({...d.data(),id:d.id})).sort((a,b)=>b.ts-a.ts)}catch(e){alert(e.message)}if(v=='me')render()}
 const SL={pending:'⏳ પેન્ડિંગ – એડમિનની મંજૂરીની રાહ',approved:'✅ મંજૂર – લાઇવ',rejected:'❌ રિજેક્ટ',sold:'✔ વેચાઈ ગઈ',withdrawn:'✖ વેચવી નથી'};
 const mine=()=>`<div class="sec">👤 ${E(me.name)} <span class="mu">${E(U.phoneNumber)}</span></div>`+(okM?(MY.length?MY.map(x=>`<div class="card"><div style="display:flex;gap:10px"><div class="th" style="width:70px;height:70px;flex:none;background-image:url('${E(x.thumb)}')"></div><div><b>${E(x.title)}</b><div>₹${E(x.price)}</div><span class="bd">${SL[x.status]||''}</span></div></div>${x.status=='rejected'?`<p class="mu">કારણ: ${E(x.reason)}</p>`:''}<div style="margin-top:8px;display:flex;gap:6px;flex-wrap:wrap">${x.status=='approved'?`<button class="b s" onclick="close_('${x.id}','sold')">✔ વેચાઈ ગઈ</button><button class="b s g" onclick="close_('${x.id}','withdrawn')">✖ વેચવી નથી</button>`:`<button class="b s g" onclick="del('${x.id}')">🗑 Delete</button>`}</div></div>`).join(''):'<p class="mu">હજી કોઈ વસ્તુ નથી.</p>'):'<p class="mu">લોડ થઈ રહ્યું છે...</p>');
