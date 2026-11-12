@@ -14,6 +14,9 @@ input{width:100%;padding:10px;margin-bottom:8px;border:1px solid var(--bd);borde
 .b{cursor:pointer;border:0;border-radius:8px;padding:8px 12px;background:var(--ac);color:#fff;font:inherit;font-size:14px;margin:2px}.b.g{background:var(--mu)}.mu{color:var(--mu);font-size:13px}
 .im{display:flex;gap:6px;overflow-x:auto;margin:8px 0}.im img{height:110px;border-radius:8px}
 textarea{width:100%;padding:10px;margin-bottom:8px;border:1px solid var(--bd);border-radius:8px;background:var(--bg);color:var(--tx);font:inherit}
+.md{position:fixed;inset:0;background:rgba(0,0,0,.5);display:flex;align-items:center;justify-content:center;z-index:99;padding:20px;-webkit-backdrop-filter:blur(2px);backdrop-filter:blur(2px)}
+.mc{background:var(--card);border-radius:18px;padding:22px 20px 16px;max-width:340px;width:100%;text-align:center;box-shadow:0 12px 40px rgba(0,0,0,.35);animation:pop .18s ease}.mc img{width:54px;height:54px;border-radius:13px}.mc p{margin:10px 0 18px;font-size:16px;white-space:pre-wrap}.mbt{display:flex;gap:10px}.mbt button{flex:1;padding:11px}
+@keyframes pop{from{transform:scale(.9);opacity:0}to{transform:scale(1);opacity:1}}
 </style></head><body><div class="w" id="app"></div>
 <script>
 firebase.initializeApp(CFG);const db=firebase.firestore(),au=firebase.auth(),st=firebase.storage();
@@ -57,4 +60,6 @@ const pagesUI=()=>PGS.map((p,i)=>`<div class="card"><b>${E(p.t)}</b><p class="mu
 const svPg=async()=>{try{await db.collection('meta').doc('pages').set({list:PGS});render()}catch(e){alert(e.message)}};
 const spg=()=>{const t=$('pt').value.trim(),c=$('pc').value.trim();if(!t)return;pe<0?PGS.push({t,c}):PGS[pe]={t,c};pe=-1;svPg()};
 const dpg=i=>{if(confirm('પાનું હટાવવું?')){PGS.splice(i,1);svPg()}};
+function mShow(msg,btns){return new Promise(res=>{const d=document.createElement('div');d.className='md';d.innerHTML=`<div class="mc"><img src="../icon-192.png" alt=""><h3 style="margin:8px 0 0;color:var(--ac)">Online Kalavad</h3><p>${E(msg)}</p><div class="mbt">${btns.map((b,i)=>`<button class="b ${b[1]?'':'g'}" data-i="${i}">${b[0]}</button>`).join('')}</div></div>`;d.onclick=e=>{const i=e.target.dataset&&e.target.dataset.i;if(i!==undefined){d.remove();res(btns[i][2])}};document.body.appendChild(d)})}
+window.alert=m=>mShow(String(m),[['ઠીક છે',1,true]]);
 </script></body></html>
