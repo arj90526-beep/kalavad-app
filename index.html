@@ -63,7 +63,7 @@ if(!U&&v!='land'&&v!='login'&&v!='page'){ret=h;location.replace('#login');return
 if(U&&v=='login'){location.replace(dest());return}
 const T=[['home','🏠 હોમ'],['me','👤 પ્રોફાઇલ'],['sell','➕ વેચો']];
 $('tb').innerHTML=U?`<div class="tabs">${T.map(t=>`<a class="${v==t[0]?'on':''}" onclick="go('${t[0]}')">${t[1]}</a>`).join('')}<a onclick="out()">⎋ લૉગઆઉટ</a></div>`:'';
-$('dm').innerHTML=`<h3 style="color:var(--ac);margin:0 0 8px">Online Kalavad</h3>`+(U?`<a onclick="dg('me')">👤 મારી પ્રોફાઇલ</a>`:`<a onclick="dg('login')">🔐 લૉગિન</a>`)+PG.map((p,i)=>`<a onclick="dg('page-${i}')">${E(p.t)}</a>`).join('');
+$('dm').innerHTML=`<h3 style="color:var(--ac);margin:0 0 8px">Online Kalavad</h3>`+(U?`<a onclick="dg('me')">MY PROFILE</a>`:`<a onclick="dg('login')">🔐 લૉગિન</a>`)+PG.map((p,i)=>`<a onclick="dg('page-${i}')">${E(p.t)}</a>`).join('');
 if(v=='sell'&&lastV!='sell')ph=[];lastV=v;
 $('app').innerHTML=({land,login,home,sell,me:mine,item,page}[v]||land)();
 if(v=='login')initRv();if(v=='home')autoAds();if(v=='home'&&!okL)loadL();if(v=='me'&&!okM)loadMy();scrollTo(0,0)}
