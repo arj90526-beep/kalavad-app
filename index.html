@@ -1,86 +1,72 @@
-<!DOCTYPE html>
-<html lang="gu"><head><meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Online Kalavad – કાલાવડ (Kalavad) સમાચાર | Kalavad Shitla News</title>
-<meta name="description" content="Online Kalavad (onlinekalavad) – કાલાવડ, Kalavad / Kalawad, Kalavad Shitla અને આસપાસના વિસ્તારના તાજા સમાચાર, ટ્રેન્ડિંગ ન્યૂઝ અને વીડિયો.">
-<meta name="keywords" content="kalavad, કાલાવડ, kalawad, kalavad shitla, Online Kalavad, onlinekalavad, kalavad online, kalavad news, કાલાવડ સમાચાર">
-<meta name="robots" content="index,follow,max-image-preview:large">
-<link rel="canonical" href="https://www.onlinekalavad.com/">
-<link rel="icon" href="favicon.ico?v=2">
-<link rel="apple-touch-icon" href="icon-192.png">
-<link rel="manifest" href="manifest.json">
-<meta name="theme-color" content="#B3391C">
-<meta property="og:type" content="website">
-<meta property="og:site_name" content="Online Kalavad">
-<meta property="og:title" content="Online Kalavad – કાલાવડ સમાચાર | Kalavad News">
-<meta property="og:description" content="કાલાવડ (Kalavad) ના તાજા સમાચાર, ટ્રેન્ડિંગ ન્યૂઝ અને વીડિયો.">
-<meta property="og:url" content="https://www.onlinekalavad.com/">
-<meta property="og:image" content="https://www.onlinekalavad.com/icon-512.png">
-<meta name="twitter:card" content="summary">
-<script type="application/ld+json">{"@context":"https://schema.org","@type":"NewsMediaOrganization","name":"Online Kalavad","alternateName":["onlinekalavad","Kalavad Online","Kalawad","કાલાવડ ઓનલાઇન","Kalavad Shitla"],"url":"https://www.onlinekalavad.com/","logo":"https://www.onlinekalavad.com/icon-512.png","areaServed":{"@type":"Place","name":"Kalavad (કાલાવડ), Gujarat, India"}}</script>
-<script type="application/ld+json">{"@context":"https://schema.org","@type":"WebSite","name":"Online Kalavad","url":"https://www.onlinekalavad.com/","potentialAction":{"@type":"SearchAction","target":"https://www.onlinekalavad.com/?q={search_term_string}","query-input":"required name=search_term_string"}}</script>
+<!DOCTYPE html><html lang="gu"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Online Kalavad Market – કાલાવડ ખરીદ વેચાણ</title>
+<meta name="description" content="કાલાવડમાં જૂની-નવી વસ્તુઓ ખરીદો અને વેચો – Online Kalavad Market">
+<link rel="icon" href="favicon.ico?v=2"><meta name="theme-color" content="#B3391C"><meta name="keywords" content="kalavad, કાલાવડ, kalawad, kalavad shitla, Online Kalavad, onlinekalavad, kalavad online, kalavad market, કાલાવડ ખરીદ વેચાણ">
+<link rel="canonical" href="https://www.onlinekalavad.com/"><link rel="manifest" href="manifest.json"><link rel="apple-touch-icon" href="icon-192.png">
+<meta property="og:title" content="Online Kalavad – કાલાવડ ખરીદ વેચાણ"><meta property="og:description" content="કાલાવડમાં જૂની-નવી વસ્તુઓ ખરીદો અને વેચો"><meta property="og:image" content="https://www.onlinekalavad.com/icon-512.png">
 <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-storage-compat.js"></script>
 <script src="config.js"></script>
-<script>window.va=window.va||function(){(window.vaq=window.vaq||[]).push(arguments)}</script><script defer src="/_vercel/insights/script.js"></script>
 <style>
 :root{--bg:#f3f3f1;--card:#fff;--tx:#1a1a1a;--mu:#6b6b6b;--ac:#B3391C;--bd:#e3e3df}
 @media(prefers-color-scheme:dark){:root{--bg:#121212;--card:#1e1e1e;--tx:#eee;--mu:#9a9a9a;--ac:#ff6b4a;--bd:#333}}
-*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--tx);font-family:system-ui,-apple-system,"Noto Sans Devanagari",sans-serif;line-height:1.5}
-.w{max-width:760px;margin:0 auto;padding:0 12px}
-header{background:var(--card);border-bottom:1px solid var(--bd);position:sticky;top:0;z-index:20}
-.bar{display:flex;align-items:center;gap:10px;padding:10px 0}
-.logo{font-weight:800;font-size:19px;cursor:pointer;color:var(--ac);white-space:nowrap;display:flex;align-items:center;gap:6px}.logo img{height:32px;max-width:140px;object-fit:contain}
-.bar input{flex:1;min-width:0;padding:8px 14px;border-radius:20px;border:1px solid var(--bd);background:var(--bg);color:var(--tx);font-size:15px}
-.sec{font-weight:800;font-size:18px;margin:14px 0 8px}
-.reel{display:flex;gap:10px;overflow-x:auto;padding-bottom:6px}
-.rc{flex:0 0 118px;aspect-ratio:9/14;border-radius:10px;background:linear-gradient(160deg,var(--ac),#222) center/cover;position:relative;cursor:pointer;overflow:hidden}
-.rc span{position:absolute;inset:auto 0 0;padding:22px 7px 7px;color:#fff;font-size:12px;font-weight:600;background:linear-gradient(transparent,rgba(0,0,0,.85))}
-.item{display:flex;gap:12px;background:var(--card);border:1px solid var(--bd);border-radius:10px;padding:10px;margin-bottom:10px;cursor:pointer;align-items:flex-start}
-.item h3{margin:0;font-size:16px;line-height:1.4;flex:1}
-.item .t{flex:0 0 112px;height:82px;border-radius:8px;background:linear-gradient(135deg,var(--ac),#333) center/cover}
-.mu{color:var(--mu);font-size:12px}
-.ad{display:block;margin:12px 0;border-radius:10px;overflow:hidden}.ad img{width:100%;display:block}.ad small{display:block;font-size:10px;color:var(--mu);text-align:right}
-.art{background:var(--card);border:1px solid var(--bd);border-radius:10px;padding:14px;margin-top:12px}
-.art h1{font-size:23px;line-height:1.35;margin:0 0 4px}.art p{font-size:17px;white-space:pre-wrap}
-.art img,.art video,.art iframe{width:100%;border-radius:8px;display:block;margin:12px 0}.art iframe{aspect-ratio:16/9;border:0}
-.b{cursor:pointer;border:0;border-radius:8px;padding:6px 11px;background:var(--ac);color:#fff;font-size:13px}.b.g{background:var(--mu)}
-.sh{display:flex;gap:6px;flex-wrap:wrap;align-items:center;margin:16px 0;padding-top:12px;border-top:1px solid var(--bd)}
-footer{text-align:center;color:var(--mu);font-size:12px;padding:24px 0}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--tx);font-family:system-ui,"Noto Sans Gujarati",sans-serif;line-height:1.5}
+.w{max-width:760px;margin:0 auto;padding:0 12px 30px}header{background:var(--card);border-bottom:1px solid var(--bd);position:sticky;top:0;z-index:9}
+.bar{display:flex;justify-content:space-between;align-items:center;padding:10px 0}.bar b{color:var(--ac);cursor:pointer}nav{display:flex;gap:14px}nav a{cursor:pointer}
+.card{background:var(--card);border:1px solid var(--bd);border-radius:10px;padding:14px;margin:12px 0}
+.f{display:grid;gap:10px}input,select,textarea{width:100%;padding:10px;border:1px solid var(--bd);border-radius:8px;background:var(--bg);color:var(--tx);font:inherit}
+.b{cursor:pointer;border:0;border-radius:8px;padding:10px 14px;background:var(--ac);color:#fff;font:inherit;text-align:center;text-decoration:none;display:inline-block}.b.g{background:var(--mu)}.b.s{padding:6px 10px;font-size:13px}
+.mu{color:var(--mu);font-size:13px}.c{text-align:center}.two{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:20px}
+.big{background:var(--card);border:2px solid var(--ac);border-radius:14px;padding:30px 10px;text-align:center;font-size:34px;cursor:pointer}.big b{display:block;font-size:17px;margin-top:8px}
+.chips,.rail{display:flex;gap:8px;overflow-x:auto;padding:8px 0}.chip{flex:none;padding:5px 12px;border-radius:16px;background:var(--card);border:1px solid var(--bd);cursor:pointer;font-size:14px}.chip.on{background:var(--ac);color:#fff}
+.sec{font-weight:800;font-size:18px;margin:14px 0 6px}.grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}.rail .ct{flex:0 0 140px}
+.ct{background:var(--card);border:1px solid var(--bd);border-radius:10px;overflow:hidden;cursor:pointer;padding-bottom:8px}.ct>*{margin:4px 8px 0}.ct .im{margin:0;aspect-ratio:1;background:var(--bd) center/cover}.ct b{color:var(--ac)}
+.gal{display:flex;gap:8px;overflow-x:auto;scroll-snap-type:x mandatory}.gal img{flex:none;width:100%;max-height:320px;object-fit:contain;background:var(--bg);scroll-snap-align:center;border-radius:8px}
+.pv{display:flex;gap:6px;flex-wrap:wrap}.th{width:64px;height:64px;border-radius:8px;background:center/cover;position:relative}.th i{position:absolute;top:-4px;right:-4px;background:#000;color:#fff;border-radius:50%;width:18px;height:18px;font-size:11px;text-align:center;font-style:normal;cursor:pointer}
+.bd{display:inline-block;padding:2px 8px;border-radius:10px;font-size:12px;background:var(--bd)}
 </style></head><body>
-<header><div class="w"><div class="bar"><div class="logo" id="logo" onclick="location.hash='home'"></div>
-<input id="q" placeholder="Search..." oninput="qs=this.value.trim().toLowerCase();if(location.hash&&location.hash!='#home')location.hash='home';else render()"></div></div></header>
-<main class="w" id="app"><p class="mu">લોડ થઈ રહ્યું છે...</p></main>
-<footer>© Online Kalavad · www.onlinekalavad.com</footer>
+<header><div class="w"><div class="bar"><b onclick="go('land')">🛍️ Online Kalavad</b><nav id="nv"></nav></div></div></header>
+<main class="w" id="app"></main>
 <script>
-firebase.initializeApp(CFG);var db=firebase.firestore();
-var HOME_TITLE=document.title;var A=[],ADS={},SITE={name:"Online Kalavad",logo:""},qs="",ready=false;
-function esc(s){return String(s==null?"":s).replace(/[&<>"]/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]})}
-Promise.all([db.collection("news").orderBy("ts","desc").limit(60).get(),db.collection("newsAds").get(),db.collection("newsSite").doc("main").get()]).then(function(r){
-A=r[0].docs.map(function(d){var o=d.data();o.id=d.id;return o});r[1].docs.forEach(function(d){ADS[d.id]=d.data()});if(r[2].exists)SITE=Object.assign(SITE,r[2].data());ready=true;render()
-}).catch(function(e){document.getElementById("app").innerHTML='<p class="mu">ડેટા લોડ થયો નહીં: '+esc(e.message)+'</p>'});
-function ad(k){var a=ADS[k];if(!a||!a.img)return"";return'<a class="ad" '+(a.link?'href="'+esc(a.link)+'" target="_blank" rel="noopener sponsored"':'')+'><small>જાહેરાત</small><img src="'+a.img+'" alt=""></a>'}
-function bg(a){return a.img?' style="background-image:url('+a.img+')"':''}
-function render(){var l=document.getElementById("logo");l.innerHTML='<img src="'+(SITE.logo||'icon-192.png')+'" alt="Online Kalavad logo">'+'<span>'+esc(SITE.name)+'</span>';
-if(!ready)return;var h=location.hash.slice(1)||"home",app=document.getElementById("app");
-if(h.indexOf("post-")==0)return post(h.slice(5));document.title=HOME_TITLE;app.innerHTML=home();window.scrollTo(0,0)}
-function item(a){return'<div class="item" onclick="location.hash=\'post-'+a.id+'\'"><h3>'+esc(a.title)+'<div class="mu" style="margin-top:6px">'+esc(a.d)+'</div></h3><div class="t"'+bg(a)+'></div></div>'}
-function home(){var L=A.filter(function(a){return!qs||a.title.toLowerCase().indexOf(qs)>-1});var T=qs?[]:A.filter(function(a){return a.tr});
-return ad("top")+(T.length?'<div class="sec">🔥 ટ્રેન્ડિંગ</div><div class="reel">'+T.map(function(a){return'<div class="rc"'+bg(a)+' onclick="location.hash=\'post-'+a.id+'\'"><span>'+esc(a.title)+'</span></div>'}).join("")+'</div>':'')+
-'<div class="sec">તાજા સમાચાર</div>'+(L.length?L.map(function(a,i){return item(a)+(i==1?ad("mid"):"")}).join(""):'<p class="mu">કોઈ સમાચાર મળ્યા નથી.</p>')}
-function vid(u){var m=u.match(/(?:youtu\.be\/|v=|shorts\/|embed\/)([\w-]{11})/);if(m)return'<iframe src="https://www.youtube.com/embed/'+m[1]+'" allowfullscreen></iframe>';
-if(/\.(mp4|webm)(\?|$)/i.test(u))return'<video src="'+esc(u)+'" controls playsinline></video>';return'<p><a href="'+esc(u)+'" target="_blank" rel="noopener">▶ વીડિયો જુઓ</a></p>'}
-function post(id){var a=A.find(function(x){return x.id==id}),app=document.getElementById("app");app.innerHTML='<p class="mu">લોડ થઈ રહ્યું છે...</p>';
-db.collection("newsBody").doc(id).get().then(function(d){if(!d.exists){app.innerHTML='<p class="mu">સમાચાર મળ્યા નથી.</p>';return}
-countView(id);var t=a?a.title:"",dt=a?a.d:"";document.title=t+" – "+SITE.name;
-app.innerHTML=ad("top")+'<article class="art"><h1>'+esc(t)+'</h1><div class="mu">'+esc(dt)+'</div>'+(d.data().blocks||[]).map(function(b){return b.t=="p"?'<p>'+esc(b.v)+'</p>':b.t=="img"?'<img src="'+b.v+'" alt="">':vid(b.v)}).join("")+
-'<div class="sh"><b>📤 શેર કરો:</b> <button class="b" style="background:#25d366" onclick="share(\'wa\')">WhatsApp</button> <button class="b" style="background:#c13584" onclick="share(\'ig\')">Instagram</button> <button class="b" style="background:#1877f2" onclick="share(\'fb\')">Facebook</button> <button class="b g" onclick="share(\'cp\')">🔗 લિંક કોપી</button></div><button class="b g" onclick="location.hash=\'home\'">← પાછા</button></article>'+ad("mid");window.scrollTo(0,0)})}
-function countView(id){try{var k="v_"+id;if(sessionStorage.getItem(k))return;sessionStorage.setItem(k,1)}catch(e){}db.collection("news").doc(id).update({views:firebase.firestore.FieldValue.increment(1)}).catch(function(){})}
-function cp(u){try{navigator.clipboard.writeText(u).then(function(){alert("લિંક કોપી થઈ ગઈ ✅")},function(){prompt("લિંક કોપી કરો:",u)})}catch(e){prompt("લિંક કોપી કરો:",u)}}
-function share(w){var u=location.href,t=document.title;
-if(w=="wa")window.open("https://wa.me/?text="+encodeURIComponent(t+"\n"+u),"_blank");
-else if(w=="fb")window.open("https://www.facebook.com/sharer/sharer.php?u="+encodeURIComponent(u),"_blank");
-else if(w=="ig"){if(navigator.share)navigator.share({title:t,url:u}).catch(function(){});else cp(u)}else cp(u)}
-window.addEventListener("hashchange",render);render();
+firebase.initializeApp(CFG);const db=firebase.firestore(),au=firebase.auth(),st=firebase.storage();
+const CATS=["મોબાઇલ","ઇલેક્ટ્રોનિક્સ","બાઇક / વાહન","ફર્નિચર","ઘરવખરી","ખેતીના સાધનો","કપડાં","પુસ્તકો","અન્ય"],
+CONDS=["નવી જેવી","સારી","ઠીક-ઠાક","જૂની / ઘસાયેલી"],AGES=["1 મહિનાથી ઓછી","1-6 મહિના","6-12 મહિના","1-2 વર્ષ","2-5 વર્ષ","5 વર્ષથી વધુ"];
+let U=null,me={},L=[],MY=[],v='land',want='buy',cat='',q='',cur=null,ph=[],conf=null,okL=0,okM=0;
+const $=s=>document.getElementById(s),E=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const go=x=>{v=x;if(x=='sell')ph=[];render()};
+const pick=w=>{want=w;U?go(w=='sell'?'sell':'home'):go('login')};
+au.onAuthStateChanged(async u=>{U=u;if(u){try{const d=await db.collection('users').doc(u.uid).get();if(d.exists)me=d.data()}catch(e){}if(v=='login')go(want=='sell'?'sell':'home')}else render()});
+function render(){$('nv').innerHTML=U?`<a onclick="go('home')">🏠</a><a onclick="go('sell')">➕ વેચો</a><a onclick="go('me')">👤</a><a onclick="au.signOut().then(()=>{me={};okM=0;go('land')})">⎋</a>`:'';
+$('app').innerHTML=({land,login,home,sell,me:mine,item})[v]();if(v=='login')initRv();if(v=='home'&&!okL)loadL();if(v=='me'&&!okM)loadMy();scrollTo(0,0)}
+const land=()=>`<h1 class="c">Online Kalavad Market</h1><p class="mu c">કાલાવડનું પોતાનું ખરીદ-વેચાણ</p><div class="two"><div class="big" onclick="pick('sell')">💰<b>વેચાણ માટે</b></div><div class="big" onclick="pick('buy')">🛒<b>ખરીદવા માટે</b></div></div>`;
+const login=()=>`<div class="card"><h2>લૉગિન</h2><div class="f"><input id="nm" placeholder="તમારું નામ" value="${E(me.name)}"><input id="mb" type="tel" maxlength="10" placeholder="મોબાઇલ નંબર (10 અંક)"><button class="b" id="sb" onclick="sendOtp()">OTP મોકલો</button><div id="ow" class="f" style="display:none"><input id="ot" inputmode="numeric" maxlength="6" placeholder="OTP દાખલ કરો"><button class="b" onclick="verify()">ચકાસો</button></div><div class="mu" id="lm"></div></div></div>`;
+function initRv(){try{window.rv&&rv.clear()}catch(e){}window.rv=new firebase.auth.RecaptchaVerifier('sb',{size:'invisible'})}
+async function sendOtp(){const n=$('nm').value.trim(),m=$('mb').value.trim();if(n.length<2||!/^[6-9]\d{9}$/.test(m)){$('lm').textContent='સાચું નામ અને 10 અંકનો મોબાઇલ નંબર લખો';return}
+$('lm').textContent='OTP મોકલી રહ્યા છે...';try{conf=await au.signInWithPhoneNumber('+91'+m,rv);$('ow').style.display='grid';$('lm').textContent='OTP મોકલાયો ✅'}catch(e){$('lm').textContent='OTP મોકલી શકાયો નહીં: '+e.message;initRv()}}
+async function verify(){const n=$('nm').value.trim();try{const r=await conf.confirm($('ot').value.trim());me={name:n};await db.collection('users').doc(r.user.uid).set({name:n,phone:r.user.phoneNumber},{merge:true});go(want=='sell'?'sell':'home')}catch(e){$('lm').textContent='OTP ખોટો છે અથવા સમય પૂરો થયો'}}
+async function loadL(){okL=1;try{const s=await db.collection('listings').where('status','==','approved').limit(300).get();L=s.docs.map(d=>({...d.data(),id:d.id})).sort((a,b)=>b.ts-a.ts)}catch(e){alert('ડેટા લોડ ન થયો: '+e.message)}if(v=='home')render()}
+const card=x=>`<div class="ct" onclick="cur='${x.id}';go('item')"><div class="im" style="background-image:url('${E(x.thumb)}')"></div><b>₹${E(x.price)}</b><div>${E(x.title)}</div><small class="mu">${E(x.cat)}</small></div>`;
+function list(){const A=L.filter(x=>(!cat||x.cat==cat)&&(!q||(x.title+' '+x.desc).toLowerCase().includes(q))),Q=q||cat?[]:L.filter(x=>x.quick);
+return(Q.length?`<div class="sec">⚡ ક્વિક સેલ</div><div class="rail">${Q.map(card).join('')}</div>`:'')+`<div class="sec">બધી વસ્તુઓ</div>`+(A.length?`<div class="grid">${A.map(card).join('')}</div>`:'<p class="mu">કોઈ વસ્તુ મળી નથી.</p>')}
+const home=()=>`<input style="margin-top:12px" placeholder="શોધો..." value="${E(q)}" oninput="q=this.value.trim().toLowerCase();$('ls').innerHTML=list()"><div class="chips">${['બધી',...CATS].map((c,i)=>`<span class="chip ${(i?CATS[i-1]:'')==cat?'on':''}" onclick="cat=${i?`CATS[${i-1}]`:"''"};render()">${c}</span>`).join('')}</div><div id="ls">${okL?list():'<p class="mu">લોડ થઈ રહ્યું છે...</p>'}</div>`;
+function item(){const x=L.concat(MY).find(z=>z.id==cur);if(!x)return home();const w=(x.phone||'').replace(/\D/g,'');
+return`<div class="card"><div class="gal">${x.imgs.map(u=>`<img src="${E(u)}" alt="">`).join('')}</div><h2>${E(x.title)}</h2><h2 style="color:var(--ac)">₹${E(x.price)}</h2><p class="mu">${E(x.cat)} · ${E(x.cond)} · ${E(x.age)}</p><p style="white-space:pre-wrap">${E(x.desc)}</p><p class="mu">વેચનાર: ${E(x.name)}</p><a class="b" href="tel:${E(x.phone)}">📞 ફોન કરો</a> <a class="b" style="background:#25d366" target="_blank" rel="noopener" href="https://wa.me/${w}?text=${encodeURIComponent('Online Kalavad: '+x.title)}">WhatsApp</a> <button class="b g" onclick="go('home')">← પાછા</button></div>`}
+const sel=(id,l,a)=>`<select id="${id}"><option value="">${l}</option>${a.map(c=>`<option>${c}</option>`).join('')}</select>`;
+const sell=()=>`<div class="card"><h2>વેચાણ માટે વસ્તુ મૂકો</h2><div class="f">${sel('sc','— વસ્તુની કેટેગરી —',CATS)}<input id="stt" maxlength="80" placeholder="વસ્તુનું નામ"><div class="mu">ફોટા (વધુમાં વધુ 5)</div><div id="pv" class="pv"></div><label class="b s g">📷 ફોટો ઉમેરો<input type="file" accept="image/*" multiple hidden onchange="addPh(this)"></label><textarea id="sd" rows="4" maxlength="1000" placeholder="વસ્તુની વિગત"></textarea>${sel('so','— વસ્તુ કેવી છે? —',CONDS)}${sel('sa','— કેટલી જૂની છે? —',AGES)}<input id="sp" type="number" min="0" placeholder="કિંમત (₹)"><button class="b" id="sbtn" onclick="sub()">સબમિટ કરો</button><div class="mu">સબમિટ પછી એડમિન ચકાસીને મંજૂર કરશે.</div></div></div>`;
+function addPh(el){for(const f of el.files){if(ph.length>=5){alert('વધુમાં વધુ 5 ફોટા');break}ph.push(f)}el.value='';rpv()}
+const rpv=()=>$('pv').innerHTML=ph.map((f,i)=>`<div class="th" style="background-image:url(${URL.createObjectURL(f)})"><i onclick="ph.splice(${i},1);rpv()">✕</i></div>`).join('');
+const cmp=(f,m)=>new Promise((ok,no)=>{const r=new FileReader();r.onerror=no;r.onload=()=>{const i=new Image();i.onerror=no;i.onload=()=>{const s=Math.min(1,m/Math.max(i.width,i.height)),c=document.createElement('canvas');c.width=Math.max(1,i.width*s|0);c.height=Math.max(1,i.height*s|0);c.getContext('2d').drawImage(i,0,0,c.width,c.height);c.toBlob(b=>b?ok(b):no(),'image/jpeg',.72)};i.src=r.result};r.readAsDataURL(f)});
+async function sub(){const g=i=>$(i).value.trim(),d={cat:g('sc'),title:g('stt'),desc:g('sd'),cond:g('so'),age:g('sa'),price:g('sp')};
+if(!d.cat||!d.title||!d.desc||!d.cond||!d.age||d.price===''||+d.price<0||!ph.length){alert('બધી વિગત ભરો અને ઓછામાં ઓછો 1 ફોટો મૂકો');return}
+const b=$('sbtn');b.disabled=true;b.textContent='અપલોડ થઈ રહ્યું છે...';try{const id=db.collection('listings').doc().id,up=async(f,m,n)=>{const r=st.ref(`market/${U.uid}/${id}_${n}.jpg`);await r.put(await cmp(f,m),{contentType:'image/jpeg'});return r.getDownloadURL()};
+const imgs=await Promise.all(ph.map((f,i)=>up(f,900,i))),thumb=await up(ph[0],360,'t');
+await db.collection('listings').doc(id).set({...d,price:+d.price,uid:U.uid,name:me.name||'',phone:U.phoneNumber,imgs,thumb,status:'pending',quick:false,reason:'',ts:Date.now()});okM=0;alert('સબમિટ થઈ ગયું ✅ એડમિનની મંજૂરીની રાહ જુઓ');go('me')}catch(e){alert('Error: '+e.message);b.disabled=false;b.textContent='સબમિટ કરો'}}
+async function loadMy(){okM=1;try{const s=await db.collection('listings').where('uid','==',U.uid).get();MY=s.docs.map(d=>({...d.data(),id:d.id})).sort((a,b)=>b.ts-a.ts)}catch(e){alert(e.message)}if(v=='me')render()}
+const SL={pending:'⏳ પેન્ડિંગ – એડમિનની મંજૂરીની રાહ',approved:'✅ મંજૂર – લાઇવ',rejected:'❌ રિજેક્ટ',sold:'✔ વેચાઈ ગઈ',withdrawn:'✖ વેચવી નથી'};
+const mine=()=>`<div class="sec">👤 ${E(me.name)} <span class="mu">${E(U.phoneNumber)}</span></div>`+(okM?(MY.length?MY.map(x=>`<div class="card"><div style="display:flex;gap:10px"><div class="th" style="width:70px;height:70px;flex:none;background-image:url('${E(x.thumb)}')"></div><div><b>${E(x.title)}</b><div>₹${E(x.price)}</div><span class="bd">${SL[x.status]||''}</span></div></div>${x.status=='rejected'?`<p class="mu">કારણ: ${E(x.reason)}</p>`:''}<div style="margin-top:8px;display:flex;gap:6px;flex-wrap:wrap">${x.status=='approved'?`<button class="b s" onclick="close_('${x.id}','sold')">✔ વેચાઈ ગઈ</button><button class="b s g" onclick="close_('${x.id}','withdrawn')">✖ વેચવી નથી</button>`:`<button class="b s g" onclick="del('${x.id}')">🗑 Delete</button>`}</div></div>`).join(''):'<p class="mu">હજી કોઈ વસ્તુ નથી.</p>'):'<p class="mu">લોડ થઈ રહ્યું છે...</p>');
+async function close_(id,s){if(!confirm('આ વસ્તુ લિસ્ટમાંથી હટાવવી છે?'))return;try{await db.collection('listings').doc(id).update({status:s});L=L.filter(x=>x.id!=id);okM=0;render()}catch(e){alert(e.message)}}
+async function del(id){if(!confirm('Delete કરવી છે?'))return;const x=MY.find(z=>z.id==id);try{await db.collection('listings').doc(id).delete();[...x.imgs,x.thumb].forEach(u=>st.refFromURL(u).delete().catch(()=>{}));okM=0;render()}catch(e){alert(e.message)}}
+render();
 </script></body></html>
-
