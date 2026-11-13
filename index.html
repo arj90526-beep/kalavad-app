@@ -16,7 +16,7 @@
 .w{max-width:760px;margin:0 auto;padding:0 12px 30px}header{background:var(--card);border-bottom:1px solid var(--bd);position:sticky;top:0;z-index:9}
 .bar{display:flex;align-items:center;gap:8px;padding:8px 0}.lg{font-size:26px;font-weight:900;color:var(--ac);cursor:pointer;letter-spacing:-.5px}.mb{font-size:26px;cursor:pointer;padding:0 6px}
 .tabs{display:flex;justify-content:space-around;border-top:1px solid var(--bd);padding:7px 0;font-size:14px}.tabs a{cursor:pointer;padding:4px 9px;border-radius:14px;white-space:nowrap}.tabs a.on{background:var(--ac);color:#fff}
-.dr{position:fixed;inset:0;background:rgba(0,0,0,.45);display:none;z-index:30}.dr.on{display:block}.dm{width:270px;max-width:80%;height:100%;background:var(--card);padding:16px;overflow:auto}.dm a{display:block;padding:10px 4px;border-bottom:1px solid var(--bd);cursor:pointer}
+.dr{position:fixed;inset:0;background:rgba(0,0,0,.45);display:none;z-index:30}.dr.on{display:block}\.dm{display:flex;flex-direction:column;width:270px;max-width:80%;height:100%;background:var(--card);padding:16px;overflow:auto}.dm a{display:block;padding:10px 4px;border-bottom:1px solid var(--bd);cursor:pointer}
 .card{background:var(--card);border:1px solid var(--bd);border-radius:10px;padding:14px;margin:12px 0}
 .f{display:grid;gap:10px}input,select,textarea{width:100%;padding:10px;border:1px solid var(--bd);border-radius:8px;background:var(--bg);color:var(--tx);font:inherit}
 .b{cursor:pointer;border:0;border-radius:8px;padding:10px 14px;background:var(--ac);color:#fff;font:inherit;text-align:center;text-decoration:none;display:inline-block}.b:disabled{opacity:.55;cursor:not-allowed}.b.g{background:var(--mu)}.b.s{padding:6px 10px;font-size:13px}
@@ -47,7 +47,7 @@ let U=null,rd=0,me={},L=[],MY=[],X=[],cat='',q='',ph=[],conf=null,okL=0,okM=0,wa
 const $=s=>document.getElementById(s),E=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const R=()=>location.hash.slice(1)||'land',go=x=>{location.hash=x},tg=o=>$('dr').classList.toggle('on',!!o),dg=x=>{tg(0);go(x)};
 const setCat=c=>{cat=c;tg(0);R()=='home'?render():go('home')};
-const out=()=>{tg(0);if(myUn){myUn();myUn=null}au.signOut().then(()=>{me={};okM=0;L=[];okL=0;go('land')})};
+const out=async()=>{if(!await mConfirm('શું તમે લૉગઆઉટ કરવા માંગો છો?'))return;tg(0);if(myUn){myUn();myUn=null}au.signOut().then(()=>{me={};okM=0;L=[];okL=0;go('land')})};
 const dest=()=>{const d=ret||(want=='sell'?'sell':'home');ret='';return'#'+d};
 const pick=w=>{want=w;if(U)go(w=='sell'?'sell':'home');else{ret=w=='sell'?'sell':'home';go('login')}};
 db.collection('meta').doc('cats').get().then(d=>{if(d.exists&&d.data().list)CATS=d.data().list;if(rd)render()}).catch(()=>{});
@@ -62,8 +62,8 @@ function render(){if(!rd)return;clearInterval(tmr);clearInterval(adT);const h=R(
 if(!U&&v!='land'&&v!='login'&&v!='page'){ret=h;location.replace('#login');return}
 if(U&&v=='login'){location.replace(dest());return}
 const T=[['home','🏠 હોમ'],['me','👤 પ્રોફાઇલ'],['sell','➕ વેચો']];
-$('tb').innerHTML=U?`<div class="tabs">${T.map(t=>`<a class="${v==t[0]?'on':''}" onclick="go('${t[0]}')">${t[1]}</a>`).join('')}<a onclick="out()">⎋ લૉગઆઉટ</a></div>`:'';
-$('dm').innerHTML=`<h3 style="color:var(--ac);margin:0 0 8px">Online Kalavad</h3>`+(U?`<a onclick="dg('me')">MY PROFILE</a>`:`<a onclick="dg('login')">🔐 લૉગિન</a>`)+PG.map((p,i)=>`<a onclick="dg('page-${i}')">${E(p.t)}</a>`).join('');
+$('tb').innerHTML=U?`<div class="tabs">${T.map(t=>`<a class="${v==t[0]?'on':''}" onclick="go('${t[0]}')">${t[1]}</a>`).join('')}</div>`:'';
+$('dm').innerHTML=`<h3 style="color:var(--ac);margin:0 0 8px">Online Kalavad</h3>`+(U?`<a onclick="dg('me')">👤 મારી પ્રોફાઇલ</a>`:`<a onclick="dg('login')">🔐 લૉગિન</a>`)+PG.map((p,i)=>`<a onclick="dg('page-${i}')">${E(p.t)}</a>`).join('')+(U?'<div style="margin-top:auto;padding-top:24px"><button class="b" style="width:100%;background:#d32f2f" onclick="out()">⎋ લૉગઆઉટ</button></div>':'');
 if(v=='sell'&&lastV!='sell')ph=[];lastV=v;
 $('app').innerHTML=({land,login,home,sell,me:mine,item,page}[v]||land)();
 if(v=='login')initRv();if(v=='home')autoAds();if(v=='home'&&!okL)loadL();if(v=='me'&&!okM)loadMy();scrollTo(0,0)}
